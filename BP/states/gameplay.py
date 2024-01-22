@@ -19,19 +19,59 @@ outline_color = (255, 255, 0)
 #           '0502','0507',
 #           '0601','0602','0604',
 #           '0701','0702','0704']
-plains = [(1,1),(1,2),(1,4),(1,8),(1,9),(1,10),(1,12),(1,13),(1,19),(1,20),(1,21),(1,22)]
+plains = [(1,1),(1,2),(1,4),(1,8),(1,9),(1,10),(1,12),(1,13),(1,19),(1,20),(1,21),(1,22),(2,8),(2,9),(2,10),
+          (2,11),(2,12),(2,19),(2,23),(3,5),(3,8),(3,11),(3,16),(3,18),(3,20),(3,21),(4,10),(4,12),(4,13),
+          (4,15),(4,16),(4,17),(5,2),(5,7),(5,10),(5,12),(5,15),(5,17),(5,20),(5,21),(5,23),(6,1),(6,2),
+          (6,4),(6,7),(6,8),(6,12),(6,13),(6,14),(6,15),(6,17),(6,20),(6,21),(6,22),(6,23),(7,1),(7,2),
+          (7,4),(7,6),(7,7),(7,8),(7,14),(7,17),(7,18),(7,20),(7,22),(8,10),(8,17),(8,18),(8,19),(8,20),
+          (8,21),(8,22),(8,23),(9,2),(9,5),(9,6),(9,7),(9,9),(9,10),(9,17),(9,19),(9,20),(9,21),(10,4),(10,5),
+          (10,8),(10,12),(10,13),(10,14),(10,17),(11,4),(11,10),(11,15),(11,16),(11,18),(12,5),(12,13),(12,16),
+          (12,17),(12,21),(13,1),(13,3),(13,5),(13,14),(13,15),(13,17),(13,18),(13,19),(13,20),(13,21),(13,22),
+          (13,23),(14,2),(14,3),(14,16),(14,18),(14,20),(15,13),(15,14),(15,16),(16,2),(16,13),(16,14),(16,15),
+          (16,16),(16,19),(16,20),(17,4),(17,14),(17,18),(17,20),(17,23),(18,3),(18,14),(18,19),(18,23),(19,5),
+          (19,6),(19,11),(19,14),(19,15),(19,18),(19,19),(20,4),(20,14),(20,18),(20,19)] #complete
 plains_green = (217, 217, 90)
-farmlands = []
-forests = []
-hills = []
-#mountains = ['0103','0201','0301','0304','0403','0404','0405','0503','0504','0603','0703']
-mountains = [(1,3),(2,1),(3,1),(3,4),(4,3),(4,4),(4,5),(5,3),(5,4),(6,3),(7,3)]
+farmlands = [(2,16),(2,17),(2,22),(3,17),(3,19),(3,22),(3,23),(4,18),(4,19),(4,20),(4,22),(4,23),
+             (5,19),(6,18),(6,19),(7,19),(8,16),(9,16),(10,9),(13,16),(14,14),(14,15),(15,1),(15,15),
+             (16,1), (18,22),(19,21),(19,22),(19,23),(20,21),(20,22),(20,23)] #complete
+farmlands_brown = (190, 171, 167)
+forests = [(1,11),(1,16),(1,17),(1,18),(1,23),(2,2),(2,3),(2,15),(2,18),(2,20),(2,21),(3,2),(3,3),(3,9),(3,10),
+           (3,14),(3,15),(4,1),(4,2),(4,8),(4,9),(4,14),(4,21),(5,1),(5,5),(5,8),(5,9),(5,13),(5,14),(5,16),(5,18),
+           (5,22),(6,6),(6,10),(6,16),(7,5),(7,9),(7,11),(7,12),(7,15),(7,16),(7,21),(7,23),(8,2),(8,3),(8,5),(8,7),
+           (8,8),(8,9),(8,11),(8,12),(8,13),(8,14),(8,15),(9,3),(9,8),(9,11),(9,13),(9,15),(9,18),(10,2),(10,7),
+           (10,18),(11,17),(11,20),(12,1),(12,2),(12,18),(12,19),(12,20),(12,22),(13,4),(13,12),(14,4),(14,13),
+           (14,17),(14,19),(15,3),(15,4),(15,17),(15,18),(15,19),(15,20),(15,21),(16,4),(16,18),(16,21),(17,16),
+           (17,17),(17,22),(18,15),(18,17),(18,20),(18,21),(19,16),(19,17),(19,20),(20,15),(20,17),(20,20)] #complete
+forests_green = (56, 109, 93)
+hills = [(1,5),(1,7),(2,4),(2,5),(2,7),(3,7),(4,6),(5,6),(6,5),(8,1),(8,6),(9,4),(9,12),(9,22),(9,23),
+         (10,1),(10,3),(10,10),(10,11),(10,19),(10,23),(11,1),(11,2),(11,7),(11,8),(11,9),(11,12),(11,13),
+         (12,3),(12,8),(12,9),(12,10),(12,15),(13,6),(13,9),(13,10),(14,5),(14,6),(14,7),(14,10),(14,11),
+         (14,12),(15,11),(15,12),(16,10),(16,12),(17,1),(17,2),(17,9),(17,11),(17,13),(17,15),(17,19),
+         (18,8),(18,11),(18,12),(18,13),(18,18),(19,4),(19,12),(19,13),(20,3),(20,5),(20,7),(20,9),(20,10),
+         (20,13)] #complete
+hills_red = (175, 79, 90)
+mountains = [(1,3),(2,1),(3,1),(3,4),(4,3),(4,4),(4,5),(5,3),(5,4),(6,3),(7,3),(8,4),(9,1),(10,6),
+             (10,20),(10,21),(10,22),(11,5),(11,6),(11,11),(11,14),(11,21),(11,22),(11,23),(12,4),
+             (12,6),(12,7),(12,11),(12,12),(12,14),(12,23),(13,7),(13,11),(13,13),(15,5),(15,6),
+             (16,3),(16,5),(16,11),(17,3),(17,5),(17,6),(17,12),(18,1),(18,2),(18,4),(18,5),(18,6),
+             (18,7),(18,9),(18,10),(19,1),(19,2),(19,3),(19,7),(19,8),(19,9),(19,10),(20,1),(20,2),
+             (20,6),(20,8),(20,11),(20,12)] #complete
 mountains_gray = (208, 200, 224)
-deserts = [(1,6),(2,6),(3,6),(4,7),(13,8),(13,9),(14,8),(14,9),(15,7),(15,8),(15,9),(15,10),
-           (16,6),(16,7),(16,8),(16,9),(17,7),(17,8),(17,10)]
+deserts = [(1,6),(2,6),(3,6),(4,7),(13,8),(14,8),(14,9),(15,7),(15,8),(15,9),(15,10),
+           (16,6),(16,7),(16,8),(16,9),(17,7),(17,8),(17,10)] #complete
 deserts_yellow = (236, 236, 198)
-swamps = []
-
+swamps = [(1,14),(1,15),(2,13),(2,14),(3,12),(3,13),(4,11),(5,11),(6,9),(6,11),(7,10),(7,13),(9,14),
+          (10,15),(10,16),(11,3),(11,19),(13,2),(14,1),(14,21),(14,22),(14,23),(15,2),(15,22),(15,23),
+          (16,17),(16,22),(16,23),(17,21),(18,16),(20,16)] #complete
+swamps_blue = (213, 236, 244)
+towns = {'Ogon':(1,1),'Angleae':(1,9),'Galden':(2,16),'Halowich':(4,19),'Lower Drogat':(4,22),
+         'Brigud':(7,19),'Erwyn':(9,16),'Cumry':(10,4),'Cawther':(10,9),'Weshor':(15,1),
+         'Tulith':(14,15),'Lullwyn':(17,20)}
+castles = {'Drogat Castle':(3,23),'Huldra Castle':(12,12),'Aeravir Castle':(19,23)}
+temples = {"Branwyn's Temple":(7,11),'Sulwyth Temple':(10,21),"Donat's Temple":(13,9),
+           'Temple of Zhor':(18,5),'Temple of Duffyd':(20,18)}
+oasis = [(2,6),(14,9),(16,7),(16,9)]
+ruins = {(2,6):'Dead Plains',(9,1):"Jakor's Keep",(20,9):'Pelgar'}
 
 class Gameplay(BaseState):
     def __init__(self):
@@ -47,6 +87,7 @@ class Gameplay(BaseState):
         self.map_surface_rect = self.map_surface.get_rect()
 
         self.terrain_spritesheet = pygame.image.load(path.join(self.img_folder, 'terrain_spritesheet.png')).convert_alpha()
+        self.icon_spritesheet = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet.png')).convert_alpha()
         # self.grass = pygame.image.load(path.join(self.img_folder, 'grass_texture.png')).convert_alpha()
         # self.grass = pygame.transform.scale(self.grass, (HEX_RADIUS * 2, HEX_RADIUS * 2))
         # self.sand_dunes = pygame.image.load(path.join(self.img_folder, 'hills.png')).convert_alpha()
@@ -55,16 +96,6 @@ class Gameplay(BaseState):
 
     def camera_follow(self, player_rect):
         self.player_rect.center = hexagon_dict[self.player_hex]
-        # distance_to_left = player_rect.left
-        # distance_to_right = self.x - player_rect.right
-        # distance_to_top = player_rect.top
-        # distance_to_bottom = self.y - player_rect.bottom
-
-        # if (distance_to_left < 3 * HEX_SIDE_LENGTH / 2 or
-        #     distance_to_right < 3 * HEX_SIDE_LENGTH / 2 or
-        #     distance_to_top < 3 * HEX_RADIUS or
-        #     distance_to_bottom < 3 * HEX_RADIUS
-        #    ):
 
         self.camera.centerx = player_rect.centerx
         self.camera.centery = player_rect.centery
@@ -186,38 +217,48 @@ class Gameplay(BaseState):
         if key in plains:
             terrain_color = plains_green
         elif key in farmlands:
-            pass
+            terrain_color =farmlands_brown
         elif key in forests:
-            pass
+            terrain_color = forests_green
         elif key in hills:
-            pass
+            terrain_color = hills_red
         elif key in mountains:
             terrain_color = mountains_gray
         elif key in deserts:
             terrain_color = deserts_yellow
         elif key in swamps:
-            pass
+            terrain_color = swamps_blue
         else:
             terrain_color = (0, 0, 0)
 
         pygame.draw.polygon(surface, terrain_color, hexagon_points)
         
         if key in plains:
-            grass = self.terrain_spritesheet.subsurface(pygame.Rect(0, 0, 80, 80))
-            grass = pygame.transform.scale(grass, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
+            grass = self.get_spritesheet_image()
             surface.blit(grass, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
+        elif key in farmlands:
+            furrows = self.get_spritesheet_image(y=80)
+            surface.blit(furrows, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
+        elif key in forests:
+            woods = self.get_spritesheet_image(y=160)
+            surface.blit(woods, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
+        elif key in hills:
+            badlands = self.get_spritesheet_image(y=240)
+            surface.blit(badlands, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
         elif key in mountains:
-            peaks = self.terrain_spritesheet.subsurface(pygame.Rect(0, 320, 80, 80))
-            peaks = pygame.transform.scale(peaks, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
+            peaks = self.get_spritesheet_image(y=320)
             surface.blit(peaks, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
         elif key in deserts:
-            sand_dunes = self.terrain_spritesheet.subsurface(pygame.Rect(0, 400, 80, 80))
-            sand_dunes = pygame.transform.scale(sand_dunes, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
+            sand_dunes = self.get_spritesheet_image(y=400)
             surface.blit(sand_dunes, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
-            # sand_dunes = pygame.image.load(path.join(self.img_folder, 'hills.png')).convert_alpha()
-            # sand_dunes = pygame.transform.scale(sand_dunes, (HEX_RADIUS * 1.5, HEX_RADIUS * 1.5))
-            # surface.blit(sand_dunes, (center[0] - HEX_RADIUS * 0.75, center[1] - HEX_RADIUS * 0.75))
-
+        elif key in swamps:
+            mires = self.get_spritesheet_image(y=480)
+            surface.blit(mires, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
+            
+        if key in ruins:
+            image = self.icon_spritesheet.subsurface(pygame.Rect(0, 80, 80, 80))
+            #image = pygame.transform.scale(image, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
+            surface.blit(image, (center[0] - HEX_RADIUS * 0.6, center[1] - HEX_RADIUS * 0.4))
         
         '''
         if spitesheet:
@@ -244,6 +285,11 @@ class Gameplay(BaseState):
                 key = (col + 1, row + 1)
                 hexagon_dict[key] = (HEX_RADIUS + x_offset, HEX_RADIUS + y_offset)
                 self.draw_hexagon(surface, (HEX_RADIUS + x_offset, HEX_RADIUS + y_offset), key)
+
+    def get_spritesheet_image(self, x=0, y=0, w=80, h=80):
+        image = self.terrain_spritesheet.subsurface(pygame.Rect(x, y, w, h))
+        image = pygame.transform.scale(image, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
+        return image
 
     def draw(self, surface):
         # surface.fill(pygame.Color("black"))
