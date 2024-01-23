@@ -64,34 +64,54 @@ swamps = [(1,14),(1,15),(2,13),(2,14),(3,12),(3,13),(4,11),(5,11),(6,9),(6,11),(
           (10,15),(10,16),(11,3),(11,19),(13,2),(14,1),(14,21),(14,22),(14,23),(15,2),(15,22),(15,23),
           (16,17),(16,22),(16,23),(17,21),(18,16),(20,16)] #complete
 swamps_blue = (213, 236, 244)
-towns = {'Ogon':(1,1),'Angleae':(1,9),'Galden':(2,16),'Halowich':(4,19),'Lower Drogat':(4,22),
-         'Brigud':(7,19),'Erwyn':(9,16),'Cumry':(10,4),'Cawther':(10,9),'Weshor':(15,1),
-         'Tulith':(14,15),'Lullwyn':(17,20)}
-castles = {'Drogat Castle':(3,23),'Huldra Castle':(12,12),'Aeravir Castle':(19,23)}
-temples = {"Branwyn's Temple":(7,11),'Sulwyth Temple':(10,21),"Donat's Temple":(13,9),
-           'Temple of Zhor':(18,5),'Temple of Duffyd':(20,18)}
+towns = {(1,1):['Ogon', (pygame.Rect(0, 240, 80, 80))],
+         (1,9):['Angleae', (pygame.Rect(0, 240, 80, 80))],
+         (2,16):['Galden', (pygame.Rect(0, 320, 80, 80))],
+         (4,19):['Halowich', (pygame.Rect(0, 240, 80, 80))],
+         (4,22):['Lower Drogat', (pygame.Rect(0, 320, 80, 80))],
+         (7,19):['Brigud', (pygame.Rect(0, 320, 80, 80))],
+         (9,16):['Erwyn', (pygame.Rect(0, 320, 80, 80))],
+         (10,4):['Cumry', (pygame.Rect(0, 240, 80, 80))],
+         (10,9):['Cawther', (pygame.Rect(0, 320, 80, 80))],
+         (15,1):['Weshor', (pygame.Rect(0, 320, 80, 80))],
+         (14,15):['Tulith', (pygame.Rect(0, 240, 80, 80))],
+         (17,20):['Lullwyn', (pygame.Rect(0, 240, 80, 80))]}
+castles = {(3,23):['Drogat Castle', (pygame.Rect(0, 400, 80, 80))],
+           (12,12):['Huldra Castle', (pygame.Rect(0, 400, 80, 80))],
+           (19,23):['Aeravir Castle', (pygame.Rect(0, 400, 80, 80))]}
+temples = {(7,11):["Branwyn's Temple", (pygame.Rect(80, 320, 80, 80))],
+           (10,21):['Sulwyth Temple', (pygame.Rect(80, 80, 80, 80))],
+           (13,9):["Donat's Temple", (pygame.Rect(80, 240, 80, 80))],
+           (18,5):['Temple of Zhor', (pygame.Rect(80, 0, 80, 80))],
+           (20,18):['Temple of Duffyd', (pygame.Rect(80, 160, 80, 80))]}
 oasis = [(2,6),(14,9),(16,7),(16,9)]
-ruins = {(2,6):'Dead Plains',(9,1):"Jakor's Keep",(20,9):'Pelgar'}
+ruins = {(2,6):['The Dead Plains', (pygame.Rect(0, 80, 80, 80))],
+         (9,1):["Jakor's Keep", (pygame.Rect(0, 0, 80, 80))],
+         (20,9):['Ruins of Pelgar', (pygame.Rect(0, 160, 80, 80))]}
 
 class Gameplay(BaseState):
     def __init__(self):
         super(Gameplay, self).__init__()
-        self.player_rect = pygame.Rect((0, 0), (HEX_RADIUS/2, HEX_RADIUS/2))
-        self.player_rect.center = (HEX_RADIUS, HEX_RADIUS) #self.screen_rect.center
+        # self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon.png')).convert_alpha()
+        # self.player_rect = self.player_icon.get_rect()
+        # self.player_rect = pygame.Rect((0, 0), (HEX_RADIUS/2, HEX_RADIUS/2))
+        # self.player_rect.center = (HEX_RADIUS, HEX_RADIUS) #self.screen_rect.center
         self.player_hex = (1,1)
         self.camera = pygame.Rect((0, 0), (self.x, self.y))
         self.next_state = "GAME_OVER"
         self.load_data()
+
+        self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon.png')).convert_alpha()
+        self.player_rect = self.player_icon.get_rect()
+        self.player_rect.center = (HEX_RADIUS, HEX_RADIUS) #self.screen_rect.center
 
         self.map_surface = pygame.Surface((MAP_WIDTH, MAP_HEIGHT))
         self.map_surface_rect = self.map_surface.get_rect()
 
         self.terrain_spritesheet = pygame.image.load(path.join(self.img_folder, 'terrain_spritesheet.png')).convert_alpha()
         self.icon_spritesheet = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet.png')).convert_alpha()
-        # self.grass = pygame.image.load(path.join(self.img_folder, 'grass_texture.png')).convert_alpha()
-        # self.grass = pygame.transform.scale(self.grass, (HEX_RADIUS * 2, HEX_RADIUS * 2))
-        # self.sand_dunes = pygame.image.load(path.join(self.img_folder, 'hills.png')).convert_alpha()
-        # self.sand_dunes = pygame.transform.scale(self.sand_dunes, (HEX_RADIUS * 2, HEX_RADIUS * 2))
+        self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
+        
         
 
     def camera_follow(self, player_rect):
@@ -234,38 +254,47 @@ class Gameplay(BaseState):
         pygame.draw.polygon(surface, terrain_color, hexagon_points)
         
         if key in plains:
-            grass = self.get_spritesheet_image()
+            grass = self.get_terrain_image()
             surface.blit(grass, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
         elif key in farmlands:
-            furrows = self.get_spritesheet_image(y=80)
+            furrows = self.get_terrain_image(y=80)
             surface.blit(furrows, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
         elif key in forests:
-            woods = self.get_spritesheet_image(y=160)
+            woods = self.get_terrain_image(y=160)
             surface.blit(woods, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
         elif key in hills:
-            badlands = self.get_spritesheet_image(y=240)
+            badlands = self.get_terrain_image(y=240)
             surface.blit(badlands, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
         elif key in mountains:
-            peaks = self.get_spritesheet_image(y=320)
+            peaks = self.get_terrain_image(y=320)
             surface.blit(peaks, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
         elif key in deserts:
-            sand_dunes = self.get_spritesheet_image(y=400)
+            sand_dunes = self.get_terrain_image(y=400)
             surface.blit(sand_dunes, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
         elif key in swamps:
-            mires = self.get_spritesheet_image(y=480)
+            mires = self.get_terrain_image(y=480)
             surface.blit(mires, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
-            
-        if key in ruins:
-            image = self.icon_spritesheet.subsurface(pygame.Rect(0, 80, 80, 80))
-            #image = pygame.transform.scale(image, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
-            surface.blit(image, (center[0] - HEX_RADIUS * 0.6, center[1] - HEX_RADIUS * 0.4))
+
+        if key in oasis:
+            image = self.icon_spritesheet_color.subsurface(pygame.Rect(0, 480, 80, 80))
+            surface.blit(image, (center[0] - HEX_RADIUS * 1.1, center[1] - HEX_RADIUS * 0.65))
+
+        if key in castles:
+            self.get_icon_image(castles, key, center, surface)
+        elif key in ruins:
+            self.get_icon_image(ruins, key, center, surface)
+        elif key in temples:
+            self.get_icon_image(temples, key, center, surface)
+        elif key in towns:
+            self.get_icon_image(towns, key, center, surface)
+            # image = self.icon_spritesheet.subsurface(ruins[key][1])
+            # #image = self.icon_spritesheet.subsurface(pygame.Rect(0, 80, 80, 80))
+            # #image = pygame.transform.scale(image, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
+            # ruins_text = self.font.render(f'{ruins[key][0]}', True, "red")
+            # ruins_text_rect = ruins_text.get_rect(center=(center[0], center[1] - HEX_RADIUS * 0.1))
+            # surface.blit(image, (center[0] - HEX_RADIUS * 0.6, center[1] - HEX_RADIUS * 0.25))
+            # surface.blit(ruins_text, ruins_text_rect)
         
-        '''
-        if spitesheet:
-            image_rect = spritesheet.get_rect()
-            image_rect.center = center
-            surface.blit(spritesheet, image_rect.topleft)
-        '''
 
         pygame.draw.polygon(surface, "red", hexagon_points, 2)
 
@@ -286,16 +315,20 @@ class Gameplay(BaseState):
                 hexagon_dict[key] = (HEX_RADIUS + x_offset, HEX_RADIUS + y_offset)
                 self.draw_hexagon(surface, (HEX_RADIUS + x_offset, HEX_RADIUS + y_offset), key)
 
-    def get_spritesheet_image(self, x=0, y=0, w=80, h=80):
+    def get_terrain_image(self, x=0, y=0, w=80, h=80):
         image = self.terrain_spritesheet.subsurface(pygame.Rect(x, y, w, h))
         image = pygame.transform.scale(image, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
         return image
+    
+    def get_icon_image(self, dict, key, center, surface):
+        icon = self.icon_spritesheet_color.subsurface(dict[key][1])
+        self.font = pygame.font.Font(None, 16)
+        icon_text = self.font.render(f'{dict[key][0]}', True, "red", "black")
+        icon_text_rect = icon_text.get_rect(center=(center[0], center[1] - HEX_RADIUS * 0.1))
+        surface.blit(icon, (center[0] - HEX_RADIUS * 0.6, center[1] - HEX_RADIUS * 0.25))
+        surface.blit(icon_text, icon_text_rect)
 
     def draw(self, surface):
-        # surface.fill(pygame.Color("black"))
-        # surface.blit(self.map_img, self.map_img_rect)
-
-        # self.draw_regular_polygon(surface, "black", 6, 80, (544, 493))
         self.map_surface.fill("black")
         self.draw_hex_grid(self.map_surface)
 
@@ -312,10 +345,15 @@ class Gameplay(BaseState):
             if neighbor in hexagon_dict:
                 self.draw_outline(hexagon_dict[neighbor])
 
-        pygame.draw.rect(self.map_surface, pygame.Color("red"), self.player_rect)
+        #player = pygame.draw.rect(self.map_surface, pygame.Color("red"), self.player_rect)
+        self.map_surface.blit(self.player_icon, self.player_rect)
+
 
         surface.blit(self.map_surface, self.map_surface_rect)
         surface.blit(self.map_surface.subsurface(self.camera), (0, 0))
+
+        
+        
 
 
         
