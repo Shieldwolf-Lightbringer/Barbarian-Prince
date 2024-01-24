@@ -30,10 +30,10 @@ class Splash(BaseState):
         if event.type == pygame.QUIT:
             self.quit = True
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
-                self.done = True
-            elif event.key == pygame.K_ESCAPE:
+            if event.key == pygame.K_ESCAPE:
                 self.quit = True
+            else:
+                self.done = True
 
     # def update(self, dt):
     #     self.time_active += dt

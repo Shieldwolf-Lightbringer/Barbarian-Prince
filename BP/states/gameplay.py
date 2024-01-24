@@ -88,6 +88,25 @@ oasis = [(2,6),(14,9),(16,7),(16,9)]
 ruins = {(2,6):['The Dead Plains', (pygame.Rect(0, 80, 80, 80))],
          (9,1):["Jakor's Keep", (pygame.Rect(0, 0, 80, 80))],
          (20,9):['Ruins of Pelgar', (pygame.Rect(0, 160, 80, 80))]}
+roads = {
+    ((2, 7), (2, 8)),((2, 8), (1, 9)),
+    ((2, 16), (3, 17)), ((3, 17), (3, 18)),((3, 18), (3, 19)),((3, 19), (4, 19)),
+    ((4, 19), (4, 20)),((4, 20), (4, 21)),((4, 21), (3, 22)),((3, 22), (3, 23)),
+    ((3, 23), (4, 22)),
+    ((4, 19), (5, 20)),((5, 20), (6, 19)),((6, 19), (7, 19)),
+    ((7, 19), (8, 19)),((8, 19), (8, 20)),((8, 20), (9, 21)),((9, 21), (10, 21)),
+    ((7, 19), (8, 18)),((8, 18), (8, 17)),((8, 17), (8, 16)),((8, 16), (9, 16)),
+    ((12, 8), (11, 9)),((11, 9), (10, 9)),((10, 9), (10, 10)),((10, 10), (10, 11)),((10, 11), (11, 12)),
+    ((11, 12), (11, 13)),((11, 13), (12, 13)),((12, 13), (13, 14)),((13, 14), (14, 14)),((14, 14), (14, 15)),
+    ((14, 15), (15, 15)),((15, 15), (16, 14)),((16, 14), (17, 14)),((17, 14), (18, 13)),
+    ((14, 15), (13, 16)),((13, 16), (13, 17)),((13, 17), (13, 18)),((13, 18), (13, 19)),((13, 19), (13, 20)),
+    ((13, 20), (14, 20)),((14, 20), (15, 20)),((15, 20), (16, 19)),((16, 19), (17, 20)),
+    ((17, 20), (18, 19)),((18, 19), (19, 19)),((19, 19), (20, 18)),
+    ((17, 20), (18, 20)),((18, 20), (19, 21)),((19, 21), (20, 21)),((20, 21), (20, 22)),((20, 22), (19, 23)),
+    ((19, 12), (19, 11)),((19, 11), (20, 10)),((20, 10), (20, 9)),
+    ((18, 3), (18, 4)),((18, 4), (19, 4)),((19, 4), (19, 5)),((19, 5), (19, 6)),((19, 6), (18, 5)),
+    # Add more roads as needed
+}
 
 class Gameplay(BaseState):
     def __init__(self):
@@ -279,6 +298,12 @@ class Gameplay(BaseState):
             image = self.icon_spritesheet_color.subsurface(pygame.Rect(0, 480, 80, 80))
             surface.blit(image, (center[0] - HEX_RADIUS * 1.1, center[1] - HEX_RADIUS * 0.65))
 
+        # if (self.player_hex, key) in roads or (key, self.player_hex) in roads:
+        #         self.draw_road(surface, self.player_hex, key)
+        # if (key, key) in roads:
+        #     self.draw_road(surface, key, key)
+        self.draw_roads(surface)
+
         if key in castles:
             self.get_icon_image(castles, key, center, surface)
         elif key in ruins:
@@ -328,9 +353,22 @@ class Gameplay(BaseState):
         surface.blit(icon, (center[0] - HEX_RADIUS * 0.6, center[1] - HEX_RADIUS * 0.25))
         surface.blit(icon_text, icon_text_rect)
 
+    def draw_road(self, surface, start_hex, end_hex):
+        start_center = hexagon_dict[start_hex]
+        end_center = hexagon_dict[end_hex]
+        pygame.draw.line(surface, (200, 120, 95), start_center, end_center, 12)
+
+    def draw_roads(self, surface):
+        for road in roads:
+            start_hex, end_hex = road
+            if start_hex in hexagon_dict and end_hex in hexagon_dict:
+                self.draw_road(surface, start_hex, end_hex)
+
     def draw(self, surface):
         self.map_surface.fill("black")
         self.draw_hex_grid(self.map_surface)
+
+        #self.draw_roads(self.map_surface)
 
         for hex_center in hexagon_dict.values():
             pygame.draw.polygon(self.map_surface, (0, 0, 0), [

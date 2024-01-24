@@ -15,14 +15,15 @@ class GameOver(BaseState):
         if event.type == pygame.QUIT:
             self.quit = True
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_RETURN:
-                self.next_state = "MENU"
+            if event.key == pygame.K_ESCAPE:
+                self.quit = True
+            elif event.key == pygame.K_RETURN:
+                self.next_state = "SPLASH"
                 self.done = True
             elif event.key == pygame.K_SPACE:
                 self.next_state = "GAMEPLAY"
                 self.done = True
-            elif event.key == pygame.K_ESCAPE:
-                self.quit = True
+
 
     def draw(self, surface):
         surface.fill(pygame.Color("black"))
