@@ -23,6 +23,10 @@ class BaseState(object):
 
     def startup(self, persistent):
         self.persist = persistent
+        self.initialize()
+
+    def initialize(self):
+        pass
     
     def get_event(self, event):
         pass

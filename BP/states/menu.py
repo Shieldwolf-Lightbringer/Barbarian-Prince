@@ -10,6 +10,9 @@ class Menu(BaseState):
         self.next_state = "GAMEPLAY"
         self.font = pygame.font.Font(None, 36)
 
+    def initialize(self):
+        self.active_index = 0
+
     def render_text(self, index):
         color = pygame.Color("red") if index == self.active_index else pygame.Color("black")
         return self.font.render(self.options[index], True, color)

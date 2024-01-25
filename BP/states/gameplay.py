@@ -142,7 +142,7 @@ class Gameplay(BaseState):
         self.next_state = "GAME_OVER"
         self.load_data()
 
-        self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon.png')).convert_alpha()
+        self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon_outline.png')).convert_alpha()
         self.player_rect = self.player_icon.get_rect()
         self.player_rect.center = (HEX_RADIUS, HEX_RADIUS) #self.screen_rect.center
 
@@ -152,7 +152,10 @@ class Gameplay(BaseState):
         self.terrain_spritesheet = pygame.image.load(path.join(self.img_folder, 'terrain_spritesheet.png')).convert_alpha()
         self.icon_spritesheet = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet.png')).convert_alpha()
         self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
-        
+
+    def initialize(self):
+        self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
+
         
     '''The camera to follow the player as they move around the game map'''
     def camera_follow(self, player_rect):
