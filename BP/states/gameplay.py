@@ -2,7 +2,7 @@ import pygame
 from .base import BaseState
 from os import path
 from math import cos, sin, pi, sqrt, radians
-from random import randint
+from random import choice
 
 ROWS = 23
 COLUMNS = 20
@@ -12,13 +12,7 @@ MAP_WIDTH = (HEX_RADIUS * 3/2) * COLUMNS + (HEX_RADIUS * .55)
 MAP_HEIGHT = (HEX_RADIUS * 2) * (ROWS - 3) + (HEX_RADIUS * .70)
 hexagon_dict = {}
 outline_color = (255, 255, 0)
-# plains = ['0101','0102','0104','0108','0109','0110','0112','0113','0119','0120','0121','0122',
-#           '0208','0209','0210','0211','0212','0219','0223',
-#           '0305','0308','0311','0316','0318','0320','0321',
-#           '0410','0412','0413','0415','0416','0417',
-#           '0502','0507',
-#           '0601','0602','0604',
-#           '0701','0702','0704']
+
 plains = [(1,1),(1,2),(1,4),(1,8),(1,9),(1,10),(1,12),(1,13),(1,19),(1,20),(1,21),(1,22),(2,8),(2,9),(2,10),
           (2,11),(2,12),(2,19),(2,23),(3,5),(3,8),(3,11),(3,16),(3,18),(3,20),(3,21),(4,10),(4,12),(4,13),
           (4,15),(4,16),(4,17),(5,2),(5,7),(5,10),(5,12),(5,15),(5,17),(5,20),(5,21),(5,23),(6,1),(6,2),
@@ -31,10 +25,12 @@ plains = [(1,1),(1,2),(1,4),(1,8),(1,9),(1,10),(1,12),(1,13),(1,19),(1,20),(1,21
           (16,16),(16,19),(16,20),(17,4),(17,14),(17,18),(17,20),(17,23),(18,3),(18,14),(18,19),(18,23),(19,5),
           (19,6),(19,11),(19,14),(19,15),(19,18),(19,19),(20,4),(20,14),(20,18),(20,19)] #complete
 plains_green = (217, 217, 90)
+
 farmlands = [(2,16),(2,17),(2,22),(3,17),(3,19),(3,22),(3,23),(4,18),(4,19),(4,20),(4,22),(4,23),
              (5,19),(6,18),(6,19),(7,19),(8,16),(9,16),(10,9),(13,16),(14,14),(14,15),(15,1),(15,15),
              (16,1), (18,22),(19,21),(19,22),(19,23),(20,21),(20,22),(20,23)] #complete
 farmlands_brown = (190, 171, 167)
+
 forests = [(1,11),(1,16),(1,17),(1,18),(1,23),(2,2),(2,3),(2,15),(2,18),(2,20),(2,21),(3,2),(3,3),(3,9),(3,10),
            (3,14),(3,15),(4,1),(4,2),(4,8),(4,9),(4,14),(4,21),(5,1),(5,5),(5,8),(5,9),(5,13),(5,14),(5,16),(5,18),
            (5,22),(6,6),(6,10),(6,16),(7,5),(7,9),(7,11),(7,12),(7,15),(7,16),(7,21),(7,23),(8,2),(8,3),(8,5),(8,7),
@@ -43,6 +39,7 @@ forests = [(1,11),(1,16),(1,17),(1,18),(1,23),(2,2),(2,3),(2,15),(2,18),(2,20),(
            (14,17),(14,19),(15,3),(15,4),(15,17),(15,18),(15,19),(15,20),(15,21),(16,4),(16,18),(16,21),(17,16),
            (17,17),(17,22),(18,15),(18,17),(18,20),(18,21),(19,16),(19,17),(19,20),(20,15),(20,17),(20,20)] #complete
 forests_green = (56, 109, 93)
+
 hills = [(1,5),(1,7),(2,4),(2,5),(2,7),(3,7),(4,6),(5,6),(6,5),(8,1),(8,6),(9,4),(9,12),(9,22),(9,23),
          (10,1),(10,3),(10,10),(10,11),(10,19),(10,23),(11,1),(11,2),(11,7),(11,8),(11,9),(11,12),(11,13),
          (12,3),(12,8),(12,9),(12,10),(12,15),(13,6),(13,9),(13,10),(14,5),(14,6),(14,7),(14,10),(14,11),
@@ -50,6 +47,7 @@ hills = [(1,5),(1,7),(2,4),(2,5),(2,7),(3,7),(4,6),(5,6),(6,5),(8,1),(8,6),(9,4)
          (18,8),(18,11),(18,12),(18,13),(18,18),(19,4),(19,12),(19,13),(20,3),(20,5),(20,7),(20,9),(20,10),
          (20,13)] #complete
 hills_red = (175, 79, 90)
+
 mountains = [(1,3),(2,1),(3,1),(3,4),(4,3),(4,4),(4,5),(5,3),(5,4),(6,3),(7,3),(8,4),(9,1),(10,6),
              (10,20),(10,21),(10,22),(11,5),(11,6),(11,11),(11,14),(11,21),(11,22),(11,23),(12,4),
              (12,6),(12,7),(12,11),(12,12),(12,14),(12,23),(13,7),(13,11),(13,13),(15,5),(15,6),
@@ -57,13 +55,16 @@ mountains = [(1,3),(2,1),(3,1),(3,4),(4,3),(4,4),(4,5),(5,3),(5,4),(6,3),(7,3),(
              (18,7),(18,9),(18,10),(19,1),(19,2),(19,3),(19,7),(19,8),(19,9),(19,10),(20,1),(20,2),
              (20,6),(20,8),(20,11),(20,12)] #complete
 mountains_gray = (208, 200, 224)
+
 deserts = [(1,6),(2,6),(3,6),(4,7),(13,8),(14,8),(14,9),(15,7),(15,8),(15,9),(15,10),
            (16,6),(16,7),(16,8),(16,9),(17,7),(17,8),(17,10)] #complete
 deserts_yellow = (236, 236, 198)
+
 swamps = [(1,14),(1,15),(2,13),(2,14),(3,12),(3,13),(4,11),(5,11),(6,9),(6,11),(7,10),(7,13),(9,14),
           (10,15),(10,16),(11,3),(11,19),(13,2),(14,1),(14,21),(14,22),(14,23),(15,2),(15,22),(15,23),
           (16,17),(16,22),(16,23),(17,21),(18,16),(20,16)] #complete
 swamps_blue = (213, 236, 244)
+
 towns = {(1,1):['Ogon', (pygame.Rect(0, 240, 80, 80))],
          (1,9):['Angleae', (pygame.Rect(0, 240, 80, 80))],
          (2,16):['Galden', (pygame.Rect(0, 320, 80, 80))],
@@ -88,25 +89,46 @@ oasis = [(2,6),(14,9),(16,7),(16,9)]
 ruins = {(2,6):['The Dead Plains', (pygame.Rect(0, 80, 80, 80))],
          (9,1):["Jakor's Keep", (pygame.Rect(0, 0, 80, 80))],
          (20,9):['Ruins of Pelgar', (pygame.Rect(0, 160, 80, 80))]}
-roads = {
-    ((2, 7), (2, 8)),((2, 8), (1, 9)),
-    ((2, 16), (3, 17)), ((3, 17), (3, 18)),((3, 18), (3, 19)),((3, 19), (4, 19)),
-    ((4, 19), (4, 20)),((4, 20), (4, 21)),((4, 21), (3, 22)),((3, 22), (3, 23)),
-    ((3, 23), (4, 22)),
-    ((4, 19), (5, 20)),((5, 20), (6, 19)),((6, 19), (7, 19)),
-    ((7, 19), (8, 19)),((8, 19), (8, 20)),((8, 20), (9, 21)),((9, 21), (10, 21)),
-    ((7, 19), (8, 18)),((8, 18), (8, 17)),((8, 17), (8, 16)),((8, 16), (9, 16)),
-    ((12, 8), (11, 9)),((11, 9), (10, 9)),((10, 9), (10, 10)),((10, 10), (10, 11)),((10, 11), (11, 12)),
-    ((11, 12), (11, 13)),((11, 13), (12, 13)),((12, 13), (13, 14)),((13, 14), (14, 14)),((14, 14), (14, 15)),
-    ((14, 15), (15, 15)),((15, 15), (16, 14)),((16, 14), (17, 14)),((17, 14), (18, 13)),
-    ((14, 15), (13, 16)),((13, 16), (13, 17)),((13, 17), (13, 18)),((13, 18), (13, 19)),((13, 19), (13, 20)),
-    ((13, 20), (14, 20)),((14, 20), (15, 20)),((15, 20), (16, 19)),((16, 19), (17, 20)),
-    ((17, 20), (18, 19)),((18, 19), (19, 19)),((19, 19), (20, 18)),
-    ((17, 20), (18, 20)),((18, 20), (19, 21)),((19, 21), (20, 21)),((20, 21), (20, 22)),((20, 22), (19, 23)),
-    ((19, 12), (19, 11)),((19, 11), (20, 10)),((20, 10), (20, 9)),
-    ((18, 3), (18, 4)),((18, 4), (19, 4)),((19, 4), (19, 5)),((19, 5), (19, 6)),((19, 6), (18, 5)),
-    # Add more roads as needed
-}
+roads = {(1,9):[1,4],(2,7):[0,3],(2,8):[0,4],
+        (2,16):[2],(3,17):[3,5],(3,18):[0,3],(3,19):[0,2],(4,19):[2,3,5],
+        (4,20):[0,3],(4,21):[0,4],(3,22):[1,3],(3,23):[0,1,3],(4,22):[4],
+        (5,20):[1,5],(6,19):[1,4],(7,19):[1,2,4],
+        (8,18):[0,4],(8,17):[0,3],(8,16):[1,3],(9,16):[4],
+        (8,19):[3,5],(8,20):[0,2],(9,21):[2,5],(10,21):[5],
+        (12,8):[2,4],(11,9):[1,4],(10,9):[1,3],(10,10):[0,3],(10,11):[0,2],(11,12):[3,5],(11,13):[0,2],
+        (12,13):[2,5],(13,14):[2,5],(14,14):[3,5],(14,15):[0,1,4],
+        (13,16):[1,3],(13,17):[0,3],(13,18):[0,3],(13,19):[0,3],(13,20):[0,2],(14,20):[1,5],(15,20):[1,4],
+        (16,19):[2,4],(17,20):[1,2,5],
+        (18,19):[1,4],(19,19):[1,4],(20,18):[1,4],
+        (18,20):[2,5],(19,21):[2,5],(20,21):[3,5],(20,22):[0,4],(19,23):[1,4],(18,23):[1,4],
+        (15,15):[1,4],(16,14):[1,4],(17,14):[1,4],(18,13):[4],
+        (19,12):[0],(19,11):[1,3],(20,10):[0,4],(20,9):[3],
+        (18,3):[2],(19,4):[3,5],(19,5):[0,3],(19,6):[0,5],(18,5):[2],}
+rivers = {(1,1):[3],(1,2):[0,1],(2,1):[3,4],(2,2):[0,1],(3,2):[2,3,4],(3,3):[0],
+          (4,1):[3],(4,2):[0,1,5],(5,2):[2,3,4],(5,3):[0],(6,1):[2,3],(6,2):[0,5],
+          (7,1):[3],(7,2):[0,1,5],(8,1):[2,3,4],(8,2):[0],(9,1):[3],(9,2):[0,1,5],
+          (10,1):[2,3,4],(10,2):[0],(11,1):[3],(11,2):[0,1,5],(12,1):[2,3,4],(12,2):[0,2,3],
+          (13,1):[2,3],(13,2):[0,2,3,5],(14,1):[0,1,2,3,5],(14,2):[0,5],(15,1):[3,4],(15,2):[0,1,5],
+          (16,1):[2,3,4],(16,2):[0],(17,1):[3],(17,2):[0,1,5],(18,1):[2,3,4],(18,2):[0],
+          (19,1):[3],(19,2):[0,1,5],(20,1):[3,4],(20,2):[0,1],
+          (13,3):[0,5],(12,3):[0,5],(11,3):[2,3],(11,4):[0,4,5],(10,3):[2],(10,4):[1,2],
+          (11,5):[4,5],(10,5):[1,2,3],(11,6):[5],(10,6):[0,5],(9,6):[2,3],(9,7):[0,5],
+          (8,6):[2,3],(8,7):[0,5],(7,7):[2,3],(7,8):[0,4,5],(6,7):[2],(6,8):[1,2],
+          (7,9):[3,4,5],(6,9):[1,2,3],(6,10):[0,5],(7,10):[0,1,2,5],(8,9):[4],(8,10):[4,5],
+          (5,10):[2,3],(5,11):[0,5],(4,10):[2,3],(4,11):[0,4,5],(3,11):[2],(3,12):[1,2,3],
+          (4,12):[5],(3,13):[0,5],(2,12):[2,3],(2,13):[0,4,5],(1,13):[2],(1,14):[1,2,3],
+          (2,14):[5],(1,15):[0],
+          (7,11):[1,2],(8,11):[3,4,5],(7,12):[1],(8,12):[0,1],(9,12):[3,4],(9,13):[0,1,2],
+          (10,12):[4],(10,13):[4,5],(9,14):[1,2],(10,14):[4,5],(9,15):[1,2],(10,15):[4,5],
+          (9,16):[1,2],(10,16):[3,4,5],(9,17):[1],(10,17):[0,1,2],(11,17):[4],(11,18):[3,4,5],
+          (10,18):[1],(11,19):[0,1,2],(12,18):[2,3,4],(12,19):[0,3,4,5],(13,18):[2,3],(13,19):[0,5],
+          (14,17):[2,3],(14,18):[0,5],(15,17):[3],(15,18):[0,5],
+          (11,20):[1],(12,20):[0,1],(13,20):[3,4],(13,21):[0,1],(14,20):[3,4],(14,21):[0,1,2],
+          (15,21):[4],(15,22):[3,4,5],(15,23):[0,1,4,5],(14,22):[1,2],(14,23):[1],(16,22):[2,3,4],
+          (16,23):[0],(17,22):[3],(17,23):[0,1,5],(18,22):[3,4],(18,23):[0,1],(19,23):[4],
+          (20,11):[2,3],(20,12):[0,4,5],(19,12):[2],(19,13):[1,2,3],(20,13):[5],(19,14):[0,4,5],
+          (19,15):[5],(18,13):[2],(18,14):[1,2,3],(18,15):[0,4,5],(17,15):[2],(17,16):[1],}
+
 
 class Gameplay(BaseState):
     def __init__(self):
@@ -115,7 +137,7 @@ class Gameplay(BaseState):
         # self.player_rect = self.player_icon.get_rect()
         # self.player_rect = pygame.Rect((0, 0), (HEX_RADIUS/2, HEX_RADIUS/2))
         # self.player_rect.center = (HEX_RADIUS, HEX_RADIUS) #self.screen_rect.center
-        self.player_hex = (1,1)
+        self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         self.camera = pygame.Rect((0, 0), (self.x, self.y))
         self.next_state = "GAME_OVER"
         self.load_data()
@@ -132,7 +154,7 @@ class Gameplay(BaseState):
         self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
         
         
-
+    '''The camera to follow the player as they move around the game map'''
     def camera_follow(self, player_rect):
         self.player_rect.center = hexagon_dict[self.player_hex]
 
@@ -147,18 +169,21 @@ class Gameplay(BaseState):
         if self.camera.bottom > MAP_HEIGHT:
             self.camera.y -= self.camera.bottom - MAP_HEIGHT
 
+    '''This method determines which hex the mouse is hovering over or clicking in'''
     def hex_contains(self, point, hex_center):
         adjusted_point = (point[0] + self.camera.x, point[1] + self.camera.y)
         dx = adjusted_point[0] - hex_center[0]
         dy = adjusted_point[1] - hex_center[1]
         return abs(dy) <= HEX_RADIUS and abs(dx) <= HEX_SIDE_LENGTH / 2 and HEX_SIDE_LENGTH * abs(dy) + HEX_RADIUS * abs(dx) <= HEX_RADIUS * HEX_SIDE_LENGTH
 
+    '''This method outlines a hex to highlight it'''
     def draw_outline(self, hex_center):
         pygame.draw.polygon(self.map_surface, outline_color, [
             (hex_center[0] + cos(angle) * (HEX_RADIUS + 2), hex_center[1] + sin(angle) * (HEX_RADIUS + 2))
             for angle in [0, pi / 3, 2 * pi / 3, pi, 4 * pi / 3, 5 * pi / 3]
         ], 4)
 
+    '''This method determines if a hex is adjacent to the one the player is currently in'''
     def adjacent_hex(self, player_hex):
         adjacent_hexagons = []
         if player_hex[0] % 2 == 0:
@@ -187,6 +212,7 @@ class Gameplay(BaseState):
                         adjacent_hexagons.append(neighbor_hex)
         return adjacent_hexagons
 
+    '''This handles mouse clicks, keystrokes, and other events'''
     def get_event(self, event):
         if self.player_hex[0] % 2 == 0:
             dir = {
@@ -244,7 +270,7 @@ class Gameplay(BaseState):
             elif event.key == pygame.K_ESCAPE:
                 self.quit = True
 
-
+    '''This method draws each hexagon and then gives it a color, and image, and any icons it may have'''
     def draw_hexagon(self, surface, center, key, spritesheet=None):
         hexagon_points = []
         for i in range (6):
@@ -294,15 +320,15 @@ class Gameplay(BaseState):
             mires = self.get_terrain_image(y=480)
             surface.blit(mires, (center[0] - HEX_RADIUS * 0.95, center[1] - HEX_RADIUS * 0.95))
 
+        if key in rivers:
+            self.draw_river_segment(surface, hexagon_points, rivers[key])
+
+        if key in roads:
+            self.draw_road_segment(surface, center, roads[key])
+
         if key in oasis:
             image = self.icon_spritesheet_color.subsurface(pygame.Rect(0, 480, 80, 80))
             surface.blit(image, (center[0] - HEX_RADIUS * 1.1, center[1] - HEX_RADIUS * 0.65))
-
-        # if (self.player_hex, key) in roads or (key, self.player_hex) in roads:
-        #         self.draw_road(surface, self.player_hex, key)
-        # if (key, key) in roads:
-        #     self.draw_road(surface, key, key)
-        self.draw_roads(surface)
 
         if key in castles:
             self.get_icon_image(castles, key, center, surface)
@@ -327,6 +353,7 @@ class Gameplay(BaseState):
         text_rect = text.get_rect(center=(center[0], center[1] - (HEX_RADIUS * .5)))
         surface.blit(text, text_rect)
 
+    '''This method creates the grid of hexagons and offsets each column so they aling properly, it also creates the dict{}'''
     def draw_hex_grid(self, surface):
         for row in range(ROWS):
             for col in range(COLUMNS):
@@ -340,11 +367,13 @@ class Gameplay(BaseState):
                 hexagon_dict[key] = (HEX_RADIUS + x_offset, HEX_RADIUS + y_offset)
                 self.draw_hexagon(surface, (HEX_RADIUS + x_offset, HEX_RADIUS + y_offset), key)
 
+    '''This method gets the terrain image from the terrain spritesheet'''
     def get_terrain_image(self, x=0, y=0, w=80, h=80):
         image = self.terrain_spritesheet.subsurface(pygame.Rect(x, y, w, h))
         image = pygame.transform.scale(image, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
         return image
     
+    '''This method gets the icon image and text for towns, temples, ruins, and castles'''
     def get_icon_image(self, dict, key, center, surface):
         icon = self.icon_spritesheet_color.subsurface(dict[key][1])
         self.font = pygame.font.Font(None, 16)
@@ -353,17 +382,39 @@ class Gameplay(BaseState):
         surface.blit(icon, (center[0] - HEX_RADIUS * 0.6, center[1] - HEX_RADIUS * 0.25))
         surface.blit(icon_text, icon_text_rect)
 
-    def draw_road(self, surface, start_hex, end_hex):
-        start_center = hexagon_dict[start_hex]
-        end_center = hexagon_dict[end_hex]
-        pygame.draw.line(surface, (200, 120, 95), start_center, end_center, 12)
+    '''This method draws all river segments along the sides of a hex'''
+    def draw_river_segment(self, surface, key, directions):
+        for direction in directions:
+            start = key[(direction - 1) % 6]
+            end = key[(direction - 2) % 6]
+            pygame.draw.line(surface, "blue", start, end, 16)
+            pygame.draw.circle(surface, "blue", start, 8)
+            pygame.draw.circle(surface, "blue", end, 8)
 
-    def draw_roads(self, surface):
-        for road in roads:
-            start_hex, end_hex = road
-            if start_hex in hexagon_dict and end_hex in hexagon_dict:
-                self.draw_road(surface, start_hex, end_hex)
+    '''This method draws all road segments within a hex'''
+    def draw_road_segment(self, surface, key, directions):
+        for direction in directions:
+            start = key
+            end = self.get_hex_side_center(key, direction)
+            pygame.draw.line(surface, (120, 70, 40), start, end, 16)
+            pygame.draw.circle(surface, (120, 70, 40), start, 8)
+            pygame.draw.circle(surface, (120, 70, 40), end, 8)
+    
+    '''This method creates the end points for roads at the midpoint of one of the hex sides'''
+    def get_hex_side_center(self, key, direction):
+        angle = radians(60 * direction)
+        x = key[0] + ((HEX_RADIUS * 0.9) * cos(angle + radians(-90)))
+        y = key[1] + ((HEX_RADIUS * 0.9) * sin(angle + radians(-90)))
+        return int(x), int(y)
 
+    '''This method draws all the road segments in the roads dict{}'''
+    # def draw_roads(self, surface):
+    #     for road in roads:
+    #         start_hex, end_hex = road
+    #         if start_hex in hexagon_dict and end_hex in hexagon_dict:
+    #             self.draw_road(surface, start_hex, end_hex)
+
+    '''This method draws all the map elements to the screen and highlights hexes adjacent to the player'''
     def draw(self, surface):
         self.map_surface.fill("black")
         self.draw_hex_grid(self.map_surface)
@@ -385,13 +436,8 @@ class Gameplay(BaseState):
 
         #player = pygame.draw.rect(self.map_surface, pygame.Color("red"), self.player_rect)
         self.map_surface.blit(self.player_icon, self.player_rect)
+        self.camera_follow(self.player_rect)
 
 
         surface.blit(self.map_surface, self.map_surface_rect)
         surface.blit(self.map_surface.subsurface(self.camera), (0, 0))
-
-        
-        
-
-
-        
