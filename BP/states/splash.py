@@ -35,10 +35,10 @@ class Splash(BaseState):
             else:
                 self.done = True
 
-    # def update(self, dt):
-    #     self.time_active += dt
-    #     if self.time_active >= 5000:
-    #         self.done = True
+    def update(self, dt):
+        self.time_active += dt
+        if self.time_active >= 2500:
+            self.done = True
 
     def draw(self, surface):
         # surface.fill(pygame.Color("red"))

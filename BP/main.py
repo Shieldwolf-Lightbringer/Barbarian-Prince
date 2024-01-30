@@ -8,7 +8,11 @@ from states.splash import Splash
 from game import Game
 
 pygame.init()
-screen = pygame.display.set_mode((1440, 900))  # main monitor resolution
+info = pygame.display.Info()
+monitor_width = info.current_w
+monitor_height = info.current_h
+
+screen = pygame.display.set_mode((monitor_width, monitor_height))#((1440, 900))  # main monitor resolution
 states = {
      "MENU": Menu(),
      "SPLASH": Splash(),

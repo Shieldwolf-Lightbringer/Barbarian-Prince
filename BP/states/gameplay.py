@@ -2,7 +2,7 @@ import pygame
 from .base import BaseState
 from os import path
 from math import cos, sin, pi, sqrt, radians
-from random import choice
+from random import choice, randint
 
 ROWS = 23
 COLUMNS = 20
@@ -12,6 +12,7 @@ MAP_WIDTH = (HEX_RADIUS * 3/2) * COLUMNS + (HEX_RADIUS * .55)
 MAP_HEIGHT = (HEX_RADIUS * 2) * (ROWS - 3) + (HEX_RADIUS * .70)
 hexagon_dict = {}
 outline_color = (255, 255, 0)
+parchment_color = (220, 215, 175)
 
 plains = [(1,1),(1,2),(1,4),(1,8),(1,9),(1,10),(1,12),(1,13),(1,19),(1,20),(1,21),(1,22),(2,8),(2,9),(2,10),
           (2,11),(2,12),(2,19),(2,23),(3,5),(3,8),(3,11),(3,16),(3,18),(3,20),(3,21),(4,10),(4,12),(4,13),
@@ -133,13 +134,10 @@ rivers = {(1,1):[3],(1,2):[0,1],(2,1):[3,4],(2,2):[0,1],(3,2):[2,3,4],(3,3):[0],
 class Gameplay(BaseState):
     def __init__(self):
         super(Gameplay, self).__init__()
-        # self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon.png')).convert_alpha()
-        # self.player_rect = self.player_icon.get_rect()
-        # self.player_rect = pygame.Rect((0, 0), (HEX_RADIUS/2, HEX_RADIUS/2))
-        # self.player_rect.center = (HEX_RADIUS, HEX_RADIUS) #self.screen_rect.center
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
-        self.camera = pygame.Rect((0, 0), (self.x, self.y))
+        self.camera = pygame.Rect((0, 0), (self.x * 0.75, self.y * 0.75)) #(self.x, self.y))
         self.next_state = "GAME_OVER"
+        self.trackers = {'Day': 1, 'Party': 1, 'Rations': 0, 'Gold': 0}
         self.load_data()
 
         self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon_outline.png')).convert_alpha()
@@ -150,11 +148,13 @@ class Gameplay(BaseState):
         self.map_surface_rect = self.map_surface.get_rect()
 
         self.terrain_spritesheet = pygame.image.load(path.join(self.img_folder, 'terrain_spritesheet.png')).convert_alpha()
-        self.icon_spritesheet = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet.png')).convert_alpha()
+        #self.icon_spritesheet = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet.png')).convert_alpha()
         self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
+        self.knotwork = pygame.image.load(path.join(self.img_folder, 'knotwork.png')).convert_alpha()
 
     def initialize(self):
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
+        self.trackers = {'Day': 1, 'Party': 1, 'Rations': 0, 'Gold': 0}
 
         
     '''The camera to follow the player as they move around the game map'''
@@ -247,6 +247,8 @@ class Gameplay(BaseState):
                         self.player_rect.center = hex_center
                         self.player_hex = hex_key
                         self.camera_follow(self.player_rect)
+                        self.trackers['Day'] += 1
+                        self.trackers['Rations'] -= 1 * self.trackers['Party']
                         break
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
@@ -264,17 +266,48 @@ class Gameplay(BaseState):
                 if (self.player_hex[0] + v[0], self.player_hex[1] + v[1]) in hexagon_dict:
                     self.player_hex = (self.player_hex[0] + v[0], self.player_hex[1] + v[1])
                     self.camera_follow(self.player_rect)
+                    self.trackers['Day'] += 1
+                    self.trackers['Rations'] -= 1 * self.trackers['Party']
                 else:
                     self.player_hex = self.player_hex
                     self.camera_follow(self.player_rect)
             
+            elif event.key == pygame.K_h:
+                if self.player_hex not in mountains and self.player_hex not in deserts:
+                    if not any(self.player_hex in key for key in [castles, temples, towns]):
+                        self.hunt()
+            elif event.key == pygame.K_j:
+                if self.player_hex in ruins:
+                    self.search_ruins()
             elif event.key == pygame.K_SPACE:
                 self.done = True
             elif event.key == pygame.K_ESCAPE:
                 self.quit = True
 
+    def hunt(self):
+        hunt_dice = randint(1,6) + randint(1,6)
+        if hunt_dice == 12:
+            self.done = True #will cause wounds instead, when implemented
+        self.trackers['Rations'] += (hunt_dice - 2) #will factor Combat Skill and Endurance, when implemented
+        if self.player_hex in farmlands:
+            encounter = randint(1,6)
+            if encounter < 5:
+                pass
+            else:
+                self.done = True #will trigger encounters with peasant mob or constabulary, when implemented
+        self.trackers['Day'] += 1
+        self.trackers['Rations'] -= 1 * self.trackers['Party']
+
+    def search_ruins(self):  #lots of stuff to implement here
+        ruins_dice = randint(1,6) + randint(1,6)
+        if ruins_dice > 10:
+            self.trackers['Gold'] += randint(10, 50)
+        self.trackers['Day'] += 1
+        self.trackers['Rations'] -= 1 * self.trackers['Party']
+
+
     '''This method draws each hexagon and then gives it a color, and image, and any icons it may have'''
-    def draw_hexagon(self, surface, center, key, spritesheet=None):
+    def draw_hexagon(self, surface, center, key):
         hexagon_points = []
         for i in range (6):
             angle = radians(60 * i)
@@ -341,14 +374,6 @@ class Gameplay(BaseState):
             self.get_icon_image(temples, key, center, surface)
         elif key in towns:
             self.get_icon_image(towns, key, center, surface)
-            # image = self.icon_spritesheet.subsurface(ruins[key][1])
-            # #image = self.icon_spritesheet.subsurface(pygame.Rect(0, 80, 80, 80))
-            # #image = pygame.transform.scale(image, (HEX_RADIUS * 1.9, HEX_RADIUS * 1.9))
-            # ruins_text = self.font.render(f'{ruins[key][0]}', True, "red")
-            # ruins_text_rect = ruins_text.get_rect(center=(center[0], center[1] - HEX_RADIUS * 0.1))
-            # surface.blit(image, (center[0] - HEX_RADIUS * 0.6, center[1] - HEX_RADIUS * 0.25))
-            # surface.blit(ruins_text, ruins_text_rect)
-        
 
         pygame.draw.polygon(surface, "red", hexagon_points, 2)
 
@@ -444,3 +469,24 @@ class Gameplay(BaseState):
 
         surface.blit(self.map_surface, self.map_surface_rect)
         surface.blit(self.map_surface.subsurface(self.camera), (0, 0))
+
+        self.side_panel = pygame.Surface((self.x * 0.25, self.y * 0.75))
+        self.side_panel.fill(parchment_color)
+        surface.blit(self.side_panel, (self.x - self.x * 0.25, 0))
+        self.sp_rect = pygame.draw.rect(surface, "black", (self.x - self.x * 0.25, 0, self.x - self.x * 0.75, (self.y - self.y * 0.25) + 20), 20)
+
+        y_coord = 100
+        for key, value in self.trackers.items():
+            self.font = pygame.font.Font(None, 36)
+            text = self.font.render(f'{key:>10}: {value}', True, "black")
+            text_rect = text.get_rect(center=(self.sp_rect.center[0], y_coord))
+            surface.blit(text, text_rect)
+            y_coord += 50
+
+        self.bottom_panel = pygame.Surface((self.x, self.y * 0.25))
+        self.bottom_panel.fill(parchment_color)
+        surface.blit(self.bottom_panel, (0, self.y - self.y * 0.25))
+        pygame.draw.rect(surface, "black", (0, self.y - self.y * 0.25, self.x, self.y - self.y * 0.75), 20)
+
+        #self.knotwork = pygame.transform.scale(self.knotwork, (636, 20))
+        surface.blit(self.knotwork, (0, self.y - 84))
