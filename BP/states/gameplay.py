@@ -1,4 +1,6 @@
 import pygame
+import actions
+import characters
 from .base import BaseState
 from os import path
 from math import cos, sin, pi, sqrt, radians
@@ -134,11 +136,13 @@ rivers = {(1,1):[3],(1,2):[0,1],(2,1):[3,4],(2,2):[0,1],(3,2):[2,3,4],(3,3):[0],
 class Gameplay(BaseState):
     def __init__(self):
         super(Gameplay, self).__init__()
+        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6))
+        #print(self.player.gold)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         self.camera = pygame.Rect((0, 0), (self.x * 0.75, self.y * 0.75)) #(self.x, self.y))
         self.next_state = "GAME_OVER"
-        self.trackers = {'Day': 1, 'Party': 1, 'Rations': 0, 'Gold': 0}
-        self.load_data()
+        self.trackers = {'Day': 1, 'Party': 1, 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
+        self.establish_data_path()
 
         self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon_outline.png')).convert_alpha()
         self.player_rect = self.player_icon.get_rect()
@@ -153,9 +157,9 @@ class Gameplay(BaseState):
         self.knotwork = pygame.image.load(path.join(self.img_folder, 'knotwork.png')).convert_alpha()
 
     def initialize(self):
+        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6))
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
-        self.trackers = {'Day': 1, 'Party': 1, 'Rations': 0, 'Gold': 0}
-
+        self.trackers = {'Day': 1, 'Party': 1, 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
         
     '''The camera to follow the player as they move around the game map'''
     def camera_follow(self, player_rect):
@@ -300,8 +304,14 @@ class Gameplay(BaseState):
 
     def search_ruins(self):  #lots of stuff to implement here
         ruins_dice = randint(1,6) + randint(1,6)
-        if ruins_dice > 10:
-            self.trackers['Gold'] += randint(10, 50)
+        if ruins_dice > 2:
+            gold, item = actions.roll_treasure(5)
+            self.player.gold += gold
+            self.trackers['Gold'] = self.player.gold
+            if item:
+                self.player.possessions.append(item)
+                self.trackers['Items'] = len(self.player.possessions) 
+            #self.trackers['Gold'] += randint(10, 50)
         self.trackers['Day'] += 1
         self.trackers['Rations'] -= 1 * self.trackers['Party']
 
@@ -474,19 +484,38 @@ class Gameplay(BaseState):
         self.side_panel.fill(parchment_color)
         surface.blit(self.side_panel, (self.x - self.x * 0.25, 0))
         self.sp_rect = pygame.draw.rect(surface, "black", (self.x - self.x * 0.25, 0, self.x - self.x * 0.75, (self.y - self.y * 0.25) + 20), 20)
+        surface.blit(self.knotwork, (self.x - self.x * 0.25, 0))
 
-        y_coord = 100
+        y_coord = 110
         for key, value in self.trackers.items():
-            self.font = pygame.font.Font(None, 36)
-            text = self.font.render(f'{key:>10}: {value}', True, "black")
-            text_rect = text.get_rect(center=(self.sp_rect.center[0], y_coord))
-            surface.blit(text, text_rect)
-            y_coord += 50
+            tracker_font = pygame.font.Font(pygame.font.match_font('couriernew', True), 36)
+            tracker_text = tracker_font.render(f'{key:<7}: {value:>3}', True, [80, 80, 80])
+            # text_rect = text.get_rect(center=(self.sp_rect.center[0], y_coord))
+            # surface.blit(text, text_rect)
+            surface.blit(tracker_text, (self.x - self.x * 0.22, y_coord))
+            y_coord += 40
+        for item in self.player.possessions:
+            item_font = pygame.font.Font(pygame.font.match_font('couriernew', True), 16)
+            item_text = item_font.render(f'{item.title()}', True, [80, 80, 80])
+            surface.blit(item_text, (self.x - self.x * 0.22, y_coord))
+            y_coord += 20
 
         self.bottom_panel = pygame.Surface((self.x, self.y * 0.25))
         self.bottom_panel.fill(parchment_color)
         surface.blit(self.bottom_panel, (0, self.y - self.y * 0.25))
         pygame.draw.rect(surface, "black", (0, self.y - self.y * 0.25, self.x, self.y - self.y * 0.75), 20)
-
-        #self.knotwork = pygame.transform.scale(self.knotwork, (636, 20))
-        surface.blit(self.knotwork, (0, self.y - 84))
+        # self.knotwork = pygame.transform.scale(self.knotwork, (636, 84))
+        # surface.blit(self.knotwork, (0, self.y - 84))
+        intro_text = '''Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - 
+        assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. 
+        You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. 
+        Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks,
+        their allies will arm and you will lose your kingdom forever.\n
+        To escape the mercenary and royal guard, your loyal body servant Ogab smuggled you into a merchant caravan 
+        to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, 
+        loosen your swordbelt, and get ready to start the first day of your adventure. \n 
+        Important Note: if you finish actions for a day on any hex north of the Tragoth River, 
+        the mercenary royal guardsmen may find you.'''
+        e001_text = self.font.render(intro_text, True, [80, 80, 80])
+        surface.blit(e001_text, (40, self.y - self.y * 0.20))
+        

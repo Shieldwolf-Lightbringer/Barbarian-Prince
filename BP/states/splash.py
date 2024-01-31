@@ -11,7 +11,7 @@ class Splash(BaseState):
         self.title_rect = self.title.get_rect(center=[self.screen_rect.centerx, 200])
         self.next_state = "MENU"
         self.time_active = 0
-        self.load_data() # this uses the method from the base class, so creates the paths to the asset folders
+        self.establish_data_path() # this uses the method from the base class, so creates the paths to the asset folders
 
         self.background_img = pygame.image.load(path.join(self.img_folder, 'background.jpg')).convert_alpha()
         self.background_img = pygame.transform.scale(self.background_img, (self.x, self.y + 120))

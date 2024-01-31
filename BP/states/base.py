@@ -14,7 +14,7 @@ class BaseState(object):
         self.persist = {}
         self.font = pygame.font.Font(None, 24)
 
-    def load_data(self):
+    def establish_data_path(self):
         game_folder = os.getcwd() 
         self.img_folder = os.path.join(game_folder, 'img')
         self.sound_folder = os.path.join(game_folder, 'sound')
