@@ -11,6 +11,8 @@ class Character:
         self.wits = wits
         self.gold = 0
         self.determine_wealth(wealth_code)
+        self.alive = True
+        self.awake = True
         
     def determine_wealth(self, wealth_code):
         wealth_dice = randint(0,5)
@@ -26,6 +28,11 @@ class Character:
     def __str__(self):
         return f'{self.name}\nCombat Skill: {self.combat_skill}\nEndurance: {self.endurance}\nWounds: {self.wounds}\nWits: {self.wits}\nGold: {self.gold}\nPossessions: {self.possessions}'
 
+    def update(self):
+        if self.wounds >= self.endurance - 1:
+            self.awake = False
+        if self.wounds >= self.endurance:
+            self.alive = False
 
 # def roll_treasure(wealth_code):
 #     wealth_dice = randint(0,5)

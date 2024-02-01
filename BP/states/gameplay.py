@@ -1,6 +1,7 @@
 import pygame
 import actions
 import characters
+from game_console import Console
 from .base import BaseState
 from os import path
 from math import cos, sin, pi, sqrt, radians
@@ -136,30 +137,33 @@ rivers = {(1,1):[3],(1,2):[0,1],(2,1):[3,4],(2,2):[0,1],(3,2):[2,3,4],(3,3):[0],
 class Gameplay(BaseState):
     def __init__(self):
         super(Gameplay, self).__init__()
-        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6))
-        #print(self.player.gold)
-        self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
-        self.camera = pygame.Rect((0, 0), (self.x * 0.75, self.y * 0.75)) #(self.x, self.y))
         self.next_state = "GAME_OVER"
-        self.trackers = {'Day': 1, 'Party': 1, 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
+        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6))
+        self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
+        '''camera and map are confined to the upper-left 3/4s of the screen'''
+        self.camera = pygame.Rect((0, 0), (self.x * 0.75, self.y * 0.75)) #(self.x, self.y))
+        self.party = []
+        self.party.append(self.player)
+        self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
         self.establish_data_path()
 
         self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon_outline.png')).convert_alpha()
         self.player_rect = self.player_icon.get_rect()
-        self.player_rect.center = (HEX_RADIUS, HEX_RADIUS) #self.screen_rect.center
+        self.player_rect.center = (HEX_RADIUS, HEX_RADIUS)
 
         self.map_surface = pygame.Surface((MAP_WIDTH, MAP_HEIGHT))
         self.map_surface_rect = self.map_surface.get_rect()
 
         self.terrain_spritesheet = pygame.image.load(path.join(self.img_folder, 'terrain_spritesheet.png')).convert_alpha()
-        #self.icon_spritesheet = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet.png')).convert_alpha()
         self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
         self.knotwork = pygame.image.load(path.join(self.img_folder, 'knotwork.png')).convert_alpha()
 
     def initialize(self):
         self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6))
+        self.party = []
+        self.party.append(self.player)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
-        self.trackers = {'Day': 1, 'Party': 1, 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
+        self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
         
     '''The camera to follow the player as they move around the game map'''
     def camera_follow(self, player_rect):
@@ -242,29 +246,33 @@ class Gameplay(BaseState):
         
         if event.type == pygame.QUIT:
             self.quit = True
+        else:
+            self.console.handle_input(event)
 
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
-            for hex_key, hex_center in hexagon_dict.items():
-                if self.hex_contains(mouse_pos, hex_center):
-                    if hex_key in self.adjacent_hex(self.player_hex):
-                        self.player_rect.center = hex_center
-                        self.player_hex = hex_key
-                        self.camera_follow(self.player_rect)
-                        self.trackers['Day'] += 1
-                        self.trackers['Rations'] -= 1 * self.trackers['Party']
-                        break
+            if mouse_pos[0] <= self.x * 0.75 and mouse_pos[1] <= self.y * 0.75:
+                for hex_key, hex_center in hexagon_dict.items():
+                    if self.hex_contains(mouse_pos, hex_center):
+                        if hex_key in self.adjacent_hex(self.player_hex):
+                            self.player_rect.center = hex_center
+                            self.player_hex = hex_key
+                            self.camera_follow(self.player_rect)
+                            self.trackers['Day'] += 1
+                            self.trackers['Rations'] -= 1 * self.trackers['Party']
+                            break
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
             mouse_pos = pygame.mouse.get_pos()
-            for hex_key, hex_center in hexagon_dict.items():
-                if self.hex_contains(mouse_pos, hex_center):
-                    self.player_rect.center = hex_center
-                    self.player_hex = hex_key
-                    self.camera_follow(self.player_rect)
-                    break
+            if mouse_pos[0] <= self.x * 0.75 and mouse_pos[1] <= self.y * 0.75:
+                for hex_key, hex_center in hexagon_dict.items():
+                    if self.hex_contains(mouse_pos, hex_center):
+                        self.player_rect.center = hex_center
+                        self.player_hex = hex_key
+                        self.camera_follow(self.player_rect)
+                        break
 
-        elif event.type == pygame.KEYUP:
+        if event.type == pygame.KEYUP:
             if event.key in dir:
                 v = dir[event.key]
                 if (self.player_hex[0] + v[0], self.player_hex[1] + v[1]) in hexagon_dict:
@@ -283,6 +291,8 @@ class Gameplay(BaseState):
             elif event.key == pygame.K_j:
                 if self.player_hex in ruins:
                     self.search_ruins()
+            elif event.key == pygame.K_c:
+                self.console.clear_console()
             elif event.key == pygame.K_SPACE:
                 self.done = True
             elif event.key == pygame.K_ESCAPE:
@@ -445,19 +455,32 @@ class Gameplay(BaseState):
         y = key[1] + ((HEX_RADIUS * 0.9) * sin(angle + radians(-90)))
         return int(x), int(y)
 
-    '''This method draws all the road segments in the roads dict{}'''
-    # def draw_roads(self, surface):
-    #     for road in roads:
-    #         start_hex, end_hex = road
-    #         if start_hex in hexagon_dict and end_hex in hexagon_dict:
-    #             self.draw_road(surface, start_hex, end_hex)
+    '''This method prepares text for display to the screen'''
+    def wrap_text(self, text, font, max_width):
+        words = text.split()
+        lines = []
+        current_line = ""
+
+        for word in words:
+            test_line = current_line + word + " "
+            test_width, _ = font.size(test_line)
+
+            if test_width <= max_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word + " "
+
+        lines.append(current_line)
+
+        return lines
+    
+    
 
     '''This method draws all the map elements to the screen and highlights hexes adjacent to the player'''
     def draw(self, surface):
         self.map_surface.fill("black")
         self.draw_hex_grid(self.map_surface)
-
-        #self.draw_roads(self.map_surface)
 
         for hex_center in hexagon_dict.values():
             pygame.draw.polygon(self.map_surface, (0, 0, 0), [
@@ -476,9 +499,9 @@ class Gameplay(BaseState):
         self.map_surface.blit(self.player_icon, self.player_rect)
         self.camera_follow(self.player_rect)
 
-
         surface.blit(self.map_surface, self.map_surface_rect)
         surface.blit(self.map_surface.subsurface(self.camera), (0, 0))
+
 
         self.side_panel = pygame.Surface((self.x * 0.25, self.y * 0.75))
         self.side_panel.fill(parchment_color)
@@ -506,16 +529,26 @@ class Gameplay(BaseState):
         pygame.draw.rect(surface, "black", (0, self.y - self.y * 0.25, self.x, self.y - self.y * 0.75), 20)
         # self.knotwork = pygame.transform.scale(self.knotwork, (636, 84))
         # surface.blit(self.knotwork, (0, self.y - 84))
-        intro_text = '''Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - 
-        assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. 
-        You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. 
-        Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks,
-        their allies will arm and you will lose your kingdom forever.\n
-        To escape the mercenary and royal guard, your loyal body servant Ogab smuggled you into a merchant caravan 
-        to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, 
-        loosen your swordbelt, and get ready to start the first day of your adventure. \n 
-        Important Note: if you finish actions for a day on any hex north of the Tragoth River, 
-        the mercenary royal guardsmen may find you.'''
-        e001_text = self.font.render(intro_text, True, [80, 80, 80])
-        surface.blit(e001_text, (40, self.y - self.y * 0.20))
+
+        e001_text = "Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks, their allies will arm and you will lose your kingdom forever. To escape the mercenary and royal guard, your loyal body servant Ogab smuggled you into a merchant caravan to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, loosen your swordbelt, and get ready to start the first day of your adventure. Important Note: if you finish actions for a day on any hex north of the Tragoth River, the mercenary royal guardsmen may find you."
+
+        text_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
+        intro_text = self.wrap_text(e001_text, text_font, int(self.x * 0.9))
+        # y_position = self.y * 0.79
+        # for line in intro_text:
+        #     rendered_text = text_font.render(line, True, "black")
+        #     surface.blit(rendered_text, (int(self.x * 0.05), y_position))
+        #     y_position += text_font.get_linesize()
+
+        self.console = Console(surface, text_font, 1.0, 0.25)
+        self.console.cursor_blink_timer += self.console.clock.tick(30) #this isn't blinking
+        if self.console.cursor_blink_timer >= 500:
+            self.console.cursor_blink = not self.console.cursor_blink
+            self.console.cursor_blink_timer = 0
+        for line in intro_text:
+            self.console.display_message(line)
+        for line in intro_text:
+            self.console.display_message(line)
+        self.console.render()
+
         

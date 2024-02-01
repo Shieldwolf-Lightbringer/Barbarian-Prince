@@ -6,8 +6,8 @@ from os import path
 class Splash(BaseState):
     def __init__(self):
         super(Splash, self).__init__()
-        self.font = pygame.font.Font(None, 128)
-        self.title = self.font.render("BARBARIAN PRINCE", True, pygame.Color("red"))
+        self.title_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 108)
+        self.title = self.title_font.render("BARBARIAN PRINCE", True, pygame.Color("red"))
         self.title_rect = self.title.get_rect(center=[self.screen_rect.centerx, 200])
         self.next_state = "MENU"
         self.time_active = 0

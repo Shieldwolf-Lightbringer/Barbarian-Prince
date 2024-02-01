@@ -8,17 +8,17 @@ class Menu(BaseState):
         self.active_index = 0
         self.options = ["Title Screen", "Start Game", "Continue Game", "Options", "Quit Game"]
         self.next_state = "GAMEPLAY"
-        self.font = pygame.font.Font(None, 36)
+        self.menu_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 36)
 
     def initialize(self):
         self.active_index = 0
 
     def render_text(self, index):
         color = pygame.Color("red") if index == self.active_index else pygame.Color("black")
-        return self.font.render(self.options[index], True, color)
+        return self.menu_font.render(self.options[index], True, color)
     
     def get_text_position(self, text, index):
-        center = (self.screen_rect.center[0], self.screen_rect.center[1] + (index * 50))
+        center = (self.screen_rect.center[0], self.screen_rect.center[1] + (index * self.menu_font.get_linesize()))
         return text.get_rect(center=center)
     
     def handle_action(self):
