@@ -4,14 +4,13 @@ import sys
 class Console:
     def __init__(self, screen, font, width_ratio, height_ratio):
         self.screen = screen
-        self.clock = pygame.time.Clock()
+        #self.clock = pygame.time.Clock()
         self.font = font
         self.width_ratio = width_ratio
         self.height_ratio = height_ratio
 
         self.console_lines = []
         self.input_buffer = ""
-        self.cursor_blink = True
         self.cursor_blink_timer = 0
 
     def render(self):
@@ -30,11 +29,16 @@ class Console:
         console_area.blit(input_surface, (20, y_position))
 
         # Render cursor blink
-        if self.cursor_blink:
+        self.cursor_blink_timer += pygame.time.get_ticks()
+        if self.cursor_blink_timer // 500 % 2 == 0:
             cursor_pos = 20 + self.font.size(">>> " + self.input_buffer)[0]
             pygame.draw.line(console_area, (80, 80, 80), (cursor_pos, y_position),
                              (cursor_pos, y_position + self.font.get_linesize()), 2)
-
+        else:
+            cursor_pos = 20 + self.font.size(">>> " + self.input_buffer)[0]
+            pygame.draw.line(console_area, (220, 215, 175), (cursor_pos, y_position),
+                             (cursor_pos, y_position + self.font.get_linesize()), 2)
+            
         self.screen.blit(console_area, (20, self.screen.get_height() - console_area_height - 20))
 
     def add_line(self, text):
@@ -64,4 +68,3 @@ class Console:
 
     def clear_console(self):
         self.console_lines = []
-        self.render()

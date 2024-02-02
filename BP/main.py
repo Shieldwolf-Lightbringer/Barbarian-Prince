@@ -12,7 +12,9 @@ info = pygame.display.Info() # this gets the width and height of the monitor
 monitor_width = info.current_w
 monitor_height = info.current_h
 
-screen = pygame.display.set_mode((monitor_width, monitor_height)) #((1440, 900))  #main monitor resolution for development
+screen = pygame.display.set_mode((monitor_width, monitor_height)) 
+#((1440, 900))  #main monitor resolution for development
+
 states = {
      "MENU": Menu(),
      "SPLASH": Splash(),

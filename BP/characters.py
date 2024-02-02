@@ -1,13 +1,15 @@
 import pygame
-from random import randint
+from random import randint, choice
 
 class Character:
     def __init__(self, name, combat_skill, endurance, wounds, wealth_code, wits=None):
         self.name = name
         self.combat_skill = combat_skill
+        self.fatigue = 0
         self.endurance = endurance
         self.wounds = wounds
         self.possessions = []
+        self.max_carry = 10
         self.wits = wits
         self.gold = 0
         self.determine_wealth(wealth_code)
@@ -24,15 +26,35 @@ class Character:
             self.gold += gold_value
         else:
             self.gold += treasure_table[wealth_code][wealth_dice]
+        if self.gold > 0:
+            self.possessions.append('pouch of gold')
 
     def __str__(self):
-        return f'{self.name}\nCombat Skill: {self.combat_skill}\nEndurance: {self.endurance}\nWounds: {self.wounds}\nWits: {self.wits}\nGold: {self.gold}\nPossessions: {self.possessions}'
+        #return f'{self.name}\nCombat Skill: {self.combat_skill}\nEndurance: {self.endurance}\nWounds: {self.wounds}\nWits: {self.wits}\nGold: {self.gold}\nPossessions: {self.possessions}'
+        return [f'{self.name}',
+                f'Combat Skill: {self.combat_skill}',
+                f'Endurance: {self.endurance}',
+                f'Wounds: {self.wounds}',
+                f'Wits: {self.wits}',
+                f'Gold: {self.gold}',
+                f'Possessions: {len(self.possessions)}']
 
     def update(self):
         if self.wounds >= self.endurance - 1:
             self.awake = False
         if self.wounds >= self.endurance:
             self.alive = False
+        pouches_of_gold = (self.gold // 100) + 1
+        if self.possessions.count('pouch of gold') < pouches_of_gold:
+            self.possessions.append('pouch of gold')
+        elif self.possessions.count('pouch of gold') > pouches_of_gold:
+            self.possessions.remove('pouch of gold')
+        if self.gold == 0:
+            while 'pouch of gold' in self.possessions:
+                self.possessions.remove('pouch of gold')
+        if len(self.possessions) > self.max_carry:
+            random_item = choice(self.possessions)
+            self.possessions.remove(random_item)
 
 # def roll_treasure(wealth_code):
 #     wealth_dice = randint(0,5)
