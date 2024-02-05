@@ -291,7 +291,8 @@ class Gameplay(BaseState):
             elif event.key == pygame.K_r:
                 self.rest()
             elif event.key == pygame.K_p:
-                self.player.possessions.pop()
+                if self.player.possessions:
+                    self.player.possessions.pop()
             elif event.key == pygame.K_SPACE:
                 self.done = True
             elif event.key == pygame.K_ESCAPE:
@@ -373,7 +374,7 @@ class Gameplay(BaseState):
 
     def starvation(self, entity):
         entity.max_carry = max(entity.max_carry // 2, 1)
-        entity.fatigue += 1
+        entity.fatigue += 1      
 
 
     '''This method draws each hexagon and then gives it a color, and image, and any icons it may have'''
@@ -590,17 +591,27 @@ class Gameplay(BaseState):
 
         e001_text = "Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks, their allies will arm and you will lose your kingdom forever. To escape the mercenary royal guard, your loyal body servant Ogab smuggled you into a merchant caravan to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, loosen your swordbelt, and get ready to start the first day of your adventure. Important Note: if you finish actions for a day on any hex north of the Tragoth River, the mercenary royal guardsmen may find you."
 
-        text_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
-        intro_text = self.wrap_text(e001_text, text_font, int(self.x * 0.9))
+        self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
+        intro_text = self.wrap_text(e001_text, self.console_font, int(self.x * 0.9))
         # y_position = self.y * 0.79
         # for line in intro_text:
         #     rendered_text = text_font.render(line, True, "black")
         #     surface.blit(rendered_text, (int(self.x * 0.05), y_position))
         #     y_position += text_font.get_linesize()
 
-        self.console = Console(surface, text_font, 1.0, 0.25)
+        self.console = Console(surface, self.console_font, 1.0, 0.25)
         if self.trackers["Day"] == 1:
             for line in intro_text:
                 self.console.display_message(line)
+
+        #for self.player_hex in [castles, temples, towns, ruins]:
+        if self.player_hex in castles:
+            self.console.display_message(f'You arrive at the imposing fortifications of {castles[self.player_hex][0]}')
+        if self.player_hex in towns:
+            self.console.display_message(f'You arrive at the town of {towns[self.player_hex][0]}')
+        if self.player_hex in temples:
+            self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
+        if self.player_hex in ruins:
+            self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
         self.console.render()
 

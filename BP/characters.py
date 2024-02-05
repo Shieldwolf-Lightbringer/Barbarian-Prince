@@ -32,12 +32,12 @@ class Character:
     def __str__(self):
         #return f'{self.name}\nCombat Skill: {self.combat_skill}\nEndurance: {self.endurance}\nWounds: {self.wounds}\nWits: {self.wits}\nGold: {self.gold}\nPossessions: {self.possessions}'
         return [f'{self.name}',
-                f'Combat Skill: {self.combat_skill}',
+                f'Combat Skill: {max(self.combat_skill - self.fatigue, 0)}',
                 f'Endurance: {self.endurance}',
                 f'Wounds: {self.wounds}',
                 f'Wits: {self.wits}',
                 f'Gold: {self.gold}',
-                f'Possessions: {len(self.possessions)}']
+                f'Possessions: {len(self.possessions)}/{self.max_carry}']
 
     def update(self):
         if self.wounds >= self.endurance - 1:
