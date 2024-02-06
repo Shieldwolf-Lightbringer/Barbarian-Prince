@@ -12,7 +12,8 @@ def roll_treasure(wealth_code):
     else:
         return treasure_table[wealth_code][wealth_dice], None
 
-treasure_table = {1:[0, 0, 1, 1, 2, 2],
+treasure_table = {0:[0, 0, 0, 0, 0, 0],
+                  1:[0, 0, 1, 1, 2, 2],
                   2:[0, 1, 2, 2, 3, 4],
                   4:[2, 3, 4, 4, 5, 6],
                   5:[2, [3, 'A'], 4, [6, 'A'], 7, [8, 'A']],
@@ -102,3 +103,15 @@ def make_offering():
 
 def search_ruins():
     pass
+# ruin_results = {2: e133,
+#                 3: e135,
+#                 4: e136,
+#                 5: e137,
+#                 6: e139,
+#                 7: e131,
+#                 8: e132,
+#                 9: e134,
+#                 10: e138,
+#                 11: e135,
+#                 12: e035}
+        

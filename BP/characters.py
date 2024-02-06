@@ -27,7 +27,7 @@ class Character:
         else:
             self.gold += treasure_table[wealth_code][wealth_dice]
         if self.gold > 0:
-            self.possessions.append('pouch of gold')
+            self.add_item('pouch of gold')
 
     def __str__(self):
         #return f'{self.name}\nCombat Skill: {self.combat_skill}\nEndurance: {self.endurance}\nWounds: {self.wounds}\nWits: {self.wits}\nGold: {self.gold}\nPossessions: {self.possessions}'
@@ -38,6 +38,10 @@ class Character:
                 f'Wits: {self.wits}',
                 f'Gold: {self.gold}',
                 f'Possessions: {len(self.possessions)}/{self.max_carry}']
+    
+    def add_item(self, item):
+        if len(self.possessions) <= self.max_carry:
+            self.possessions.append(item)
 
     def update(self):
         if self.wounds >= self.endurance - 1:
@@ -46,7 +50,7 @@ class Character:
             self.alive = False
         pouches_of_gold = (self.gold // 100) + 1
         if self.possessions.count('pouch of gold') < pouches_of_gold:
-            self.possessions.append('pouch of gold')
+            self.add_item('pouch of gold')
         elif self.possessions.count('pouch of gold') > pouches_of_gold:
             self.possessions.remove('pouch of gold')
         if self.gold == 0:
@@ -67,7 +71,8 @@ class Character:
 #     else:
 #         return treasure_table[wealth_code][wealth_dice], None
 
-treasure_table = {1:[0, 0, 1, 1, 2, 2],
+treasure_table = {0:[0, 0, 0, 0, 0, 0],
+                  1:[0, 0, 1, 1, 2, 2],
                   2:[0, 1, 2, 2, 3, 4],
                   4:[2, 3, 4, 4, 5, 6],
                   5:[2, [3, 'A'], 4, [6, 'A'], 7, [8, 'A']],
