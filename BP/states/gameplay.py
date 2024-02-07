@@ -138,6 +138,8 @@ class Gameplay(BaseState):
     def __init__(self):
         super(Gameplay, self).__init__()
         self.next_state = "GAME_OVER"
+        self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
+        self.console = Console(self.screen, self.console_font, 1.0, 0.25)
         self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6))
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         '''camera and map are confined to the upper-left 3/4s of the screen'''
@@ -282,6 +284,7 @@ class Gameplay(BaseState):
                 if (self.player_hex[0] + v[0], self.player_hex[1] + v[1]) in hexagon_dict:
                     self.player_hex = (self.player_hex[0] + v[0], self.player_hex[1] + v[1])
                     self.camera_follow(self.player_rect)
+                    self.location_message()
                     #self.trackers['Day'] += 1
                     #self.trackers['Rations'] -= 1 * self.trackers['Party']
                     self.hunt(self.party[0])
@@ -298,6 +301,8 @@ class Gameplay(BaseState):
             elif event.key == pygame.K_p:
                 if self.player.possessions:
                     self.player.possessions.pop(-1)
+            elif event.key == pygame.K_c:
+                self.console.clear_console()
             elif event.key == pygame.K_SPACE:
                 self.done = True
             elif event.key == pygame.K_ESCAPE:
@@ -400,7 +405,6 @@ class Gameplay(BaseState):
                         character.max_carry = min(character.max_carry * 2, 10)
                     if character.fatigue > 0:
                         character.fatigue -= 1
-                    #self.trackers['Rations'] += character.possessions.count('ration')
                 else:
                     self.starvation(character)
 
@@ -409,15 +413,17 @@ class Gameplay(BaseState):
         self.trackers['Rations'] -= rations_eaten
         self.trackers['Day'] += 1
 
+
     def starvation(self, entity):
         entity.max_carry = max(entity.max_carry // 2, 1)
         entity.fatigue += 1
         if entity is not self.player:
             desertion_dice = randint(1,6) + randint(1,6) - self.player.wits
-            print(desertion_dice)
             if desertion_dice >= 4:
+                self.console.display_message(f'{entity.name} has grown weary of hunger and has abandoned you!')
                 self.party.remove(entity)
-                self.trackers['Party'] = len(self.party)   
+                self.trackers['Party'] = len(self.party)
+  
 
 
     '''This method draws each hexagon and then gives it a color, and image, and any icons it may have'''
@@ -607,8 +613,6 @@ class Gameplay(BaseState):
         for key, value in self.trackers.items():
             tracker_font = pygame.font.Font(pygame.font.match_font('couriernew', True), 36)
             tracker_text = tracker_font.render(f'{key:<7}: {value:>3}', True, [80, 80, 80])
-            # text_rect = text.get_rect(center=(self.sp_rect.center[0], y_coord))
-            # surface.blit(text, text_rect)
             surface.blit(tracker_text, (self.x - self.x * 0.22, y_coord))
             y_coord += tracker_font.get_linesize()
         y_coord += 20
@@ -624,15 +628,18 @@ class Gameplay(BaseState):
             surface.blit(item_text, (self.x - self.x * 0.11, item_y_coord))
             item_y_coord += char_font.get_linesize()
         character_y_coord = attribute_y_coord + 20
-        for character in self.party:
+        party_text = char_font.render('Party Members:', True, [80, 80, 80])
+        surface.blit(party_text, (self.x - self.x * 0.22, character_y_coord))
+        character_y_coord += char_font.get_linesize()
+        for character in self.party[1:]:
             character_text = char_font.render(f'{character.name}', True, [80, 80, 80])
             surface.blit(character_text, (self.x - self.x * 0.22, character_y_coord))
             character_y_coord += char_font.get_linesize()
 
 
-        self.bottom_panel = pygame.Surface((self.x, self.y * 0.25))
-        self.bottom_panel.fill(parchment_color)
-        surface.blit(self.bottom_panel, (0, self.y - self.y * 0.25))
+        # self.bottom_panel = pygame.Surface((self.x, self.y * 0.25))
+        # self.bottom_panel.fill(parchment_color)
+        # surface.blit(self.bottom_panel, (0, self.y - self.y * 0.25))
         pygame.draw.rect(surface, "black", (0, self.y - self.y * 0.25, self.x, self.y - self.y * 0.75), 20)
         # self.knotwork = pygame.transform.scale(self.knotwork, (636, 84))
         # surface.blit(self.knotwork, (0, self.y - 84))
@@ -640,26 +647,44 @@ class Gameplay(BaseState):
         e001_text = "Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks, their allies will arm and you will lose your kingdom forever. To escape the mercenary royal guard, your loyal body servant Ogab smuggled you into a merchant caravan to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, loosen your swordbelt, and get ready to start the first day of your adventure. Important Note: if you finish actions for a day on any hex north of the Tragoth River, the mercenary royal guardsmen may find you."
         day70_text = "Ten weeks have passed, and you have been unable to raise sufficeint funds or forces to retake your kingdom.  Perhaps the fates may offer you another chance in the future, but for now you must remain a prince-in-exile."
 
-        self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
+        #self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
         intro_text = self.wrap_text(e001_text, self.console_font, int(self.x * 0.9))
         day70_loss_text = self.wrap_text(day70_text, self.console_font, int(self.x * 0.9))
 
-        self.console = Console(surface, self.console_font, 1.0, 0.25)
+        #self.console = Console(surface, self.console_font, 1.0, 0.25)
         if self.trackers["Day"] == 1:
             for line in intro_text:
                 self.console.display_message(line)
-        elif self.trackers["Day"] == 70:
+            self.location_message()
+                
+        if self.trackers["Day"] == 71:
             for line in day70_loss_text:
                 self.console.display_message(line)
 
 
         #for self.player_hex in [castles, temples, towns, ruins]:
+        # if self.player_hex in castles:
+        #     self.console.display_message(f'You arrive at the imposing fortifications of {castles[self.player_hex][0]}')
+        # elif self.player_hex in towns:
+        #     self.console.display_message(f'You arrive at the town of {towns[self.player_hex][0]}')
+        # elif self.player_hex in temples:
+        #     self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
+        # elif self.player_hex in ruins:
+        #     self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
+        # elif self.trackers["Day"] not in [1, 71]:
+        #     self.console.clear_console()
+
+        self.console.render()
+
+
+    def location_message(self):
         if self.player_hex in castles:
             self.console.display_message(f'You arrive at the imposing fortifications of {castles[self.player_hex][0]}')
-        if self.player_hex in towns:
+        elif self.player_hex in towns:
             self.console.display_message(f'You arrive at the town of {towns[self.player_hex][0]}')
-        if self.player_hex in temples:
+        elif self.player_hex in temples:
             self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
-        if self.player_hex in ruins:
+        elif self.player_hex in ruins:
             self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
-        self.console.render()
+        elif self.trackers["Day"] not in [1, 71]:
+            self.console.clear_console()

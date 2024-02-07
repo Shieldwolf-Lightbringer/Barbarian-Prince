@@ -7,6 +7,7 @@ class BaseState(object):
         self.done = False
         self.quit = False
         self.next_state = None
+        self.screen = pygame.display.get_surface()
         self.screen_rect = pygame.display.get_surface().get_rect()
         # self.dimensions = pygame.display.get_window_size()
         self.x = self.screen_rect[2]
