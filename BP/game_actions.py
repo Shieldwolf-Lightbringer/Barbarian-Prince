@@ -1,3 +1,5 @@
+import travel_events
+from hexmap import overland_map
 from random import randint
 
 '''general actions'''
@@ -54,17 +56,23 @@ item_table = {'A':['healing potion', 'cure poison vial', 'gift of charm', 'endur
 # e193 shield of light
 # e194 royal helm of the northlands
 
-def encounter(hex):
-    '''this needs to check what terrain the player is in, then roll on the appropriate table'''
-    terrain_type = hex
-    row_dice = randint(1,6)
-    column_dice = randint(0,5)
-    if hex in terrain_type:
+def encounter(hex, console):
+    '''this still needs to account for roads and river crossings'''
+    terrain_type = getattr(travel_events, overland_map[hex][0])
+    encounter_dice = randint(1,6) + randint(1,6)
+    if encounter_dice >= terrain_type['event']:
+        row_dice = randint(1,6)
+        column_dice = randint(0,5)
         event = terrain_type[row_dice][column_dice]
-    pass
+        console.display_message(f'You encounter event {event}!')
 
-def get_lost():
-    pass
+def get_lost(hex, console):
+    '''this still needs to account for roads and river crossings'''
+    terrain_type = getattr(travel_events, overland_map[hex][0])
+    get_lost_dice = randint(1,6) + randint(1,6)
+    if get_lost_dice >= terrain_type['lost']:
+        console.display_message(f'You have gotten lost attempting to enter the {overland_map[hex][0]}.  Maybe you will find your way tomorrow.')
+        return True
 
 def talk():
     pass
@@ -77,8 +85,15 @@ def fight():
 
 
 '''actions available in any hex'''
-def rest():
-    pass
+def rest(party, console):
+    for character in party:
+        if character.wounds > 0:
+            character.wounds -= 1
+            console.display_message(f'{character.name} has rested for the day and healed a wound.')
+        else:
+            console.display_message(f'{character.name} has rested for the day.')
+    hunt_bonus = int(len(party) - 1)
+    return hunt_bonus
 
 def cache_locate():
     pass
@@ -101,17 +116,15 @@ def seek_audience():
 def make_offering():
     pass
 
-def search_ruins():
-    pass
-# ruin_results = {2: e133,
-#                 3: e135,
-#                 4: e136,
-#                 5: e137,
-#                 6: e139,
-#                 7: e131,
-#                 8: e132,
-#                 9: e134,
-#                 10: e138,
-#                 11: e135,
-#                 12: e035}
+def search_ruins(console):
+    ruin_results = {2: ['e133', 'Plague'], 3: ['e135', 'Broken Columns'], 
+                    4: ['e136', 'Hidden Treasures'], 5: ['e137', 'Inhabitants'], 
+                    6: ['e139', 'Minor Treasures'], 7: ['e131', 'Empty Ruins'],
+                    8: ['e132', 'Organized Search'], 9: ['e134', 'Unstable Ruins'], 
+                    10: ['e138', 'Unclean'], 11: ['e135', 'Broken Columns'], 
+                    12: ['e035', 'Spell of Chaos']}
+    ruin_search_dice = randint(1,6) + randint(1,6)
+    event = ruin_results[ruin_search_dice]
+    console.display_message(f'Your search of the ruins has uncovered {event[1]}!')
+
         

@@ -232,6 +232,7 @@ class Gameplay(BaseState):
 
     '''This handles mouse clicks, keystrokes, and other events'''
     def get_event(self, event):
+        #self.console.handle_input(event)
         if self.player_hex[0] % 2 == 0:
             dir = {
                 pygame.K_q: (-1, +0),
@@ -279,12 +280,18 @@ class Gameplay(BaseState):
 
         if event.type == pygame.KEYUP:
             self.player.update()
+            #if self.trackers["Day"] not in [1, 71]:
+            self.console.clear_console()
             if event.key in dir:
                 v = dir[event.key]
                 if (self.player_hex[0] + v[0], self.player_hex[1] + v[1]) in hexagon_dict:
-                    self.player_hex = (self.player_hex[0] + v[0], self.player_hex[1] + v[1])
+                    if game_actions.get_lost((self.player_hex[0] + v[0], self.player_hex[1] + v[1]), self.console):
+                        self.player_hex = self.player_hex
+                    else:
+                        self.player_hex = (self.player_hex[0] + v[0], self.player_hex[1] + v[1])
                     self.camera_follow(self.player_rect)
                     self.location_message()
+                    game_actions.encounter(self.player_hex, self.console)
                     #self.trackers['Day'] += 1
                     #self.trackers['Rations'] -= 1 * self.trackers['Party']
                     self.hunt(self.party[0])
@@ -295,9 +302,13 @@ class Gameplay(BaseState):
             elif event.key == pygame.K_h:
                 self.hunt(self.party[0])
             elif event.key == pygame.K_j:
-                self.search_ruins()
+                #self.search_ruins()
+                if self.player_hex in ruins:
+                    game_actions.search_ruins(self.console)
+                    self.hunt(self.party[0])
             elif event.key == pygame.K_r:
-                self.rest()
+                #self.rest()
+                self.hunt(self.party[0], game_actions.rest(self.party, self.console))
             elif event.key == pygame.K_p:
                 if self.player.possessions:
                     self.player.possessions.pop(-1)
@@ -307,8 +318,6 @@ class Gameplay(BaseState):
                 self.done = True
             elif event.key == pygame.K_ESCAPE:
                 self.quit = True
-            else:
-                self.console.handle_input(event)
 
     def hunt(self, hunter, bonus=0):
         if self.player_hex not in mountains and self.player_hex not in deserts:
@@ -343,27 +352,27 @@ class Gameplay(BaseState):
 
 
 
-    def search_ruins(self):  #lots of stuff to implement here
-        if self.player_hex in ruins:
-            ruins_dice = randint(1,6) + randint(1,6)
-            if ruins_dice > 2:
-                gold, item = game_actions.roll_treasure(5)
-                self.player.gold += gold
-                self.trackers['Gold'] = self.player.gold
-                if item:
-                    self.player.possessions.append(item)
-                    self.trackers['Items'] = len(self.player.possessions) 
-            #self.trackers['Day'] += 1
+    # def search_ruins(self):  #lots of stuff to implement here
+    #     if self.player_hex in ruins:
+    #         ruins_dice = randint(1,6) + randint(1,6)
+    #         if ruins_dice > 2:
+    #             gold, item = game_actions.roll_treasure(5)
+    #             self.player.gold += gold
+    #             self.trackers['Gold'] = self.player.gold
+    #             if item:
+    #                 self.player.possessions.append(item)
+    #                 self.trackers['Items'] = len(self.player.possessions) 
+    #         #self.trackers['Day'] += 1
 
-            self.hunt(self.party[0])
+    #         self.hunt(self.party[0])
 
 
-    def rest(self):
-        for character in self.party:
-            if character.wounds > 0:
-                character.wounds -= 1
-        hunt_bonus = int(len(self.party) - 1)
-        self.hunt(self.party[0], hunt_bonus)
+    # def rest(self):
+    #     for character in self.party:
+    #         if character.wounds > 0:
+    #             character.wounds -= 1
+    #     hunt_bonus = int(len(self.party) - 1)
+    #     self.hunt(self.party[0], hunt_bonus)
 
 
     def eat_meal(self):
@@ -673,7 +682,7 @@ class Gameplay(BaseState):
         #     self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
         # elif self.trackers["Day"] not in [1, 71]:
         #     self.console.clear_console()
-
+                
         self.console.render()
 
 
@@ -686,5 +695,5 @@ class Gameplay(BaseState):
             self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
         elif self.player_hex in ruins:
             self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
-        elif self.trackers["Day"] not in [1, 71]:
-            self.console.clear_console()
+        # elif self.trackers["Day"] not in [1, 71]:
+        #     self.console.clear_console()

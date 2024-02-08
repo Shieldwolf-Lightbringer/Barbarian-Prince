@@ -8,6 +8,7 @@ class Character:
         self.fatigue = 0
         self.endurance = endurance
         self.wounds = wounds
+        self.poison_wounds = wounds
         self.possessions = []
         self.max_carry = 10
         self.wits = wits
@@ -15,6 +16,8 @@ class Character:
         self.determine_wealth(wealth_code)
         self.alive = True
         self.awake = True
+        self.mounted = False
+        self.flying = False
         
     def determine_wealth(self, wealth_code):
         wealth_dice = randint(0,5)
@@ -22,7 +25,7 @@ class Character:
             gold_value = treasure_table[wealth_code][wealth_dice][0]
             item_row = treasure_table[wealth_code][wealth_dice][1]
             item_dice = randint(0,5)
-            self.possessions.append(item_table[item_row][item_dice])
+            self.add_item(item_table[item_row][item_dice])
             self.gold += gold_value
         else:
             self.gold += treasure_table[wealth_code][wealth_dice]
