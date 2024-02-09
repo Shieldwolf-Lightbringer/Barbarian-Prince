@@ -83,6 +83,167 @@ def evade():
 def fight():
     pass
 
+def dismiss_party_member(party):
+    pass
+
+def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains, farmlands, bonus=0):
+    hunter = party[0]
+    if player_hex not in mountains and player_hex not in deserts:
+        if not any(player_hex in key for key in [castles, temples, towns]):
+            hunt_dice = randint(1,6) + randint(1,6)
+            if hunt_dice == 12:
+                injury = randint(1,6)
+                console.display_message(f'{hunter.name} was injured while hunting, suffering {injury} wounds!')
+                hunter.wounds += injury
+
+            hunt_result = (hunter.combat_skill + int(hunter.endurance / 2) + bonus) - hunt_dice
+            rations = ["ration"] * hunt_result
+            console.display_message(f'{hunter.name} brings back {hunt_result} rations from hunting.')
+            for ration in rations:
+                for character in party:
+                    character.add_item(ration)
+                rations.pop()
+
+
+            if player_hex in farmlands:
+                encounter = randint(1,6)
+                if encounter == 5:
+                    mob = (randint(1,6) + randint(1,6)) * 2
+                    console.display_message(f'You are pursued by a large mob of {mob} angry farmers and villagers!')
+                    if hunter.combat_skill + randint(1,6) - hunter.fatigue < 10:
+                        hunter.wounds += randint(1,3)
+                elif encounter == 6:
+                    constables = randint(6,11)
+                    console.display_message(f'Your illegal hunting has attracted the attention of {constables} members of the local constabulary!')
+                    if hunter.combat_skill + randint(1,6) - hunter.fatigue < 12:
+                        hunter.wounds += randint(1,6)
+
+
+def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis):
+    gold_spent = 0
+    if any(player_hex in key for key in [castles, temples, towns]):
+        lodging(party, console)
+        for character in party:
+            if 'ration' in character.possessions:
+                console.display_message(f'{character.name} has eaten.')
+                character.possessions.remove('ration')
+                character.has_eaten = True
+                if character.max_carry < 10:
+                    character.max_carry = min(character.max_carry * 2, 10)
+                if character.fatigue > 0:
+                    character.fatigue -= 1
+            elif party[0].gold >= 1 + gold_spent:
+                gold_spent += 1
+                console.display_message(f'{character.name} has purchased a meal.')
+                character.has_eaten = True
+            else:
+                starvation(character, party, console)
+        party[0].gold -= gold_spent
+                
+    elif player_hex in deserts and player_hex not in oasis:
+        for character in party:
+            for _ in range(2):
+                if 'ration' in character.possessions:
+                    console.display_message(f'{character.name} has eaten.')
+                    character.possessions.remove('ration')
+                    character.has_eaten = True
+                    if character.max_carry < 10:
+                        character.max_carry = min(character.max_carry * 2, 10)
+                    if character.fatigue > 0:
+                        character.fatigue -= 1
+                else:
+                    starvation(character, party, console)
+
+    else:
+        for character in party:
+            if 'ration' in character.possessions:
+                console.display_message(f'{character.name} has eaten.')
+                character.possessions.remove('ration')
+                character.has_eaten = True
+                if character.max_carry < 10:
+                    character.max_carry = min(character.max_carry * 2, 10)
+                if character.fatigue > 0:
+                    character.fatigue -= 1
+            else:
+                starvation(character, party, console)
+    
+
+def starvation(character, party, console):
+    if not character.has_eaten:
+        character.max_carry = max(character.max_carry // 2, 1)
+        character.fatigue += 1
+        console.display_message(f'{character.name} has gone without food!')
+    desertion(character, party, console, 'hunger')
+    '''Need to implement mount starvation'''
+
+def desertion(character, party, console, reason):
+    if not character.heir or character.true_love:
+        desertion_dice = randint(1,6) + randint(1,6) - party[0].wits
+        if desertion_dice >= 4:
+            console.display_message(f'{character.name} has grown weary of {reason} and has abandoned you!')
+            party.remove(character)
+
+def lodging(party, console):
+    rooms = 0.0
+    stables = 0
+    for character in party:
+        if any([character.heir, character.priest, character.monk, character.magician, character.wizard, character.witch]):
+            rooms += 1
+        else:
+            rooms += 0.5
+        if character.mounted:
+            stables += 1
+
+    rooms = int(rooms) + (rooms > int(rooms))
+    if party[0].gold >= rooms + stables:
+        console.display_message(f'You rent {rooms} rooms and {stables} stables for the night, costing you {rooms + stables} gold.')
+        party[0].gold -= rooms + stables
+    elif rooms + stables > party[0].gold >= rooms:
+        console.display_message(f'You rent {rooms} rooms for the night, costing you {rooms} gold.')
+        '''Need to implement mounts going missing on d6 of 4+'''
+        party[0].gold -= rooms
+    else:
+        for character in party:
+            desertion(character, party, console, 'poverty')
+
+def escape():
+    '''move randomly to adjacent hex, no new events.  Cannot cross river unless flying.'''
+    pass
+
+def hide():
+    '''remain in hex, no hunting.  mounts can forage.  eat and lodge normally in towns, castles, or temples.'''
+    pass
+
+def follow_characters():
+    pass
+
+def trap_lock(character, console):
+    trap_roll = randint(1,6)
+    if trap_roll == 1:
+        console.display_message(f'{character} was struck by a poisoned needle!')
+        character.poison_wounds += 1
+    elif trap_roll == 2:
+        console.display_message(f'{character} was struck by a burning acid explosion!')
+        character.wounds += randint(1,6)
+    elif trap_roll == 3:
+        console.display_message(f'Poison gas envelops {character}!')
+        character.poison_wounds += randint(1,6)
+    elif trap_roll == 4:
+        console.display_message(f'Plague dust inflicts sickness on {character}!')
+        character.plague = True
+    elif trap_roll == 5:
+        console.display_message(f'Flying spikes and knives explode toward {character}!')
+        character.wounds += randint(4,9)
+    else:
+        console.display_message(f'Trap malfunctions! No injury to {character}!')
+
+def true_love():
+    '''True love will not abandon party, regardless of money/food situation.  If forced to separate, character will
+    return at end of day on roll of 10 or 11 on 2d6; a 12 means they died.  If they find you again, a roll of 9+ on
+    2d6 means they return with a horse; a 12 means they return with a pegasus.  
+    While true love is in party, you get +1 wits.  Cannot have true love with more than one character at a time.
+    Maybe develop a loyalty or boon companion mechanic?'''
+
 
 '''actions available in any hex'''
 def rest(party, console):

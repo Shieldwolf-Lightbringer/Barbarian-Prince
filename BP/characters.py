@@ -2,7 +2,7 @@ import pygame
 from random import randint, choice
 
 class Character:
-    def __init__(self, name, combat_skill, endurance, wounds, wealth_code, wits=None):
+    def __init__(self, name, combat_skill, endurance, wounds, wealth_code, wits=None, heir=False):
         self.name = name
         self.combat_skill = combat_skill
         self.fatigue = 0
@@ -16,6 +16,15 @@ class Character:
         self.determine_wealth(wealth_code)
         self.alive = True
         self.awake = True
+        self.has_eaten = False
+        self.heir = heir
+        self.priest = False
+        self.monk = False
+        self.magician = False
+        self.wizard = False
+        self.witch = False
+        self.true_love = False
+        self.plague = False
         self.mounted = False
         self.flying = False
         
@@ -46,11 +55,20 @@ class Character:
         if len(self.possessions) <= self.max_carry:
             self.possessions.append(item)
 
+    def plague_and_recovery(self):
+        if self.plague and self.alive:
+            self.wounds += randint(1,3) 
+            recovery_roll = randint(1,6)
+            if recovery_roll >= 4:
+                self.plague = False
+
     def update(self):
         if self.wounds >= self.endurance - 1:
             self.awake = False
         if self.wounds >= self.endurance:
             self.alive = False
+        self.eaten = False
+        self.plague_and_recovery()
         pouches_of_gold = (self.gold // 100) + 1
         if self.possessions.count('pouch of gold') < pouches_of_gold:
             self.add_item('pouch of gold')

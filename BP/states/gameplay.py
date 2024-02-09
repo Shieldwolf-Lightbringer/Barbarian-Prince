@@ -140,7 +140,7 @@ class Gameplay(BaseState):
         self.next_state = "GAME_OVER"
         self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
         self.console = Console(self.screen, self.console_font, 1.0, 0.25)
-        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6))
+        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6), True)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         '''camera and map are confined to the upper-left 3/4s of the screen'''
         self.camera = pygame.Rect((0, 0), (self.x * 0.75, self.y * 0.75)) #(self.x, self.y))
@@ -164,7 +164,7 @@ class Gameplay(BaseState):
         self.party.append(sword_maiden)
 
     def initialize(self):
-        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6))
+        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6), True)
         self.party = []
         self.party.append(self.player)
         sword_maiden = characters.Character('Red Sonja', 6, 6, 0, 0)
@@ -255,6 +255,9 @@ class Gameplay(BaseState):
         if event.type == pygame.QUIT:
             self.quit = True
 
+        if self.player.alive is False:
+            self.done = True
+
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
             if mouse_pos[0] <= self.x * 0.75 and mouse_pos[1] <= self.y * 0.75:
@@ -279,7 +282,8 @@ class Gameplay(BaseState):
                         break
 
         if event.type == pygame.KEYUP:
-            self.player.update()
+            for character in self.party:
+                character.update()
             #if self.trackers["Day"] not in [1, 71]:
             self.console.clear_console()
             if event.key in dir:
@@ -292,148 +296,51 @@ class Gameplay(BaseState):
                     self.camera_follow(self.player_rect)
                     self.location_message()
                     game_actions.encounter(self.player_hex, self.console)
-                    #self.trackers['Day'] += 1
-                    #self.trackers['Rations'] -= 1 * self.trackers['Party']
-                    self.hunt(self.party[0])
+
+                    game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
+                    game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+                    
+                    self.count_rations()
+                    self.trackers['Gold'] = self.party[0].gold
+                    self.trackers['Day'] += 1
                 else:
                     self.player_hex = self.player_hex
                     self.camera_follow(self.player_rect)
-            
-            elif event.key == pygame.K_h:
-                self.hunt(self.party[0])
-            elif event.key == pygame.K_j:
-                #self.search_ruins()
+
+            elif event.key == pygame.K_t:
                 if self.player_hex in ruins:
                     game_actions.search_ruins(self.console)
-                    self.hunt(self.party[0])
+                    game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
+                    game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+                    self.count_rations()
+                    self.trackers['Gold'] = self.party[0].gold
+                    self.trackers['Day'] += 1
+
             elif event.key == pygame.K_r:
-                #self.rest()
-                self.hunt(self.party[0], game_actions.rest(self.party, self.console))
+                game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
+                game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+                self.count_rations()
+                self.trackers['Gold'] = self.party[0].gold
+                self.trackers['Day'] += 1
+
             elif event.key == pygame.K_p:
                 if self.player.possessions:
                     self.player.possessions.pop(-1)
+
             elif event.key == pygame.K_c:
                 self.console.clear_console()
+
             elif event.key == pygame.K_SPACE:
                 self.done = True
             elif event.key == pygame.K_ESCAPE:
                 self.quit = True
 
-    def hunt(self, hunter, bonus=0):
-        if self.player_hex not in mountains and self.player_hex not in deserts:
-            if not any(self.player_hex in key for key in [castles, temples, towns]):
-                hunt_dice = randint(1,6) + randint(1,6)
-                if hunt_dice == 12:
-                    hunter.wounds += randint(1,6)
-                    if hunter.wounds >= hunter.endurance:
-                        self.done = True
-                #self.trackers['Rations'] += (hunter.combat_skill + int(hunter.endurance / 2)) - hunt_dice
-                hunt_result = (hunter.combat_skill + int(hunter.endurance / 2) + bonus) - hunt_dice
-                rations = ["ration"] * hunt_result
-                for ration in rations:
-                    for character in self.party:
-                        character.add_item(ration)
-                ration_count = 0
-                for character in self.party:
-                    ration_count += character.possessions.count('ration')
-                self.trackers['Rations'] = ration_count
 
-                if self.player_hex in farmlands:
-                    encounter = randint(1,6)
-                    if encounter < 5:
-                        pass
-                    else:
-                        if hunter.combat_skill + randint(1,6) - hunter.fatigue < 10:
-                            hunter.wounds += randint(1,6)
-                            if hunter.wounds >= hunter.endurance:
-                                self.done = True #will trigger encounters with peasant mob or constabulary, when implemented
-                #self.trackers['Day'] += 1
-        self.eat_meal()
-
-
-
-    # def search_ruins(self):  #lots of stuff to implement here
-    #     if self.player_hex in ruins:
-    #         ruins_dice = randint(1,6) + randint(1,6)
-    #         if ruins_dice > 2:
-    #             gold, item = game_actions.roll_treasure(5)
-    #             self.player.gold += gold
-    #             self.trackers['Gold'] = self.player.gold
-    #             if item:
-    #                 self.player.possessions.append(item)
-    #                 self.trackers['Items'] = len(self.player.possessions) 
-    #         #self.trackers['Day'] += 1
-
-    #         self.hunt(self.party[0])
-
-
-    # def rest(self):
-    #     for character in self.party:
-    #         if character.wounds > 0:
-    #             character.wounds -= 1
-    #     hunt_bonus = int(len(self.party) - 1)
-    #     self.hunt(self.party[0], hunt_bonus)
-
-
-    def eat_meal(self):
-        rations_eaten = 0
-        gold_spent = 0
-        if any(self.player_hex in key for key in [castles, temples, towns]):
-            for character in self.party:
-                if 'ration' in character.possessions:
-                    character.possessions.remove('ration')
-                    rations_eaten += 1
-                    if character.max_carry < 10:
-                        character.max_carry = min(character.max_carry * 2, 10)
-                    if character.fatigue > 0:
-                        character.fatigue -= 1
-                elif self.player.gold >= 1 + gold_spent:
-                    gold_spent += 1
-                else:
-                    self.starvation(character)
-                    
-        elif self.player_hex in deserts and self.player_hex not in oasis:
-            for character in self.party:
-                for _ in range(2):
-                    if 'ration' in character.possessions:
-                        character.possessions.remove('ration')
-                        rations_eaten += 1
-                        if character.max_carry < 10:
-                            character.max_carry = min(character.max_carry * 2, 10)
-                        if character.fatigue > 0:
-                            character.fatigue -= 1
-                    else:
-                        self.starvation(character)
-
-        else:
-            for character in self.party:
-                if 'ration' in character.possessions:
-                    character.possessions.remove('ration')
-                    rations_eaten += 1
-                    if character.max_carry < 10:
-                        character.max_carry = min(character.max_carry * 2, 10)
-                    if character.fatigue > 0:
-                        character.fatigue -= 1
-                else:
-                    self.starvation(character)
-
-        self.player.gold -= gold_spent
-        self.trackers['Gold'] = self.player.gold
-        self.trackers['Rations'] -= rations_eaten
-        self.trackers['Day'] += 1
-
-
-    def starvation(self, entity):
-        entity.max_carry = max(entity.max_carry // 2, 1)
-        entity.fatigue += 1
-        if entity is not self.player:
-            desertion_dice = randint(1,6) + randint(1,6) - self.player.wits
-            if desertion_dice >= 4:
-                self.console.display_message(f'{entity.name} has grown weary of hunger and has abandoned you!')
-                self.party.remove(entity)
-                self.trackers['Party'] = len(self.party)
-  
-
+    def count_rations(self):
+        ration_count = 0
+        for character in self.party:
+            ration_count += character.possessions.count('ration')
+        self.trackers['Rations'] = ration_count
 
     '''This method draws each hexagon and then gives it a color, and image, and any icons it may have'''
     def draw_hexagon(self, surface, center, key):
@@ -641,7 +548,7 @@ class Gameplay(BaseState):
         surface.blit(party_text, (self.x - self.x * 0.22, character_y_coord))
         character_y_coord += char_font.get_linesize()
         for character in self.party[1:]:
-            character_text = char_font.render(f'{character.name}', True, [80, 80, 80])
+            character_text = char_font.render(f'{character.name} ({len(character.possessions)}/{character.max_carry})', True, [80, 80, 80])
             surface.blit(character_text, (self.x - self.x * 0.22, character_y_coord))
             character_y_coord += char_font.get_linesize()
 
@@ -654,7 +561,7 @@ class Gameplay(BaseState):
         # surface.blit(self.knotwork, (0, self.y - 84))
 
         e001_text = "Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks, their allies will arm and you will lose your kingdom forever. To escape the mercenary royal guard, your loyal body servant Ogab smuggled you into a merchant caravan to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, loosen your swordbelt, and get ready to start the first day of your adventure. Important Note: if you finish actions for a day on any hex north of the Tragoth River, the mercenary royal guardsmen may find you."
-        day70_text = "Ten weeks have passed, and you have been unable to raise sufficeint funds or forces to retake your kingdom.  Perhaps the fates may offer you another chance in the future, but for now you must remain a prince-in-exile."
+        day70_text = "Ten weeks have passed, and you have been unable to raise sufficeint funds or forces to retake your kingdom.  Perhaps the fates may offer you another chance in the future, but for now you must remain in exile."
 
         #self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
         intro_text = self.wrap_text(e001_text, self.console_font, int(self.x * 0.9))
