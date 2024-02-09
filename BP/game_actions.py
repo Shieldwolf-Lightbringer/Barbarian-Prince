@@ -101,9 +101,8 @@ def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains
             console.display_message(f'{hunter.name} brings back {hunt_result} rations from hunting.')
             for ration in rations:
                 for character in party:
-                    character.add_item(ration)
-                rations.pop()
-
+                    character.add_item(ration) 
+                    ### This is not dividing rations properly
 
             if player_hex in farmlands:
                 encounter = randint(1,6)
@@ -165,8 +164,7 @@ def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis
                 if character.fatigue > 0:
                     character.fatigue -= 1
             else:
-                starvation(character, party, console)
-    
+                starvation(character, party, console)   
 
 def starvation(character, party, console):
     if not character.has_eaten:

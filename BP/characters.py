@@ -67,7 +67,7 @@ class Character:
             self.awake = False
         if self.wounds >= self.endurance:
             self.alive = False
-        self.eaten = False
+        self.has_eaten = False
         self.plague_and_recovery()
         pouches_of_gold = (self.gold // 100) + 1
         if self.possessions.count('pouch of gold') < pouches_of_gold:

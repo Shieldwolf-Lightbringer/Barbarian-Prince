@@ -282,8 +282,8 @@ class Gameplay(BaseState):
                         break
 
         if event.type == pygame.KEYUP:
-            for character in self.party:
-                character.update()
+            # for character in self.party:
+            #     character.update()
             #if self.trackers["Day"] not in [1, 71]:
             self.console.clear_console()
             if event.key in dir:
@@ -303,6 +303,9 @@ class Gameplay(BaseState):
                     self.count_rations()
                     self.trackers['Gold'] = self.party[0].gold
                     self.trackers['Day'] += 1
+                    for character in self.party:
+                        character.update()
+                    self.trackers['Party'] = len(self.party)
                 else:
                     self.player_hex = self.player_hex
                     self.camera_follow(self.player_rect)
@@ -315,6 +318,9 @@ class Gameplay(BaseState):
                     self.count_rations()
                     self.trackers['Gold'] = self.party[0].gold
                     self.trackers['Day'] += 1
+                    self.trackers['Party'] = len(self.party)
+                    for character in self.party:
+                        character.update()
 
             elif event.key == pygame.K_r:
                 game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
@@ -322,6 +328,9 @@ class Gameplay(BaseState):
                 self.count_rations()
                 self.trackers['Gold'] = self.party[0].gold
                 self.trackers['Day'] += 1
+                self.trackers['Party'] = len(self.party)
+                for character in self.party:
+                    character.update()
 
             elif event.key == pygame.K_p:
                 if self.player.possessions:
