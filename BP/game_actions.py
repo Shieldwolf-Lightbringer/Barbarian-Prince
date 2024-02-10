@@ -97,12 +97,19 @@ def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains
                 hunter.wounds += injury
 
             hunt_result = (hunter.combat_skill + int(hunter.endurance / 2) + bonus) - hunt_dice
-            rations = ["ration"] * hunt_result
+            #rations = ["ration"] * hunt_result
+            rations = hunt_result // len(party)
+            extra_rations = hunt_result % len(party)
             console.display_message(f'{hunter.name} brings back {hunt_result} rations from hunting.')
-            for ration in rations:
-                for character in party:
-                    character.add_item(ration) 
+            #for ration in rations:
+                #for character in party:
+                    #character.add_item(ration) 
                     ### This is not dividing rations properly
+            for character in party:
+                for _ in range(rations):
+                    character.add_item('ration')
+            for _ in range(extra_rations):
+                party[randint(0, len(party) - 1)].add_item('ration')
 
             if player_hex in farmlands:
                 encounter = randint(1,6)
