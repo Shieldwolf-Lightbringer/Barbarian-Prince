@@ -1,5 +1,6 @@
 import travel_events
 from hexmap import overland_map
+from collections import Counter
 from random import randint
 
 '''general actions'''
@@ -101,10 +102,7 @@ def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains
             rations = hunt_result // len(party)
             extra_rations = hunt_result % len(party)
             console.display_message(f'{hunter.name} brings back {hunt_result} rations from hunting.')
-            #for ration in rations:
-                #for character in party:
-                    #character.add_item(ration) 
-                    ### This is not dividing rations properly
+
             for character in party:
                 for _ in range(rations):
                     character.add_item('ration')
@@ -143,22 +141,24 @@ def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis
                 console.display_message(f'{character.name} has purchased a meal.')
                 character.has_eaten = True
             else:
+                console.display_message(f'{party[0].name} does not have enough gold to purchase a meal for {character.name}!')
                 starvation(character, party, console)
         party[0].gold -= gold_spent
                 
     elif player_hex in deserts and player_hex not in oasis:
         for character in party:
-            for _ in range(2):
-                if 'ration' in character.possessions:
-                    console.display_message(f'{character.name} has eaten.')
-                    character.possessions.remove('ration')
-                    character.has_eaten = True
-                    if character.max_carry < 10:
-                        character.max_carry = min(character.max_carry * 2, 10)
-                    if character.fatigue > 0:
-                        character.fatigue -= 1
-                else:
-                    starvation(character, party, console)
+            ration_count = Counter(character.possessions)
+            if ration_count['ration'] >= 2:
+                console.display_message(f'{character.name} has eaten.')
+                character.possessions.remove('ration')
+                character.possessions.remove('ration')
+                character.has_eaten = True
+                if character.max_carry < 10:
+                    character.max_carry = min(character.max_carry * 2, 10)
+                if character.fatigue > 0:
+                    character.fatigue -= 1
+            else:
+                starvation(character, party, console)
 
     else:
         for character in party:
@@ -187,6 +187,8 @@ def desertion(character, party, console, reason):
         if desertion_dice >= 4:
             console.display_message(f'{character.name} has grown weary of {reason} and has abandoned you!')
             party.remove(character)
+        else:
+            console.display_message(f'Despite {reason}, {character.name} has decided to remain your companion!')
 
 def lodging(party, console):
     rooms = 0.0
@@ -208,6 +210,7 @@ def lodging(party, console):
         '''Need to implement mounts going missing on d6 of 4+'''
         party[0].gold -= rooms
     else:
+        console.display_message(f'{party[0].name} does not have enough gold to rent rooms and the party is forced to sleep in the street!')
         for character in party:
             desertion(character, party, console, 'poverty')
 
