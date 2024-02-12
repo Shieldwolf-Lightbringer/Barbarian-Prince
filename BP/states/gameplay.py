@@ -140,7 +140,7 @@ class Gameplay(BaseState):
         self.next_state = "GAME_OVER"
         self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
         self.console = Console(self.screen, self.console_font, 1.0, 0.25)
-        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6), True)
+        self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         '''camera and map are confined to the upper-left 3/4s of the screen'''
         self.camera = pygame.Rect((0, 0), (self.x * 0.75, self.y * 0.75)) #(self.x, self.y))
@@ -160,14 +160,14 @@ class Gameplay(BaseState):
         self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
         self.knotwork = pygame.image.load(path.join(self.img_folder, 'knotwork.png')).convert_alpha()
 
-        sword_maiden = characters.Character('Red Sonja', 6, 6, 0, 0)
+        sword_maiden = characters.Character(None, 'female', 6, 6, 0, 0)
         self.party.append(sword_maiden)
 
     def initialize(self):
-        self.player = characters.Character('Cal Arath', 8, 9, 0, 2, randint(2,6), True)
+        self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
         self.party = []
         self.party.append(self.player)
-        sword_maiden = characters.Character('Red Sonja', 6, 6, 0, 0)
+        sword_maiden = characters.Character(None, 'female', 6, 6, 0, 0)
         self.party.append(sword_maiden)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
@@ -301,11 +301,12 @@ class Gameplay(BaseState):
                     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
                     
                     self.count_rations()
-                    self.trackers['Gold'] = self.party[0].gold
-                    self.trackers['Day'] += 1
+                    self.update_trackers()
+                    # self.trackers['Gold'] = self.party[0].gold
+                    # self.trackers['Day'] += 1
                     for character in self.party:
                         character.update()
-                    self.trackers['Party'] = len(self.party)
+                    # self.trackers['Party'] = len(self.party)
                 else:
                     self.player_hex = self.player_hex
                     self.camera_follow(self.player_rect)
@@ -316,9 +317,10 @@ class Gameplay(BaseState):
                     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
                     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
                     self.count_rations()
-                    self.trackers['Gold'] = self.party[0].gold
-                    self.trackers['Day'] += 1
-                    self.trackers['Party'] = len(self.party)
+                    self.update_trackers()
+                    # self.trackers['Gold'] = self.party[0].gold
+                    # self.trackers['Day'] += 1
+                    # self.trackers['Party'] = len(self.party)
                     for character in self.party:
                         character.update()
 
@@ -326,9 +328,10 @@ class Gameplay(BaseState):
                 game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
                 game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
                 self.count_rations()
-                self.trackers['Gold'] = self.party[0].gold
-                self.trackers['Day'] += 1
-                self.trackers['Party'] = len(self.party)
+                self.update_trackers()
+                # self.trackers['Gold'] = self.party[0].gold
+                # self.trackers['Day'] += 1
+                # self.trackers['Party'] = len(self.party)
                 for character in self.party:
                     character.update()
 
@@ -344,12 +347,18 @@ class Gameplay(BaseState):
             elif event.key == pygame.K_ESCAPE:
                 self.quit = True
 
-
+    '''This method counts the rations in the party and updates the tracker'''
     def count_rations(self):
         ration_count = 0
         for character in self.party:
             ration_count += character.possessions.count('ration')
         self.trackers['Rations'] = ration_count
+
+    '''This method updates the Gold, Day, and Party trackers'''
+    def update_trackers(self):
+        self.trackers['Gold'] = self.party[0].gold
+        self.trackers['Day'] += 1
+        self.trackers['Party'] = len(self.party)
 
     '''This method draws each hexagon and then gives it a color, and image, and any icons it may have'''
     def draw_hexagon(self, surface, center, key):
@@ -500,6 +509,16 @@ class Gameplay(BaseState):
 
         return lines
     
+    '''This method displays a message for the player when they arrive in a hex containing a feature'''
+    def location_message(self):
+        if self.player_hex in castles:
+            self.console.display_message(f'You arrive at the imposing fortifications of {castles[self.player_hex][0]}')
+        elif self.player_hex in towns:
+            self.console.display_message(f'You arrive at the town of {towns[self.player_hex][0]}')
+        elif self.player_hex in temples:
+            self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
+        elif self.player_hex in ruins:
+            self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
     
 
     '''This method draws all the map elements to the screen and highlights hexes adjacent to the player'''
@@ -585,31 +604,5 @@ class Gameplay(BaseState):
         if self.trackers["Day"] == 71:
             for line in day70_loss_text:
                 self.console.display_message(line)
-
-
-        #for self.player_hex in [castles, temples, towns, ruins]:
-        # if self.player_hex in castles:
-        #     self.console.display_message(f'You arrive at the imposing fortifications of {castles[self.player_hex][0]}')
-        # elif self.player_hex in towns:
-        #     self.console.display_message(f'You arrive at the town of {towns[self.player_hex][0]}')
-        # elif self.player_hex in temples:
-        #     self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
-        # elif self.player_hex in ruins:
-        #     self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
-        # elif self.trackers["Day"] not in [1, 71]:
-        #     self.console.clear_console()
                 
         self.console.render()
-
-
-    def location_message(self):
-        if self.player_hex in castles:
-            self.console.display_message(f'You arrive at the imposing fortifications of {castles[self.player_hex][0]}')
-        elif self.player_hex in towns:
-            self.console.display_message(f'You arrive at the town of {towns[self.player_hex][0]}')
-        elif self.player_hex in temples:
-            self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
-        elif self.player_hex in ruins:
-            self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
-        # elif self.trackers["Day"] not in [1, 71]:
-        #     self.console.clear_console()

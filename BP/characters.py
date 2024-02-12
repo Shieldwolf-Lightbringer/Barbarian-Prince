@@ -2,8 +2,11 @@ import pygame
 from random import randint, choice
 
 class Character:
-    def __init__(self, name, combat_skill, endurance, wounds, wealth_code, wits=None, heir=False):
-        self.name = name
+    def __init__(self, name=None, sex=None, combat_skill=0, endurance=2, wounds=0, wealth_code=0, wits=None, heir=False,
+                 daily_wage=0, priest=False, monk=False, magician=False, wizard=False, witch=False, true_love=False,
+                 mounted=False, flying=False):
+        self.name = name if name else self.random_name()
+        self.sex = sex if sex else choice('male', 'female')
         self.combat_skill = combat_skill
         self.fatigue = 0
         self.endurance = endurance
@@ -12,21 +15,24 @@ class Character:
         self.possessions = []
         self.max_carry = 10
         self.wits = wits
+        self.heir = heir
         self.gold = 0
         self.determine_wealth(wealth_code)
         self.alive = True
         self.awake = True
         self.has_eaten = False
-        self.heir = heir
-        self.priest = False
-        self.monk = False
-        self.magician = False
-        self.wizard = False
-        self.witch = False
-        self.true_love = False
+        self.daily_wage = 0
+        self.priest = priest
+        self.monk = monk
+        self.magician = magician
+        self.wizard = wizard
+        self.witch = witch
+        self.magical = False
+        self.true_love = true_love
         self.plague = False
-        self.mounted = False
-        self.flying = False
+        self.move_speed = 1
+        self.mounted = mounted
+        self.flying = flying
         
     def determine_wealth(self, wealth_code):
         wealth_dice = randint(0,5)
@@ -41,8 +47,45 @@ class Character:
         if self.gold > 0:
             self.add_item('pouch of gold')
 
+    def random_name(self):
+        syllables = ['aa','ad','ae','al','am','an','ar','at','ay','az',
+                     'ba','be','bi','bo','bu',
+                     'ca','ce','ck','co','cu','cy',
+                     'da','de','di','do','du','dy',
+                     'ee','ed','el','em','en','er,','ex','ey','ez',
+                     'fa','fe','fi','fo','fr','fu',
+                     'ga','ge','gi','gn','go','gu',
+                     'ha','he','hi','hn','ho','hu','hy',
+                     'i','id','ie','il','im','in','io','ir','iu',
+                     'ja','je','ji','jo','ju',
+                     'ka','ke','ki','ko','ku',
+                     'la','le','lf','li','lm','ln','lo','lu','ly',
+                     'ma','me','mi','mm','mn','mo','mu','my',
+                     'na','ne','ni','nn','no','nu','ny',
+                     'o','ob','od','oe','of','og','oh','oi','ok','ol','om','on','oo','op','or','os','ot','ou','ow','oy','oz',
+                     'pa','pe','pi','po','pp','pu','py',
+                     'qu','qi',
+                     'ra','re','ri','ro','rr','ru','ry',
+                     'sa','se','sh','si','so','ss','su','sy',
+                     'ta','te','th','ti','to','tt','tu','ty',
+                     'u','ub','uc','ud','uf','ug','uh','uk','ul','um','un','up','ur','us','ut','ux','uz',
+                     'va','ve','vi','vo','vu',
+                     'wa','we','wi','wo','wu','wy',
+                     'xa','xe','xi','xo','xu','xy',
+                     'ya','ye','yi','yo','yu',
+                     'za','ze','zi','zo','zu','zz']
+        name = ''
+        num_syllables = randint(1,5)
+
+        for _ in range(num_syllables):
+            syllable = choice(syllables)
+            name += syllable
+            if randint(0,1) == 1:
+                name += ' '
+
+        return name.strip().title()
+
     def __str__(self):
-        #return f'{self.name}\nCombat Skill: {self.combat_skill}\nEndurance: {self.endurance}\nWounds: {self.wounds}\nWits: {self.wits}\nGold: {self.gold}\nPossessions: {self.possessions}'
         return [f'{self.name}',
                 f'Combat Skill: {max(self.combat_skill - self.fatigue, 0)}',
                 f'Endurance: {self.endurance}',
@@ -80,17 +123,15 @@ class Character:
         if len(self.possessions) > self.max_carry:
             random_item = choice(self.possessions)
             self.possessions.remove(random_item)
+        if not self.mounted or not self.flying:
+            self.move_speed = 1
+        if self.mounted:
+            self.move_speed = 2
+        if self.flying:
+            self.move_speed = 3
+        if any([self.priest, self.monk, self.magician, self.wizard, self.witch]):
+            self.magical = True
 
-# def roll_treasure(wealth_code):
-#     wealth_dice = randint(0,5)
-#     if isinstance(treasure_table[wealth_code][wealth_dice], list):
-#         gold_value = treasure_table[wealth_code][wealth_dice][0]
-#         item_row = treasure_table[wealth_code][wealth_dice][1]
-#         item_dice = randint(0,5)
-#         item = item_table[item_row][item_dice]
-#         return gold_value, item
-#     else:
-#         return treasure_table[wealth_code][wealth_dice], None
 
 treasure_table = {0:[0, 0, 0, 0, 0, 0],
                   1:[0, 0, 1, 1, 2, 2],
