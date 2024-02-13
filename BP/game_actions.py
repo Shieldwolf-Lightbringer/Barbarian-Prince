@@ -1,5 +1,6 @@
-import travel_events
 import characters
+import events
+import travel_events
 from hexmap import overland_map
 from collections import Counter
 from random import choice, randint
@@ -179,6 +180,7 @@ def starvation(character, party, console):
         character.max_carry = max(character.max_carry // 2, 1)
         character.fatigue += 1
         console.display_message(f'{character.name} has gone without food!')
+        character.check_carry_capacity()
     desertion(character, party, console, 'hunger')
     '''Need to implement mount starvation'''
 
@@ -274,10 +276,10 @@ def cache_stash():
 
 '''actions available in certain hexes'''
 
-def seek_news_and_information(character, console): #town, temple, or castle
-    gather_info_roll = randint(1,6) + randint(1,6) + character.info_bonus
+def seek_news_and_information(character, player_hex, console): #town, temple, or castle
+    gather_info_roll = randint(1,6) + randint(1,6) + character.info_bonus[player_hex]
     if character.gold >= 5:
-        console.display_message(f'Do you wish to spend 5 gold to loosen tongues? (y/n)') #need to handle choice
+        console.display_message('Do you wish to spend 5 gold to loosen tongues? (y/n)') #need to handle choice
         character.gold -= 5
         gather_info_roll += 1
     if character.wits >= 5:
@@ -285,77 +287,104 @@ def seek_news_and_information(character, console): #town, temple, or castle
 
     if gather_info_roll == 2:
         console.display_message('Your inquiries uncover no news of note; nothing seems to be happening.')
+    
     elif gather_info_roll == 3:
         console.display_message("You discover a thieves' den and pillage it while they are out.  You gain 50 gold.")
         character.gold += 50
+    
     elif gather_info_roll == 4:
-        console.display_message('You learn of secret rites at a nearby temple.  You gain a small advantage when making offerings there.')
-        character.offering_bonus += 1
+        temples = {(7,11):"Branwyn's Temple",
+                   (10,21):'Sulwyth Temple',
+                   (13,9):"Donat's Temple",
+                   (18,5):'Temple of Zhor',
+                   (20,18):'Temple of Duffyd'}
+        secret_rites = choice(temples)
+        console.display_message('You learn of secret rites at {secret_rites}.  You gain a small advantage when making offerings there.')
+        if secret_rites in character.offering_bonus:
+            character.offering_bonus[secret_rites] += 1
+        else:
+            character.offering_bonus[secret_rites] = 1
+            
     elif gather_info_roll == 5:
-        console.display_message('Your inquiries uncover no news of note; but you feel at home in this town and gain a small bonus when seeking information or hirelings.')
-        character.info_bonus += 1
-        character.hire_bonus += 1 
+        console.display_message('Your inquiries uncover no news of note; but you feel at home in this place and gain a small bonus when seeking information or hirelings.')
+        if player_hex in character.info_bonus:
+            character.info_bonus[player_hex] += 1
+        else:
+            character.info_bonus[player_hex] = 1
+        if player_hex in character.hiring_bonus:
+            character.hiring_bonus[player_hex] += 1
+        else:
+            character.hiring_bonus[player_hex] = 1
+    
     elif gather_info_roll == 6:
         console.display_message('A large caravan is in town.  If you wish to visit them today, see event e129.')
+    
     elif gather_info_roll == 7:
         console.display_message('Discover cheaper lodgings and food, pay half the normal price here.')
+    
     elif gather_info_roll == 8:
         console.display_message('A cutpurse picks your pocket, stealing half your gold!')
         character.gold /= 2
+    
     elif gather_info_roll == 9:
         console.display_message('You attract the attention of the local constabulary, see event e050.')
+    
     elif gather_info_roll == 10:
         console.display_message('You discover the residence of a local magician, see event e016.')
+    
     elif gather_info_roll == 11:
         console.display_message("You discover the local thieves' guild and are 'invited' to join.  If you do, you participate in a theft tonight and then flee the hex.  If you pay the guild their cut, you may return to this hex in the future. ")
         character.gold += 200
+    
     elif gather_info_roll >= 12:
         console.display_message('A secret informant offers you valuable information for 10 gold.')
-        secrets = choice(['bogus secrets that prove worthless', 'event e147', 'event e143', 'event e144', 'event e145', 'event e146'])
+        secret_info = choice(['bogus secrets that prove worthless', 'event e147', 'event e143', 'event e144', 'event e145', 'event e146'])
 
-def hire_followers(party, console): #town or castle
-    hire_result = randint(1,6) + randint(1,6) + party[0].hire_bonus
+
+def hire_followers(party, player_hex, console): #town or castle
+    hiring_roll = randint(1,6) + randint(1,6) + party[0].hiring_bonus[player_hex]
     
-    if hire_result == 2:
-        console.display_message("A Freeman joins your part at no cost (except food and lodging).")
+    if hiring_roll == 2:
+        console.display_message("A Freeman joins your party at no cost (except food and lodging).")
         freeman = characters.Character(None, None, 3, 4)
         party.append(freeman)
-    elif hire_result == 3:
+    elif hiring_roll == 3:
         console.display_message("A Lancer with a horse can be hired for 3 gold per day.")
         lancer = characters.Character(None, None, 5, 5, daily_wage=3, mounted=True)
         party.append(lancer)
-    elif hire_result == 4:
+    elif hiring_roll == 4:
         console.display_message("One or two mercenaries can be hired for 2 gold per day each.")
         mercenary = characters.Character(None, None, 4, 4, daily_wage=2)
         party.append(mercenary)
-    elif hire_result == 5:
+    elif hiring_roll == 5:
         console.display_message("Horse dealer in area, you can buy horses (for mounts) at 10 gold each.")
-    elif hire_result == 6:
+    elif hiring_roll == 6:
         console.display_message("Local guide available (see r205), hires for 2 gold per day.")
         guide = characters.Character(None, None, 2, 3, daily_wage=2)
         party.append(guide)
-    elif hire_result == 7:
+    elif hiring_roll == 7:
         console.display_message("Henchmen available, roll one die for the number available for hire, at 1 gold per day each.")
         henchmen = characters.Character(None, None, 3, 3, daily_wage=1)
         party.append(henchmen)
-    elif hire_result == 8:
+    elif hiring_roll == 8:
         console.display_message("Slave market, see event e163")
-    elif hire_result == 9:
+    elif hiring_roll == 9:
         console.display_message("Nothing available, but you gain some news and information, see r209 but subtract one (-1) from your dice roll there.")
-    elif hire_result == 10:
+    elif hiring_roll == 10:
         console.display_message("Honest horse dealer in area, can buy horses (for mounts) at 7 gold each.")
-    elif hire_result == 11:
+    elif hiring_roll == 11:
         console.display_message("Runaway boy or girl joins your party at no cost (except food and lodging), has combat skill 1, endurance 3.")
         runaway = characters.Character(None, None, 1, 3)
         party.append(runaway)
-    elif hire_result >= 12:
+    elif hiring_roll >= 12:
         console.display_message("Porters in any quantity available, hire for ½ gold each per day. In addition, a local guide (r205) can be hired for 2 gold per day, has combat skill 1, endurance 2.")
         porters = characters.Character(None, None, 1, 2, daily_wage=0.5)
         guide = characters.Character(None, None, 1, 2, daily_wage=2)
         party.append(porters)
         party.append(guide)
 
-def seek_audience(): #town, temple, or castle
+
+def seek_audience(party, player_hex, console): #town, temple, or castle
     pass
     # if current_hex_key in (101, 109, 216, 419, 422, 719, 916, 1004, 1009, 1415, 1501, 1720):
 	# 	audience_town = d6(2)
@@ -426,32 +455,72 @@ def seek_audience(): #town, temple, or castle
 	# 		# 11 Meet daughter of the Lady Aeravir, e154.
 	# 		# 12+ Audience granted, e160.
 
-def make_offering(): #temple
-    pass
-# You spend the day preparing, waiting in line, and finally giving an offering at the temple altar. This action is only permitted at a temple. You must spend at least one gold piece for proper herbs and sacrifice. If you spend ten gold pieces for exceptionally fine herbs and sacrifices, add one (+1) to your dice roll result. To determine the result, roll two dice:
-# 2 You commit a magnificent error in the rites, the entire temple becomes impure and abandoned, no longer functions as a temple for the rest of the game. You are arrested and sentenced to death, e061.
-# 3 Good Omens, but no special result.
-# 4 Bad Omens, you are travelling under a curse. Roll one die for each of your followers, any result except a 1 means they believe the omens and immediately desert you. You cannot seek to hire any followers (r210) in this hex for the rest of the game.
-# 5 High Priest insulted by your northern manners, arrested e060.
-# 6 Good Omens, you get free food (r215) and lodging (r217) tonight.
-# 7 Favourable Omens for further worship, if you try this Offerings action again tomorrow, you can add one (+1) to your dice roll. Otherwise no effect.
-# 8 Gods favour your questions, priests assign a monk to your party. The monk has combat skill 2, endurance 3, serves as a guide when leaving this or any adjacent hex only.
-# 9 Special omen and riddle provides a clue to treasures, see e147.
-# 10 Fall in love with priestess (see r229). You immediately escape (r218) with her and can never return to this hex. She is combat skill 2, endurance 4, and has wealth 100 in temple treasures she has stolen!
-# 11 The High Priest requires an audience with you; see e155.
-# 12, 13 High Priest spends afternoon talking with you, provides you with final clues to some secret information, roll one die: 1,2-e144; 3,4-e145; 5,6-e146. Alternately, instead of the secret information, you can use his influence in attempting Offerings again tomorrow, and add three (+3) to your dice roll here.
-# 14+ Gods declare your cause a religious crusade, and the Staff of Command is passed into your hands. If you bring this possession to any hex north of the Tragoth River you will command instant obedience throughout the Northlands, regain your throne and win the game. In the meantime you are given a pair of warrior monks (combat skill 5, endurance 6) with mounts to join your party and help you return northward.
+def make_offering(party, player_hex, console): #temple
+    offering_roll = randint(1,6) + randint(1,6) + party[0].offering_bonus[player_hex]
+    console.display_message('You must spend 1 gold for proper herbs and sacrifice to make an offering.')
+    if party[0].gold >= 10:
+        console.display_message('If you wish, you may spend 10 gold on fine herbs and sacrifices for the offering. (y/n)?') #need to handle choice
+        if 'yes':
+            party[0].gold -= 10
+            offering_roll += 1
+    else:
+        party[0].gold -= 1
+    
+    console.display_message('You spend the day preparing, waiting in line, and finally giving an offering at the temple altar.') 
+
+    if offering_roll == 2:
+        console.display_message('You commit a magnificent error in the rites, the entire temple becomes impure and abandoned, no longer functions as a temple for the rest of the game. You are arrested and sentenced to death, e061.')
+    if offering_roll == 3:
+        console.display_message('Good Omens, but no special result.')
+    if offering_roll == 4:
+        console.display_message('Bad Omens, you are travelling under a curse. Roll one die for each of your followers, any result except a 1 means they believe the omens and immediately desert you. You cannot seek to hire any followers (r210) in this hex for the rest of the game.')
+    if offering_roll == 5:
+        console.display_message('High Priest insulted by your northern manners, arrested e060.')
+    if offering_roll == 6:
+        console.display_message('Good Omens, you get free food (r215) and lodging (r217) tonight.')
+    if offering_roll == 7:
+        console.display_message('Favourable Omens for further worship, if you try this Offerings action again tomorrow, you can add one (+1) to your dice roll. Otherwise no effect.')
+    if offering_roll == 8:
+        console.display_message('Gods favour your questions, priests assign a monk to your party. The monk has combat skill 2, endurance 3, serves as a guide when leaving this or any adjacent hex only.')
+        monk = characters.Character(None, None, 2, 3, monk=True)
+        party.append(monk)
+    if offering_roll == 9:
+        console.display_message('Special omen and riddle provides a clue to treasures, see e147.')
+    if offering_roll == 10:
+        console.display_message('Fall in love with priestess (see r229). You immediately escape (r218) with her and can never return to this hex. She is combat skill 2, endurance 4, and has wealth 100 in temple treasures she has stolen!')
+        priestess_love = characters.Character(None, 'female', 2, 4, wealth_code=100, priest=True, true_love=True)
+        party.append(priestess_love)
+    if offering_roll == 11:
+        console.display_message('The High Priest requires an audience with you; see e155.')
+    if offering_roll == 12 or offering_roll == 13:
+        console.display_message('High Priest spends afternoon talking with you, provides you with final clues to some secret information, roll one die: 1,2-e144; 3,4-e145; 5,6-e146. Alternately, instead of the secret information, you can use his influence in attempting Offerings again tomorrow, and add three (+3) to your dice roll here.')
+    if offering_roll >= 14:
+        console.display_message('Gods declare your cause a religious crusade, and the Staff of Command is passed into your hands. If you bring this possession to any hex north of the Tragoth River you will command instant obedience throughout the Northlands, regain your throne and win the game. In the meantime you are given a pair of warrior monks (combat skill 5, endurance 6) with mounts to join your party and help you return northward.')
+        party[0].add_item('Staff of Command')
+        warrior_monk = characters.Character(None, None, 5, 6, monk=True, mounted=True)
+        party.append(warrior_monk)
 
 
-def search_ruins(console): #ruins
+def search_ruins(party, console): #ruins
     ruin_results = {2: ['e133', 'Plague'], 3: ['e135', 'Broken Columns'], 
                     4: ['e136', 'Hidden Treasures'], 5: ['e137', 'Inhabitants'], 
                     6: ['e139', 'Minor Treasures'], 7: ['e131', 'Empty Ruins'],
                     8: ['e132', 'Organized Search'], 9: ['e134', 'Unstable Ruins'], 
                     10: ['e138', 'Unclean'], 11: ['e135', 'Broken Columns'], 
                     12: ['e035', 'Spell of Chaos']}
-    ruin_search_dice = randint(1,6) + randint(1,6)
-    event = ruin_results[ruin_search_dice]
-    console.display_message(f'Your search of the ruins has uncovered {event[1]}!')
+    ruin_search_roll = randint(1,6) + randint(1,6)
+    ruin_event = ruin_results[ruin_search_roll]
+    console.display_message(f'Your search of the ruins has uncovered {ruin_event[1]}!')
+    if ruin_event[0] == 'e133':
+        events.e133(party, console)
+    elif ruin_event[0] == 'e132':
+        events.e132(party, console)
+    elif ruin_event[0] == 'e131':
+        events.e131(console)
+    elif ruin_event[0] == 'e035':
+        events.e035(party, None, console)
+    elif ruin_event[0] == 'e139':
+        events.e139(party, console)
+
 
         

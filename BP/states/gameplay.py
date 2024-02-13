@@ -1,6 +1,7 @@
 import pygame
 import game_actions
 import characters
+import events
 from game_console import Console
 from .base import BaseState
 from os import path
@@ -267,8 +268,6 @@ class Gameplay(BaseState):
                             self.player_rect.center = hex_center
                             self.player_hex = hex_key
                             self.camera_follow(self.player_rect)
-                            # self.trackers['Day'] += 1
-                            # self.trackers['Rations'] -= 1 * self.trackers['Party']
                             break
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
@@ -282,9 +281,6 @@ class Gameplay(BaseState):
                         break
 
         if event.type == pygame.KEYUP:
-            # for character in self.party:
-            #     character.update()
-            #if self.trackers["Day"] not in [1, 71]:
             self.console.clear_console()
             if event.key in dir:
                 v = dir[event.key]
@@ -302,25 +298,20 @@ class Gameplay(BaseState):
                     
                     self.count_rations()
                     self.update_trackers()
-                    # self.trackers['Gold'] = self.party[0].gold
-                    # self.trackers['Day'] += 1
                     for character in self.party:
                         character.update()
-                    # self.trackers['Party'] = len(self.party)
+
                 else:
                     self.player_hex = self.player_hex
                     self.camera_follow(self.player_rect)
 
             elif event.key == pygame.K_t:
                 if self.player_hex in ruins:
-                    game_actions.search_ruins(self.console)
+                    game_actions.search_ruins(self.party, self.console)
                     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
                     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
                     self.count_rations()
                     self.update_trackers()
-                    # self.trackers['Gold'] = self.party[0].gold
-                    # self.trackers['Day'] += 1
-                    # self.trackers['Party'] = len(self.party)
                     for character in self.party:
                         character.update()
 
@@ -329,9 +320,6 @@ class Gameplay(BaseState):
                 game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
                 self.count_rations()
                 self.update_trackers()
-                # self.trackers['Gold'] = self.party[0].gold
-                # self.trackers['Day'] += 1
-                # self.trackers['Party'] = len(self.party)
                 for character in self.party:
                     character.update()
 
@@ -341,6 +329,9 @@ class Gameplay(BaseState):
 
             elif event.key == pygame.K_c:
                 self.console.clear_console()
+
+            elif event.key == pygame.K_x:
+                self.trackers['Day'] += events.e035(self.party, self.player_hex, self.console)
 
             elif event.key == pygame.K_SPACE:
                 self.done = True

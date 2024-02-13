@@ -30,9 +30,14 @@ class Character:
         self.magical = False
         self.true_love = true_love
         self.plague = False
+        self.mindless = False
         self.move_speed = 1
         self.mounted = mounted
         self.flying = flying
+        self.audience_bonus = {}
+        self.hiring_bonus = {}
+        self.info_bonus = {}
+        self.offering_bonus = {}
         
     def determine_wealth(self, wealth_code):
         wealth_dice = randint(0,5)
@@ -105,12 +110,19 @@ class Character:
             if recovery_roll >= 4:
                 self.plague = False
 
+    def check_carry_capacity(self):
+        while len(self.possessions) > self.max_carry:
+            random_item = choice(self.possessions)
+            self.possessions.remove(random_item)
+
     def update(self):
         if self.wounds >= self.endurance - 1:
             self.awake = False
         if self.wounds >= self.endurance:
             self.alive = False
         self.has_eaten = False
+        if self.fatigue > self.combat_skill:
+            self.fatigue = self.combat_skill
         self.plague_and_recovery()
         pouches_of_gold = (self.gold // 100) + 1
         if self.possessions.count('pouch of gold') < pouches_of_gold:
@@ -120,9 +132,7 @@ class Character:
         if self.gold == 0:
             while 'pouch of gold' in self.possessions:
                 self.possessions.remove('pouch of gold')
-        if len(self.possessions) > self.max_carry:
-            random_item = choice(self.possessions)
-            self.possessions.remove(random_item)
+        self.check_carry_capacity()
         if not self.mounted or not self.flying:
             self.move_speed = 1
         if self.mounted:
