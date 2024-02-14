@@ -40,9 +40,11 @@ def e131(console): # Empty Ruins
 
 def e132(party, console): # Organized Search
     if len(party) > 1:
+        console.display_message('Your organized search might help uncover something.')
         if randint(1,6) < len(party):
-            console.display_message('Your organized search might help uncover something.')
-            game_actions.search_ruins(console)
+            game_actions.search_ruins(party, console)
+        else:
+            console.display_message('Despite your thoroughness, you turn up nothing of use.')
     else:
         console.display_message('You spend the entire day fruitlessly searching the ruins, and find nothing.')
 
@@ -72,9 +74,10 @@ def e134(party, console): # Unstable Ruins
     for character in party:
         if randint(1,6) == 6:
             character.wounds += (randint(1,6) + randint(1,6))
+    game_actions.search_ruins(party, console)
 
 def e135(party, console): # Broken Columns
-    console.display_message('Alonga palisade of broken columns, you find an altar with an ancient inscription.')
+    console.display_message('Along a palisade of broken columns, you find an altar with an ancient inscription.')
     if any(character.magical for character in party):
         console.display_message('One of your sorcerous companions is able to decipher the inscriptions!')
         # 1-e042; 2-e043; 3-e044; 4-e045; 5-e046; 6-e047
@@ -101,11 +104,13 @@ def e139(party, console): # Minor Treasures
     if minor_treasure_roll == 1:
         gold, item = game_actions.roll_treasure(25)
         party[0].gold += gold
-        party[0].add_item(item)
+        if item:
+            party[0].add_item(item)
     elif minor_treasure_roll == 2:
         gold, item = game_actions.roll_treasure(60)
         party[0].gold += gold
-        party[0].add_item(item)
+        if item:
+            party[0].add_item(item)
 
 
 events_dict = {'e002': e002}

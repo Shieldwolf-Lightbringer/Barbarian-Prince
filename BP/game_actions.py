@@ -517,10 +517,15 @@ def search_ruins(party, console): #ruins
         events.e132(party, console)
     elif ruin_event[0] == 'e131':
         events.e131(console)
-    elif ruin_event[0] == 'e035':
-        events.e035(party, None, console)
+    elif ruin_event[0] == 'e134':
+        events.e134(party, console)
+    elif ruin_event[0] == 'e135':
+        events.e135(party, console)
+    elif ruin_event[0] == 'e136':
+        events.e136(party, console)
     elif ruin_event[0] == 'e139':
         events.e139(party, console)
-
+    elif ruin_event[0] == 'e035':
+        events.e035(party, None, console)
 
         

@@ -2,14 +2,14 @@ import pygame
 from random import randint, choice
 
 class Character:
-    def __init__(self, name=None, sex=None, combat_skill=0, endurance=2, wounds=0, wealth_code=0, wits=None, heir=False,
+    def __init__(self, name=None, sex=None, combat_skill=None, endurance=None, wounds=0, wealth_code=0, wits=None, heir=False,
                  daily_wage=0, priest=False, monk=False, magician=False, wizard=False, witch=False, true_love=False,
                  mounted=False, flying=False):
         self.name = name if name else self.random_name()
         self.sex = sex if sex else choice('male', 'female')
-        self.combat_skill = combat_skill
+        self.combat_skill = combat_skill if combat_skill else randint(1,4)
         self.fatigue = 0
-        self.endurance = endurance
+        self.endurance = endurance if endurance else max((self.combat_skill + randint(0,2)), 2)
         self.wounds = wounds
         self.poison_wounds = wounds
         self.possessions = []
@@ -94,7 +94,7 @@ class Character:
         return [f'{self.name}',
                 f'Combat Skill: {max(self.combat_skill - self.fatigue, 0)}',
                 f'Endurance: {self.endurance}',
-                f'Wounds: {self.wounds}',
+                f'Wounds: {self.wounds + self.poison_wounds}',
                 f'Wits: {self.wits}',
                 f'Gold: {self.gold}',
                 f'Possessions: {len(self.possessions)}/{self.max_carry}']
@@ -116,9 +116,11 @@ class Character:
             self.possessions.remove(random_item)
 
     def update(self):
-        if self.wounds >= self.endurance - 1:
+        if self.wounds + self.poison_wounds < self.endurance - 1:
+            self.awake = True
+        if self.wounds + self.poison_wounds >= self.endurance - 1:
             self.awake = False
-        if self.wounds >= self.endurance:
+        if self.wounds + self.poison_wounds >= self.endurance:
             self.alive = False
         self.has_eaten = False
         if self.fatigue > self.combat_skill:
@@ -133,9 +135,9 @@ class Character:
             while 'pouch of gold' in self.possessions:
                 self.possessions.remove('pouch of gold')
         self.check_carry_capacity()
-        if not self.mounted or not self.flying:
+        if not self.mounted and not self.flying:
             self.move_speed = 1
-        if self.mounted:
+        if self.mounted and not self.flying:
             self.move_speed = 2
         if self.flying:
             self.move_speed = 3
