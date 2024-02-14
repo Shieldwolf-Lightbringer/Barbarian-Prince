@@ -6,7 +6,7 @@ class Character:
                  daily_wage=0, priest=False, monk=False, magician=False, wizard=False, witch=False, true_love=False,
                  mounted=False, flying=False):
         self.name = name if name else self.random_name()
-        self.sex = sex if sex else choice('male', 'female')
+        self.sex = sex if sex else choice(['male', 'female'])
         self.combat_skill = combat_skill if combat_skill else randint(1,4)
         self.fatigue = 0
         self.endurance = endurance if endurance else max((self.combat_skill + randint(0,2)), 2)
@@ -85,7 +85,7 @@ class Character:
         for _ in range(num_syllables):
             syllable = choice(syllables)
             name += syllable
-            if randint(0,1) == 1:
+            if randint(0,2) == 0:
                 name += ' '
 
         return name.strip().title()

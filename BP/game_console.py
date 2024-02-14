@@ -54,7 +54,7 @@ class Console:
         if text not in self.displayed_messages:
             self.displayed_messages.add(text)
             self.console_lines.append((text, requires_input))
-            max_lines = int(self.screen.get_height() * self.height_ratio / self.font.get_linesize())
+            max_lines = 6 #int(self.screen.get_height() * self.height_ratio / self.font.get_linesize())
             if len(self.console_lines) > max_lines:
                 self.console_lines.pop(0)
 

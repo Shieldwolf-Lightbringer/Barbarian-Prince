@@ -127,11 +127,13 @@ def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains
 
 def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis):
     gold_spent = 0
+    food_message = ""
     if any(player_hex in key for key in [castles, temples, towns]):
         lodging(party, console)
         for character in reversed(party):
             if 'ration' in character.possessions:
-                console.display_message(f'{character.name} has eaten.')
+                food_message += f'{character.name} has eaten. '
+                #console.display_message(f'{character.name} has eaten.')
                 character.possessions.remove('ration')
                 character.has_eaten = True
                 if character.max_carry < 10:
@@ -140,7 +142,8 @@ def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis
                     character.fatigue -= 1
             elif party[0].gold >= 1 + gold_spent:
                 gold_spent += 1
-                console.display_message(f'{character.name} has purchased a meal.')
+                food_message += f'{character.name} has purchased a meal. '
+                #console.display_message(f'{character.name} has purchased a meal.')
                 character.has_eaten = True
             else:
                 console.display_message(f'{party[0].name} does not have enough gold to purchase a meal for {character.name}!')
@@ -151,7 +154,8 @@ def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis
         for character in reversed(party):
             ration_count = Counter(character.possessions)
             if ration_count['ration'] >= 2:
-                console.display_message(f'{character.name} has eaten.')
+                food_message += f'{character.name} has eaten. '
+                #console.display_message(f'{character.name} has eaten.')
                 character.possessions.remove('ration')
                 character.possessions.remove('ration')
                 character.has_eaten = True
@@ -165,7 +169,8 @@ def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis
     else:
         for character in reversed(party):
             if 'ration' in character.possessions:
-                console.display_message(f'{character.name} has eaten.')
+                food_message += f'{character.name} has eaten. '
+                #console.display_message(f'{character.name} has eaten.')
                 character.possessions.remove('ration')
                 character.has_eaten = True
                 if character.max_carry < 10:
@@ -173,14 +178,19 @@ def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis
                 if character.fatigue > 0:
                     character.fatigue -= 1
             else:
-                starvation(character, party, console)   
+                starvation(character, party, console)
+
+    console.display_message(food_message)
 
 def starvation(character, party, console):
+    starvation_message = ""
     if not character.has_eaten:
         character.max_carry = max(character.max_carry // 2, 1)
         character.fatigue += 1
-        console.display_message(f'{character.name} has gone without food!')
+        starvation_message += f'{character.name} has gone without food! '
+        #console.display_message(f'{character.name} has gone without food!')
         character.check_carry_capacity()
+    console.display_message(starvation_message)
     desertion(character, party, console, 'hunger')
     '''Need to implement mount starvation'''
 
@@ -258,13 +268,17 @@ def true_love():
 
 '''actions available in any hex'''
 def rest(party, console):
+    rest_message = ""
     for character in party:
         if character.wounds > 0:
             character.wounds -= 1
-            console.display_message(f'{character.name} has rested for the day and healed a wound.')
+            #console.display_message(f'{character.name} has rested for the day and healed a wound.')
+            rest_message += f'{character.name} has rested for the day and healed a wound. '
         else:
-            console.display_message(f'{character.name} has rested for the day.')
+            #console.display_message(f'{character.name} has rested for the day.')
+            rest_message += f'{character.name} has rested for the day. '
     hunt_bonus = int(len(party) - 1)
+    console.display_message(rest_message)
     return hunt_bonus
 
 def cache_locate():
@@ -511,18 +525,22 @@ def search_ruins(party, console): #ruins
     ruin_search_roll = randint(1,6) + randint(1,6)
     ruin_event = ruin_results[ruin_search_roll]
     console.display_message(f'Your search of the ruins has uncovered {ruin_event[1]}!')
-    if ruin_event[0] == 'e133':
-        events.e133(party, console)
+    if ruin_event[0] == 'e131':
+        events.e131(console)
     elif ruin_event[0] == 'e132':
         events.e132(party, console)
-    elif ruin_event[0] == 'e131':
-        events.e131(console)
+    elif ruin_event[0] == 'e133':
+        events.e133(party, console)
     elif ruin_event[0] == 'e134':
         events.e134(party, console)
     elif ruin_event[0] == 'e135':
         events.e135(party, console)
     elif ruin_event[0] == 'e136':
         events.e136(party, console)
+    elif ruin_event[0] == 'e137':
+        events.e137(party, console)
+    elif ruin_event[0] == 'e138':
+        events.e138(party, console)
     elif ruin_event[0] == 'e139':
         events.e139(party, console)
     elif ruin_event[0] == 'e035':

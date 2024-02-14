@@ -162,7 +162,11 @@ class Gameplay(BaseState):
         self.knotwork = pygame.image.load(path.join(self.img_folder, 'knotwork.png')).convert_alpha()
 
         sword_maiden = characters.Character(None, 'female', 6, 6, 0, 0)
+        wizard = characters.Character(wizard=True)
+        priest = characters.Character(priest=True)
         self.party.append(sword_maiden)
+        self.party.append(wizard)
+        self.party.append(priest)
 
     def initialize(self):
         self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
@@ -170,6 +174,10 @@ class Gameplay(BaseState):
         self.party.append(self.player)
         sword_maiden = characters.Character(None, 'female', 6, 6, 0, 0)
         self.party.append(sword_maiden)
+        wizard = characters.Character(wizard=True)
+        self.party.append(wizard)
+        priest = characters.Character(priest=True)
+        self.party.append(priest)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
         
@@ -299,7 +307,7 @@ class Gameplay(BaseState):
                     self.count_rations()
                     self.update_trackers()
                     for character in self.party:
-                        character.update()
+                        character.update() #need to remove them if they die
 
                 else:
                     self.player_hex = self.player_hex
@@ -313,7 +321,7 @@ class Gameplay(BaseState):
                     self.count_rations()
                     self.update_trackers()
                     for character in self.party:
-                        character.update()
+                        character.update() #need to remove them if they die
 
             elif event.key == pygame.K_r:
                 game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
@@ -321,7 +329,7 @@ class Gameplay(BaseState):
                 self.count_rations()
                 self.update_trackers()
                 for character in self.party:
-                    character.update()
+                    character.update() #need to remove them if they die
 
             elif event.key == pygame.K_p:
                 if self.player.possessions:
