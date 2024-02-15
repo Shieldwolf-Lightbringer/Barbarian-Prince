@@ -90,7 +90,7 @@ def e044(party, console): # High Altar
     console.display_message('The inscriptions reveal this to be a high altar of godly power!')
     priest_monk_in_party = any([character.priest, character.monk] for character in party)
     if priest_monk_in_party:
-        priests_monks = [character for character in party if character.priest or character.monk]
+        priests_monks = [character for character in party if any([character.priest, character.monk])]
         invoker = choice(priests_monks)
         console.display_message(f'One of your godly companions, {invoker.name} knows the invocations to use at this altar, and will attempt them if you wish.') 
         invocations_roll = randint(1,6)
