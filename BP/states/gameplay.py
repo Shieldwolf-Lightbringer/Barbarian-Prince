@@ -169,6 +169,7 @@ class Gameplay(BaseState):
         self.party.append(priest)
 
     def initialize(self):
+        self.console.clear_console()
         self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
         self.party = []
         self.party.append(self.player)
@@ -289,31 +290,32 @@ class Gameplay(BaseState):
                         break
 
         if event.type == pygame.KEYUP:
-            self.console.clear_console()
-            if event.key in dir:
-                v = dir[event.key]
-                if (self.player_hex[0] + v[0], self.player_hex[1] + v[1]) in hexagon_dict:
-                    if game_actions.get_lost((self.player_hex[0] + v[0], self.player_hex[1] + v[1]), self.console):
-                        self.player_hex = self.player_hex
-                    else:
-                        self.player_hex = (self.player_hex[0] + v[0], self.player_hex[1] + v[1])
-                    self.camera_follow(self.player_rect)
-                    self.location_message()
-                    game_actions.encounter(self.player_hex, self.console)
+            # if event.key in dir or [pygame.K_r, pygame.K_t, pygame.K_p]:
+            #     self.console.clear_console()
+            # if event.key in dir:
+            #     v = dir[event.key]
+            #     if (self.player_hex[0] + v[0], self.player_hex[1] + v[1]) in hexagon_dict:
+            #         if game_actions.get_lost((self.player_hex[0] + v[0], self.player_hex[1] + v[1]), self.console):
+            #             self.player_hex = self.player_hex
+            #         else:
+            #             self.player_hex = (self.player_hex[0] + v[0], self.player_hex[1] + v[1])
+            #         self.camera_follow(self.player_rect)
+            #         self.location_message()
+            #         game_actions.encounter(self.player_hex, self.console)
 
-                    game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
-                    game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+            #         game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
+            #         game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
                     
-                    self.count_rations()
-                    self.update_trackers()
-                    for character in self.party:
-                        character.update() #need to remove them if they die
+            #         self.count_rations()
+            #         self.update_trackers()
+            #         for character in self.party:
+            #             character.update() #need to remove them if they die
 
-                else:
-                    self.player_hex = self.player_hex
-                    self.camera_follow(self.player_rect)
+            #     else:
+            #         self.player_hex = self.player_hex
+            #         self.camera_follow(self.player_rect)
 
-            elif event.key == pygame.K_t:
+            if event.key == pygame.K_t:
                 if self.player_hex in ruins:
                     game_actions.search_ruins(self.party, self.console)
                     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
@@ -345,6 +347,20 @@ class Gameplay(BaseState):
                 self.done = True
             elif event.key == pygame.K_ESCAPE:
                 self.quit = True
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                self.player_hex = game_actions.move('s', self.player_hex, hexagon_dict, self.console)
+                self.camera_follow(self.player_rect)
+                self.location_message()
+                game_actions.encounter(self.player_hex, self.console)
+                game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
+                game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+                
+                self.count_rations()
+                self.update_trackers()
+                for character in self.party:
+                    character.update() #need to remove them if they die
 
     '''This method counts the rations in the party and updates the tracker'''
     def count_rations(self):
@@ -434,7 +450,7 @@ class Gameplay(BaseState):
         text_rect = text.get_rect(center=(center[0], center[1] - (HEX_RADIUS * .5)))
         surface.blit(text, text_rect)
 
-    '''This method creates the grid of hexagons and offsets each column so they aling properly, it also creates the dict{}'''
+    '''This method creates the grid of hexagons and offsets each column so they align properly, it also creates the dict{}'''
     def draw_hex_grid(self, surface):
         for row in range(ROWS):
             for col in range(COLUMNS):
@@ -605,3 +621,15 @@ class Gameplay(BaseState):
                 self.console.display_message(line)
                 
         self.console.render()
+
+
+    def daily_actions_and_events(self):
+        # self.count_rations()
+        # self.update_trackers()
+        self.choose_daily_action()
+        game_actions.hunt()
+        game_actions.eat_meal()
+        self.count_rations()
+        self.update_trackers()
+        for character in self.party:
+            character.update()

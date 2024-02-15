@@ -77,6 +77,35 @@ def get_lost(hex, console):
         console.display_message(f'You have gotten lost attempting to enter the {overland_map[hex][0]}.  Maybe you will find your way tomorrow.')
         return True
 
+def move(input, player_hex, hexagon_dict, console):
+    if player_hex[0] % 2 == 0:
+        dir = {
+            'nw': (-1, +0),
+            'n' : (+0, -1),
+            'ne': (+1, +0),
+            'sw': (-1, +1),
+            's' : (+0, +1),
+            'se': (+1, +1)
+            }
+    elif player_hex[0] % 2 == 1:
+        dir = {
+            'nw': (-1, -1),
+            'n' : (+0, -1),
+            'ne': (+1, -1),
+            'sw': (-1, +0),
+            's' : (+0, +1),
+            'se': (+1, +0)
+            }
+    if input in dir:
+        v = dir[input]
+        if (player_hex[0] + v[0], player_hex[1] + v[1]) in hexagon_dict:
+            if get_lost((player_hex[0] + v[0], player_hex[1] + v[1]), console):
+                player_hex = player_hex
+            else:
+                player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
+        return player_hex
+
+
 def talk():
     pass
 
@@ -469,6 +498,7 @@ def seek_audience(party, player_hex, console): #town, temple, or castle
 	# 		# 11 Meet daughter of the Lady Aeravir, e154.
 	# 		# 12+ Audience granted, e160.
 
+
 def make_offering(party, player_hex, console): #temple
     offering_roll = randint(1,6) + randint(1,6) + party[0].offering_bonus[player_hex]
     console.display_message('You must spend 1 gold for proper herbs and sacrifice to make an offering.')
@@ -511,8 +541,9 @@ def make_offering(party, player_hex, console): #temple
     if offering_roll >= 14:
         console.display_message('Gods declare your cause a religious crusade, and the Staff of Command is passed into your hands. If you bring this possession to any hex north of the Tragoth River you will command instant obedience throughout the Northlands, regain your throne and win the game. In the meantime you are given a pair of warrior monks (combat skill 5, endurance 6) with mounts to join your party and help you return northward.')
         party[0].add_item('Staff of Command')
-        warrior_monk = characters.Character(None, None, 5, 6, monk=True, mounted=True)
-        party.append(warrior_monk)
+        for _ in range(2):
+            warrior_monk = characters.Character(None, None, 5, 6, monk=True, mounted=True)
+            party.append(warrior_monk)
 
 
 def search_ruins(party, console): #ruins
