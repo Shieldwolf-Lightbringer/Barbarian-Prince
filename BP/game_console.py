@@ -1,5 +1,4 @@
 import pygame
-import game_actions
 
 class Console:
     def __init__(self, screen, font, width_ratio, height_ratio):
@@ -68,7 +67,9 @@ class Console:
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                self.execute_command()
+                command_result = self.execute_command()
+                if command_result is not None:
+                    return command_result
             elif event.key == pygame.K_BACKSPACE:
                 self.input_buffer = self.input_buffer[:-1]
             elif event.key == pygame.K_UP:
@@ -77,14 +78,15 @@ class Console:
                 self.scroll_down()
             else:
                 self.input_buffer += event.unicode
+        return None
 
     def execute_command(self):
         command = self.input_buffer.strip().lower()
         if command:
+            self.clear_console()
             self.add_line(">>> " + command)  # Echo the command back to the console
-            
-            # TODO: Add logic to handle commands based on your game's requirements
-        self.input_buffer = ""  # Clear the input buffer
+            return command
+
 
     def display_message(self, message, requires_input=False):
         self.add_line(message, requires_input)

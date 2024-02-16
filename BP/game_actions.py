@@ -103,7 +103,9 @@ def move(input, player_hex, hexagon_dict, console):
                 player_hex = player_hex
             else:
                 player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
-        return player_hex
+    else:
+        player_hex = player_hex        
+    return player_hex
 
 
 def talk():

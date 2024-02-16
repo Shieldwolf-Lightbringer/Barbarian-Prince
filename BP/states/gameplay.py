@@ -243,24 +243,24 @@ class Gameplay(BaseState):
     '''This handles mouse clicks, keystrokes, and other events'''
     def get_event(self, event):
         #self.console.handle_input(event)
-        if self.player_hex[0] % 2 == 0:
-            dir = {
-                pygame.K_q: (-1, +0),
-                pygame.K_w: (+0, -1),
-                pygame.K_e: (+1, +0),
-                pygame.K_a: (-1, +1),
-                pygame.K_s: (+0, +1),
-                pygame.K_d: (+1, +1)
-                }
-        elif self.player_hex[0] % 2 == 1:
-            dir = {
-                pygame.K_q: (-1, -1),
-                pygame.K_w: (+0, -1),
-                pygame.K_e: (+1, -1),
-                pygame.K_a: (-1, +0),
-                pygame.K_s: (+0, +1),
-                pygame.K_d: (+1, +0)
-                }
+        # if self.player_hex[0] % 2 == 0:
+        #     dir = {
+        #         pygame.K_q: (-1, +0),
+        #         pygame.K_w: (+0, -1),
+        #         pygame.K_e: (+1, +0),
+        #         pygame.K_a: (-1, +1),
+        #         pygame.K_s: (+0, +1),
+        #         pygame.K_d: (+1, +1)
+        #         }
+        # elif self.player_hex[0] % 2 == 1:
+        #     dir = {
+        #         pygame.K_q: (-1, -1),
+        #         pygame.K_w: (+0, -1),
+        #         pygame.K_e: (+1, -1),
+        #         pygame.K_a: (-1, +0),
+        #         pygame.K_s: (+0, +1),
+        #         pygame.K_d: (+1, +0)
+        #         }
         
         if event.type == pygame.QUIT:
             self.quit = True
@@ -315,52 +315,74 @@ class Gameplay(BaseState):
             #         self.player_hex = self.player_hex
             #         self.camera_follow(self.player_rect)
 
-            if event.key == pygame.K_t:
-                if self.player_hex in ruins:
-                    game_actions.search_ruins(self.party, self.console)
-                    game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
-                    game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-                    self.count_rations()
-                    self.update_trackers()
-                    for character in self.party:
-                        character.update() #need to remove them if they die
+            # if event.key == pygame.K_t:
+            #     if self.player_hex in ruins:
+            #         game_actions.search_ruins(self.party, self.console)
+            #         game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
+            #         game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+            #         self.count_rations()
+            #         self.update_trackers()
+            #         for character in self.party:
+            #             character.update() #need to remove them if they die
 
-            elif event.key == pygame.K_r:
-                game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
-                game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-                self.count_rations()
-                self.update_trackers()
-                for character in self.party:
-                    character.update() #need to remove them if they die
+            # elif event.key == pygame.K_r:
+            #     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
+            #     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+            #     self.count_rations()
+            #     self.update_trackers()
+            #     for character in self.party:
+            #         character.update() #need to remove them if they die
 
-            elif event.key == pygame.K_p:
-                if self.player.possessions:
-                    self.player.possessions.pop(-1)
+            # elif event.key == pygame.K_p:
+            #     if self.player.possessions:
+            #         self.player.possessions.pop(-1)
 
-            elif event.key == pygame.K_c:
-                self.console.clear_console()
+            # elif event.key == pygame.K_c:
+            #     self.console.clear_console()
 
-            elif event.key == pygame.K_x:
-                self.trackers['Day'] += events.e035(self.party, self.player_hex, self.console)
+            # elif event.key == pygame.K_x:
+            #     self.trackers['Day'] += events.e035(self.party, self.player_hex, self.console)
 
-            elif event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE:
                 self.done = True
-            elif event.key == pygame.K_ESCAPE:
+            if event.key == pygame.K_ESCAPE:
                 self.quit = True
         
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_s:
-                self.player_hex = game_actions.move('s', self.player_hex, hexagon_dict, self.console)
-                self.camera_follow(self.player_rect)
-                self.location_message()
-                game_actions.encounter(self.player_hex, self.console)
+        player_input = self.console.handle_input(event)
+        if player_input in ['nw','n','ne','sw','s','se']:
+
+        #if event.type == pygame.KEYDOWN:
+        #     if event.key == pygame.K_m:
+            direction = player_input
+            self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console)
+            self.camera_follow(self.player_rect)
+            self.location_message()
+            game_actions.encounter(self.player_hex, self.console)
+            game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
+            game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+            
+            self.count_rations()
+            self.update_trackers()
+            for character in self.party:
+                character.update() #need to remove them if they die
+
+        if player_input == 't':
+            if self.player_hex in ruins:
+                game_actions.search_ruins(self.party, self.console)
                 game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
                 game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-                
                 self.count_rations()
                 self.update_trackers()
                 for character in self.party:
                     character.update() #need to remove them if they die
+
+        if player_input == 'r':
+            game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
+            game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+            self.count_rations()
+            self.update_trackers()
+            for character in self.party:
+                character.update() #need to remove them if they die
 
     '''This method counts the rations in the party and updates the tracker'''
     def count_rations(self):
