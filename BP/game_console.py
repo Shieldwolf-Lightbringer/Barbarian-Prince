@@ -89,7 +89,8 @@ class Console:
 
 
     def display_message(self, message, requires_input=False):
-        self.add_line(message, requires_input)
+        #self.add_line(message, requires_input)
+        self.wrap_text(message, requires_input)
 
     def clear_console(self):
         self.console_lines = []
@@ -105,3 +106,24 @@ class Console:
         max_scroll_offset = max(0, len(self.console_lines) - max_displayed_lines)
         self.scroll_offset = min(max_scroll_offset, self.scroll_offset + 1)
         
+    def wrap_text(self, text, requires_input=False):
+        words = text.split()
+        lines = []
+        current_line = ""
+
+        for word in words:
+            test_line = current_line + word + " "
+            test_width, _ = self.font.size(test_line)
+
+            if test_width <= (self.screen.get_width() * 0.9):
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word + " "
+
+        lines.append(current_line)
+        
+        for line in lines:
+            self.add_line(line, requires_input)
+
+        #return lines

@@ -626,21 +626,23 @@ class Gameplay(BaseState):
         # surface.blit(self.knotwork, (0, self.y - 84))
 
         e001_text = "Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks, their allies will arm and you will lose your kingdom forever. To escape the mercenary royal guard, your loyal body servant Ogab smuggled you into a merchant caravan to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, loosen your swordbelt, and get ready to start the first day of your adventure. Important Note: if you finish actions for a day on any hex north of the Tragoth River, the mercenary royal guardsmen may find you."
-        day70_text = "Ten weeks have passed, and you have been unable to raise sufficeint funds or forces to retake your kingdom.  Perhaps the fates may offer you another chance in the future, but for now you must remain in exile."
+        day70_text = "Ten weeks have passed, and you have been unable to raise sufficient funds or forces to retake your kingdom.  Perhaps the fates may offer you another chance in the future, but for now you must remain in exile."
 
         #self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
-        intro_text = self.wrap_text(e001_text, self.console_font, int(self.x * 0.9))
-        day70_loss_text = self.wrap_text(day70_text, self.console_font, int(self.x * 0.9))
+        # intro_text = self.wrap_text(e001_text, self.console_font, int(self.x * 0.9))
+        # day70_loss_text = self.wrap_text(day70_text, self.console_font, int(self.x * 0.9))
 
         #self.console = Console(surface, self.console_font, 1.0, 0.25)
         if self.trackers["Day"] == 1:
-            for line in intro_text:
-                self.console.display_message(line)
+            # for line in intro_text:
+            #     self.console.display_message(line)
+            self.console.display_message(e001_text)
             self.location_message()
                 
         if self.trackers["Day"] == 71:
-            for line in day70_loss_text:
-                self.console.display_message(line)
+            self.console.display_message(day70_text)
+            # for line in day70_loss_text:
+            #     self.console.display_message(line)
                 
         self.console.render()
 
