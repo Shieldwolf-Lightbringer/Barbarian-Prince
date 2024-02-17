@@ -43,8 +43,7 @@ def e042(party, console): # Alcove of Sending
     if caster_in_party:
         caster_character = [character for character in party if character.magician or character.wizard or character.witch]
         caster_companion = choice(caster_character)
-        console.display_message(f'{caster_companion.name} informs you that this is an Alcove of Sending.  With it, you can send your astral form to compel audience with one of the mayors, high priests, or castle lords.')  
-        console.display_message('However, you can only use this altar once and any companions granted by the audience cannot return through the astral realm with you.')
+        console.display_message(f'{caster_companion.name} informs you that this is an Alcove of Sending.  With it, you can send your astral form to compel audience with one of the mayors, high priests, or castle lords. However, you can only use this altar once and any companions granted by the audience cannot return through the astral realm with you.')  
         #need to implement astral audience
 
 
@@ -164,8 +163,9 @@ def e133(party, console): # Plague
                 party.remove(character)
             else:
                 console.display_message(f'Madness has taken the mind of {character.name}, but your northern blood helps you to survive! You awaken the next morning and find youself alone.')
-                character.gold = 0
-                character.possessions = []
+                if len(party) > 1:
+                    character.gold = 0
+                    character.possessions = []
                 game_actions.starvation(character, party, console)
                 while len(party) > 1:
                     for character in party:
@@ -176,8 +176,7 @@ def e133(party, console): # Plague
 
 
 def e134(party, console): # Unstable Ruins
-    console.display_message('In the ruins there are many unstable walls and rocks, making your search very dangerous.')
-    console.display_message('You can either give up searching these ruins, doing nothing else today, or you can press on.')
+    console.display_message('In the ruins there are many unstable walls and rocks, making your search very dangerous. You can either give up searching these ruins, doing nothing else today, or you can press on.')
     for character in party:
         if randint(1,6) == 6:
             crushing_wounds = (randint(1,6) + randint(1,6))
