@@ -168,6 +168,8 @@ class Gameplay(BaseState):
         self.party.append(wizard)
         self.party.append(priest)
 
+        self.show_inventory_screen = False
+
     def initialize(self):
         self.console.clear_console()
         self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
@@ -342,6 +344,8 @@ class Gameplay(BaseState):
 
             # elif event.key == pygame.K_x:
             #     self.trackers['Day'] += events.e035(self.party, self.player_hex, self.console)
+            # if event.key == pygame.K_i:
+            #     self.show_inventory_screen = not self.show_inventory_screen
 
             if event.key == pygame.K_SPACE:
                 self.done = True
@@ -365,6 +369,9 @@ class Gameplay(BaseState):
             self.update_trackers()
             for character in self.party:
                 character.update() #need to remove them if they die
+
+        if player_input == 'i':
+            self.show_inventory_screen = not self.show_inventory_screen
 
         if player_input == 't':
             if self.player_hex in ruins:
@@ -526,25 +533,25 @@ class Gameplay(BaseState):
         y = key[1] + ((HEX_RADIUS * 0.9) * sin(angle + radians(-90)))
         return int(x), int(y)
 
-    '''This method prepares text for display to the screen'''
-    def wrap_text(self, text, font, max_width):
-        words = text.split()
-        lines = []
-        current_line = ""
+    # '''This method prepares text for display to the screen'''
+    # def wrap_text(self, text, font, max_width):
+    #     words = text.split()
+    #     lines = []
+    #     current_line = ""
 
-        for word in words:
-            test_line = current_line + word + " "
-            test_width, _ = font.size(test_line)
+    #     for word in words:
+    #         test_line = current_line + word + " "
+    #         test_width, _ = font.size(test_line)
 
-            if test_width <= max_width:
-                current_line = test_line
-            else:
-                lines.append(current_line)
-                current_line = word + " "
+    #         if test_width <= max_width:
+    #             current_line = test_line
+    #         else:
+    #             lines.append(current_line)
+    #             current_line = word + " "
 
-        lines.append(current_line)
+    #     lines.append(current_line)
 
-        return lines
+    #     return lines
     
     '''This method displays a message for the player when they arrive in a hex containing a feature'''
     def location_message(self):
@@ -616,6 +623,38 @@ class Gameplay(BaseState):
             character_text = char_font.render(f'{character.name} ({len(character.possessions)}/{character.max_carry})', True, [80, 80, 80])
             surface.blit(character_text, (self.x - self.x * 0.22, character_y_coord))
             character_y_coord += char_font.get_linesize()
+
+
+        # self.show_inventory_screen = False
+        if self.show_inventory_screen:
+            inventory_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
+            self.inventory_screen = pygame.Surface((self.x * 0.75, self.y * 0.75))
+            self.inventory_screen.fill(parchment_color)
+            surface.blit(self.inventory_screen, (0, 0))
+            x_coord, y_coord = 20, 20
+            for character in self.party:
+                attribute_y_coord = y_coord
+                for attribute in character.__str__():
+                    char_text = inventory_font.render(attribute, True, [80, 80, 80])
+                    surface.blit(char_text, (x_coord, attribute_y_coord))
+                    attribute_y_coord += inventory_font.get_linesize()
+                item_y_coord = attribute_y_coord
+                item_counts = {}
+                for item in character.possessions:
+                    item_counts[item] = item_counts.get(item, 0) + 1
+                for item, count in item_counts.items():
+                    if count > 1:
+                        item_text = inventory_font.render(f'{item.title()} x {count}', True, [80, 80, 80])
+                    else:
+                        item_text = inventory_font.render(f'{item.title()}', True, [80, 80, 80])
+                    surface.blit(item_text, (x_coord, item_y_coord))
+                    item_y_coord += inventory_font.get_linesize()
+                x_coord += 150
+        #game_actions.inventory(self.party, inventory_font, self.inventory_screen)
+        # if self.show_inventory_screen:
+        #     self.inventory_screen.fill('gray')
+        #     surface.blit(self.inventory_screen, (0, 0))
+        #     game_actions.inventory(self.party, inventory_font, self.inventory_screen)
 
 
         # self.bottom_panel = pygame.Surface((self.x, self.y * 0.25))

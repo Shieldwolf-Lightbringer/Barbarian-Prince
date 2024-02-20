@@ -60,7 +60,7 @@ item_table = {'A':['healing potion', 'cure poison vial', 'gift of charm', 'endur
 # e194 royal helm of the northlands
 
 def encounter(hex, console):
-    '''this still needs to account for roads and river crossings'''
+    '''this still needs to account for roads, river rafting, and river crossings'''
     terrain_type = getattr(travel_events, overland_map[hex][0])
     encounter_dice = randint(1,6) + randint(1,6)
     if encounter_dice >= terrain_type['event']:
@@ -70,12 +70,58 @@ def encounter(hex, console):
         console.display_message(f'You encounter event {event}!')
 
 def get_lost(hex, console):
-    '''this still needs to account for roads and river crossings'''
+    '''this still needs to account for roads, river rafting, and river crossings'''
     terrain_type = getattr(travel_events, overland_map[hex][0])
     get_lost_dice = randint(1,6) + randint(1,6)
     if get_lost_dice >= terrain_type['lost']:
         console.display_message(f'You have gotten lost attempting to enter the {overland_map[hex][0]}.  Maybe you will find your way tomorrow.')
         return True
+
+def follow_road(direction, player_hex, console):
+    has_road ={
+		"n" : "1",
+		"ne": "2",
+		"se": "3",
+		"s" : "4",
+		"sw": "5",
+		"nw": "6"}
+    
+    if overland_map[player_hex][3] is not None:
+        if has_road[direction] in overland_map[player_hex][3]:
+            terrain_type = getattr(travel_events, "Road")
+    '''Need to think about incoroprating road travel into getting lost and encounter functions?'''
+
+def cross_river(direction, player_hex, console):
+    has_river ={
+		"n" : "1",
+		"ne": "2",
+		"se": "3",
+		"s" : "4",
+		"sw": "5",
+		"nw": "6"}
+    
+    if overland_map[player_hex][2] is not None:
+        if has_river[direction] in overland_map[player_hex][2]:
+            terrain_type = getattr(travel_events, "Cross_River")
+            console.display_message("You are attempting to cross a river.")
+            can_cross = randint(1,6) + randint(1,6)
+            if can_cross >= terrain_type["lost"]:
+                console.display_message("However, you are unable to find a suitable place to cross the river today.")
+                return False
+            else: #pass the river
+                console.display_message("You have successfully made it across the river.")
+                river_event = randint(1,6) + randint(1,6)
+                if river_event >= terrain_type['event']:
+                    row_dice = randint(1,6)
+                    column_dice = randint(0,5)
+                    event = terrain_type[row_dice][column_dice]
+                    console.display_message(f'You encounter event {event}!')
+                return True
+        return True
+    return True
+
+def raft_river():
+    pass
 
 def move(input, player_hex, hexagon_dict, console):
     if player_hex[0] % 2 == 0:
@@ -99,10 +145,19 @@ def move(input, player_hex, hexagon_dict, console):
     if input in dir:
         v = dir[input]
         if (player_hex[0] + v[0], player_hex[1] + v[1]) in hexagon_dict:
-            if get_lost((player_hex[0] + v[0], player_hex[1] + v[1]), console):
-                player_hex = player_hex
+            if cross_river(input, player_hex, console):
+                if get_lost((player_hex[0] + v[0], player_hex[1] + v[1]), console):
+                    player_hex = player_hex
+                else:
+                    player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
             else:
-                player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
+                player_hex = player_hex
+                return player_hex
+            
+            # if get_lost((player_hex[0] + v[0], player_hex[1] + v[1]), console):
+            #     player_hex = player_hex
+            # else:
+            #     player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
     else:
         player_hex = player_hex        
     return player_hex
@@ -138,7 +193,8 @@ def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains
 
             for character in party:
                 for _ in range(rations):
-                    character.add_item('ration')
+                    if len(character.possessions) <= character.max_carry:
+                        character.add_item('ration')
             for _ in range(extra_rations):
                 party[randint(0, len(party) - 1)].add_item('ration')
 
@@ -154,7 +210,6 @@ def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains
                     console.display_message(f'Your illegal hunting has attracted the attention of {constables} members of the local constabulary!')
                     if hunter.combat_skill + randint(1,6) - hunter.fatigue < 12:
                         hunter.wounds += randint(1,6)
-
 
 def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis):
     gold_spent = 0
