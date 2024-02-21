@@ -40,6 +40,49 @@ def e035(party, player_hex, console): # Spell of Chaos
             days_mindless += 1
 
 
+def e037(party, console): # Broken Chest
+    broken_chest_items = {'e180': 'healing potion',
+                          'e181': 'cure poison vial',
+                          'e182': 'gift of charm',
+                          'e184': 'resistance talisman',
+                          'e186': 'magic sword',
+                          'e189': 'charisma talisman'}
+    item = choice(['e180','e181','e182','e184','e186','e189'])
+    special_item = broken_chest_items[item]
+    console.display_message(f'You find a chest with a broken and cracked lid. Sorting through old mouldering cloths, you find a {special_item.title()}.')
+    party[0].add_item(special_item)
+
+
+def e038(party, console): # Cache under Stone
+    stone_cache_items = {'e180': 'healing potion',
+                         'e181': 'cure poison vial',
+                         'e182': 'gift of charm',
+                         'e185': 'poison drug',
+                         'e187': 'anti-poison amulet',
+                         'e190': 'nerve gas bomb'}
+    item = choice(['e180','e181','e182','e185','e187','e190'])
+    special_item = stone_cache_items[item]
+    console.display_message(f'By chance you overturn a stone slab, jumping back as it crashes to the ground. You see that it uncovers an old cache of rotting food and other items. You find a {special_item.title()}.')
+    party[0].add_item(special_item)
+
+
+def e039(party, console): # Treasure Chest
+    console.display_message('You find a locked chest. You know the lock may be trapped.')
+    trap_roll = randint(1,6)
+    if trap_roll >= 3:
+        game_actions.trap_lock(party[0], console)
+    chest_roll = randint(1,6)
+    if chest_roll == 6:
+         console.display_message('Unbelievable! The chest is empty!')
+    else:
+        gold, item = game_actions.roll_treasure(60)
+        party[0].gold += gold
+        console.display_message(f'You find {gold} gold!')
+        if item:
+            party[0].add_item(item)
+            console.display_message(f'You find a {item}!')
+
+
 def e042(party, console): # Alcove of Sending
     console.display_message('Behind the altar, you find a small alcove inscribed with runes.')
     caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
@@ -206,17 +249,17 @@ def e135(party, console): # Broken Columns
         if magical_character:
             sorcerous_companion = choice(magical_character)
             console.display_message(f'{sorcerous_companion.name} is able to decipher the inscriptions!')
-            if inscription_event == 'e042':
+            if inscription_event == 'e042': # Alcove of Sending
                 e042(party, console)
-            elif inscription_event == 'e043':
+            elif inscription_event == 'e043': # Small Altar
                 e043(party, console)
-            elif inscription_event == 'e044':
+            elif inscription_event == 'e044': # High Altar
                 e044(party, console)
-            elif inscription_event == 'e045':
+            elif inscription_event == 'e045': # Arch of Travel
                 e045(party, console)
-            elif inscription_event == 'e046':
+            elif inscription_event == 'e046': # Gateway to Darkness (time portal)
                 e046(party, console)
-            elif inscription_event == 'e047':
+            elif inscription_event == 'e047': # Mirror of Reversal
                 e047(party, console)
     else:
         console.display_message('With none able to decipher the inscriptions, you are forced to leave empty-handed.')
@@ -224,8 +267,22 @@ def e135(party, console): # Broken Columns
 
 def e136(party, console): # Hidden Treasures
     console.display_message('You uncover the remains of a palace treasure room!')
-    party[0].gold += 100
-    #1-e037; 2-e038; 3-e039; 4-e044; 5-500 gold; 6-nothing
+    treasure_room_roll = randint(1,6)
+    treasure_rooms = {1:'e037', 2:'e038', 3:'e039', 4:'e044', 5:'500 gold', 6:'nothing'}
+    hidden_treasure_event = treasure_rooms[treasure_room_roll]
+    if hidden_treasure_event == 'nothing':
+        console.display_message('Unfortunately, the treasure room was looted long ago.  You find nothing of value.')
+    elif hidden_treasure_event == '500 gold':
+        console.display_message('You find piles of gold coins!  There is enough here to raise your army and retake your kingdom!')
+        party[0].gold += 500
+    elif hidden_treasure_event == 'e037': # Broken Chest
+        e037(party, console)
+    elif hidden_treasure_event == 'e038': # Cache under Stone
+        e038(party, console)
+    elif hidden_treasure_event == 'e039': # Treasure Chest
+        e039(party, console)
+    elif hidden_treasure_event == 'e044': # High Altar
+        e044(party, console)
 
 
 def e137(party, console): # Inhabitants
