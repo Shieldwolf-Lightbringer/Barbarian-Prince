@@ -25,14 +25,17 @@ def e035(party, player_hex, console): # Spell of Chaos
     for character in party:
         character.mindless = True
     while len(party) > 1:
-        if not character.heir:
-            party.pop()
+        for character in party:
+            if not character.heir:
+                party.remove(character)
     while party[0].mindless:
         if randint(1,6) - days_mindless < 0:
             party[0].mindless = False
             return days_mindless
         else:
-            #game_actions.move(player_hex, console)
+            from states.gameplay import hexagon_dict
+            random_move = choice(['n','ne','se','s','sw','nw'])
+            player_hex = game_actions.move(random_move, player_hex, hexagon_dict, console)
             game_actions.starvation(party[0], party, console)
             days_mindless += 1
 
@@ -42,8 +45,9 @@ def e042(party, console): # Alcove of Sending
     caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
     if caster_in_party:
         caster_character = [character for character in party if character.magician or character.wizard or character.witch]
-        caster_companion = choice(caster_character)
-        console.display_message(f'{caster_companion.name} informs you that this is an Alcove of Sending.  With it, you can send your astral form to compel audience with one of the mayors, high priests, or castle lords. However, you can only use this altar once and any companions granted by the audience cannot return through the astral realm with you.')  
+        if caster_character:
+            caster_companion = choice(caster_character)
+            console.display_message(f'{caster_companion.name} informs you that this is an Alcove of Sending.  With it, you can send your astral form to compel audience with one of the mayors, high priests, or castle lords. However, you can only use this altar once and any companions granted by the audience cannot return through the astral realm with you.')  
         #need to implement astral audience
 
 
@@ -61,10 +65,12 @@ def e043(party, console): # Small Altar
     caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
     if caster_in_party:
         caster_character = [character for character in party if character.magician or character.wizard or character.witch]
-        caster_companion = choice(caster_character)
-        console.display_message(f'{caster_companion.name} warns you that the altar is protected by a {altar_spell} spell!')
+        if caster_character:
+            caster_companion = choice(caster_character)
+            console.display_message(f'{caster_companion.name} warns you that the altar is protected by a {altar_spell} spell!')
     else:
         console.display_message(f'Without any counsel on the nature of the magic, you must decide whether to risk it or abandon the {special_item}.')
+    
     if altar_spell == 'magic shock field':
         console.display_message('Try as you might, you cannot pass through the field and reach the altar.  You are shocked for 1 wound in the process.')
         party[0].wounds += 1
@@ -89,29 +95,30 @@ def e044(party, console): # High Altar
     console.display_message('The inscriptions reveal this to be a high altar of godly power!')
     priest_monk_in_party = any([character.priest, character.monk] for character in party)
     if priest_monk_in_party:
-        priests_monks = [character for character in party if any([character.priest, character.monk])]
-        invoker = choice(priests_monks)
-        console.display_message(f'One of your godly companions, {invoker.name} knows the invocations to use at this altar, and will attempt them if you wish.') 
-        invocations_roll = randint(1,6)
-        if invocations_roll == 1:
-            console.display_message(f'{invoker.name} is incinerated in godly fires and dies!')
-            party.remove(invoker)
-        elif invocations_roll == 2:
-            console.display_message('Lightning and earthquakes destroy the high altar! Everyone is injured by flying stones and fire!')
-            for character in party:
-                character.wounds += randint(1,6)
-        elif invocations_roll == 3:
-            console.display_message(f'It was an altar to the wrong god, {invoker.name} suffers 1 wound for the transgression.')
-            invoker.wounds += 1
-        elif invocations_roll == 4:
-            console.display_message('A voice of the gods sounds forth and gives you a riddle none can solve, and a prophecy none can understand.')
-        elif invocations_roll == 5:
-            console.display_message('Voices of the gods give a prophecy that seems to promise treasure! See event 147.')
-            #e147(party, console)
-        elif invocations_roll == 6:
-            console.display_message('One of the gods appears, issuing thunderbolts and flames, pledging support to your cause. In an astral vision you see the gods striking down the usurpers to your throne, and telling Northlands priests that your reign shall be holy. You will regain your throne and win the game if you can return alive to the northlands (any hex north of the Tragoth River) within the next 30 days. However, experiencing the power of the gods directly has weakened your human frame, your endurance is permanently reduced by one.  In gratitude for the godly support, you must give all your money away to the gods of the altar instantly, or be struck down dead.')
-            party[0].endurance -= 1
-            party[0].gold = 0
+        holy_character = [character for character in party if any([character.priest, character.monk])]
+        if holy_character:
+            invoker = choice(holy_character)
+            console.display_message(f'One of your godly companions, {invoker.name} knows the invocations to use at this altar, and will attempt them if you wish.') 
+            invocations_roll = randint(1,6)
+            if invocations_roll == 1:
+                console.display_message(f'{invoker.name} is incinerated in godly fires and dies!')
+                party.remove(invoker)
+            elif invocations_roll == 2:
+                console.display_message('Lightning and earthquakes destroy the high altar! Everyone is injured by flying stones and fire!')
+                for character in party:
+                    character.wounds += randint(1,6)
+            elif invocations_roll == 3:
+                console.display_message(f'It was an altar to the wrong god, {invoker.name} suffers 1 wound for the transgression.')
+                invoker.wounds += 1
+            elif invocations_roll == 4:
+                console.display_message('A voice of the gods sounds forth and gives you a riddle none can solve, and a prophecy none can understand.')
+            elif invocations_roll == 5:
+                console.display_message('Voices of the gods give a prophecy that seems to promise treasure! See event 147.')
+                #e147(party, console)
+            elif invocations_roll == 6:
+                console.display_message('One of the gods appears, issuing thunderbolts and flames, pledging support to your cause. In an astral vision you see the gods striking down the usurpers to your throne, and telling Northlands priests that your reign shall be holy. You will regain your throne and win the game if you can return alive to the northlands (any hex north of the Tragoth River) within the next 30 days. However, experiencing the power of the gods directly has weakened your human frame, your endurance is permanently reduced by one.  In gratitude for the godly support, you must give all your money away to the gods of the altar instantly, or be struck down dead.')
+                party[0].endurance -= 1
+                party[0].gold = 0
 
 
 def e045(party, console): # Arch of Travel
@@ -119,8 +126,9 @@ def e045(party, console): # Arch of Travel
     caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
     if caster_in_party:
         caster_character = [character for character in party if character.magician or character.wizard or character.witch]
-        caster_companion = choice(caster_character)
-        console.display_message(f'{caster_companion.name} tells you that this is an Arch of Travel.  Your party may use it to magically transfer to any hex on the map, though time will contiue to pass.')
+        if caster_character:
+            caster_companion = choice(caster_character)
+            console.display_message(f'{caster_companion.name} tells you that this is an Arch of Travel.  Your party may use it to magically transfer to any hex on the map, though time will contiue to pass.')
     # Arch is permanent when discovered (place icon on hex), and may be reused as long as you have a magical character in your party
     # Arch travel adds randint(1,6) days to the day tracker.  Travel is only one-way.
                                  
@@ -141,11 +149,11 @@ def e131(console): # Empty Ruins
     console.display_message('You spend the entire day fruitlessly searching the ruins, and find nothing.')
 
 
-def e132(party, console): # Organized Search
+def e132(party, player_hex, console): # Organized Search
     if len(party) > 1:
         console.display_message('Your organized search might help uncover something.')
         if randint(1,6) < len(party):
-            game_actions.search_ruins(party, console)
+            game_actions.search_ruins(party, player_hex, console)
         else:
             console.display_message('Despite your thoroughness, you turn up nothing of use.')
     else:
@@ -175,14 +183,16 @@ def e133(party, console): # Plague
     #game_actions.escape()
 
 
-def e134(party, console): # Unstable Ruins
+def e134(party, player_hex, console): # Unstable Ruins
     console.display_message('In the ruins there are many unstable walls and rocks, making your search very dangerous. You can either give up searching these ruins, doing nothing else today, or you can press on.')
     for character in party:
         if randint(1,6) == 6:
             crushing_wounds = (randint(1,6) + randint(1,6))
             console.display_message(f'{character.name} is crushed by falling rocks for {crushing_wounds} wounds!')
             character.wounds += crushing_wounds
-    game_actions.search_ruins(party, console)
+            if not character.alive:
+                party.remove(character)
+    game_actions.search_ruins(party, player_hex, console)
 
 
 def e135(party, console): # Broken Columns
@@ -193,20 +203,21 @@ def e135(party, console): # Broken Columns
     magical_in_party = any(character.magical for character in party)
     if magical_in_party:
         magical_character = [character for character in party if character.magical]
-        sorcerous_companion = choice(magical_character)
-        console.display_message(f'{sorcerous_companion.name} is able to decipher the inscriptions!')
-        if inscription_event == 'e042':
-            e042(party, console)
-        elif inscription_event == 'e043':
-            e043(party, console)
-        elif inscription_event == 'e044':
-            e044(party, console)
-        elif inscription_event == 'e045':
-            e045(party, console)
-        elif inscription_event == 'e046':
-            e046(party, console)
-        elif inscription_event == 'e047':
-            e047(party, console)
+        if magical_character:
+            sorcerous_companion = choice(magical_character)
+            console.display_message(f'{sorcerous_companion.name} is able to decipher the inscriptions!')
+            if inscription_event == 'e042':
+                e042(party, console)
+            elif inscription_event == 'e043':
+                e043(party, console)
+            elif inscription_event == 'e044':
+                e044(party, console)
+            elif inscription_event == 'e045':
+                e045(party, console)
+            elif inscription_event == 'e046':
+                e046(party, console)
+            elif inscription_event == 'e047':
+                e047(party, console)
     else:
         console.display_message('With none able to decipher the inscriptions, you are forced to leave empty-handed.')
 

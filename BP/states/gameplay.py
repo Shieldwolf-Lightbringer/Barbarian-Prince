@@ -146,6 +146,7 @@ class Gameplay(BaseState):
         '''camera and map are confined to the upper-left 3/4s of the screen'''
         self.camera = pygame.Rect((0, 0), (self.x * 0.75, self.y * 0.75)) #(self.x, self.y))
         self.party = []
+        self.lovers = []
         self.party.append(self.player)
         self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
         self.establish_data_path()
@@ -161,7 +162,7 @@ class Gameplay(BaseState):
         self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
         self.knotwork = pygame.image.load(path.join(self.img_folder, 'knotwork.png')).convert_alpha()
 
-        sword_maiden = characters.Character(None, 'female', 6, 6, 0, 0)
+        sword_maiden = characters.Character(None, 'female', 7, 7, 0, 0, true_love=True)
         wizard = characters.Character(wizard=True)
         priest = characters.Character(priest=True)
         self.party.append(sword_maiden)
@@ -174,8 +175,9 @@ class Gameplay(BaseState):
         self.console.clear_console()
         self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
         self.party = []
+        self.lovers = []
         self.party.append(self.player)
-        sword_maiden = characters.Character(None, 'female', 6, 6, 0, 0)
+        sword_maiden = characters.Character(None, 'female', 7, 7, 0, 0, true_love=True)
         self.party.append(sword_maiden)
         wizard = characters.Character(wizard=True)
         self.party.append(wizard)
@@ -292,61 +294,6 @@ class Gameplay(BaseState):
                         break
 
         if event.type == pygame.KEYUP:
-            # if event.key in dir or [pygame.K_r, pygame.K_t, pygame.K_p]:
-            #     self.console.clear_console()
-            # if event.key in dir:
-            #     v = dir[event.key]
-            #     if (self.player_hex[0] + v[0], self.player_hex[1] + v[1]) in hexagon_dict:
-            #         if game_actions.get_lost((self.player_hex[0] + v[0], self.player_hex[1] + v[1]), self.console):
-            #             self.player_hex = self.player_hex
-            #         else:
-            #             self.player_hex = (self.player_hex[0] + v[0], self.player_hex[1] + v[1])
-            #         self.camera_follow(self.player_rect)
-            #         self.location_message()
-            #         game_actions.encounter(self.player_hex, self.console)
-
-            #         game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
-            #         game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-                    
-            #         self.count_rations()
-            #         self.update_trackers()
-            #         for character in self.party:
-            #             character.update() #need to remove them if they die
-
-            #     else:
-            #         self.player_hex = self.player_hex
-            #         self.camera_follow(self.player_rect)
-
-            # if event.key == pygame.K_t:
-            #     if self.player_hex in ruins:
-            #         game_actions.search_ruins(self.party, self.console)
-            #         game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
-            #         game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-            #         self.count_rations()
-            #         self.update_trackers()
-            #         for character in self.party:
-            #             character.update() #need to remove them if they die
-
-            # elif event.key == pygame.K_r:
-            #     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
-            #     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-            #     self.count_rations()
-            #     self.update_trackers()
-            #     for character in self.party:
-            #         character.update() #need to remove them if they die
-
-            # elif event.key == pygame.K_p:
-            #     if self.player.possessions:
-            #         self.player.possessions.pop(-1)
-
-            # elif event.key == pygame.K_c:
-            #     self.console.clear_console()
-
-            # elif event.key == pygame.K_x:
-            #     self.trackers['Day'] += events.e035(self.party, self.player_hex, self.console)
-            # if event.key == pygame.K_i:
-            #     self.show_inventory_screen = not self.show_inventory_screen
-
             if event.key == pygame.K_SPACE:
                 self.done = True
             if event.key == pygame.K_ESCAPE:
@@ -354,9 +301,6 @@ class Gameplay(BaseState):
         
         player_input = self.console.handle_input(event)
         if player_input in ['nw','n','ne','sw','s','se']:
-
-        #if event.type == pygame.KEYDOWN:
-        #     if event.key == pygame.K_m:
             direction = player_input
             self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console)
             self.camera_follow(self.player_rect)
@@ -368,20 +312,26 @@ class Gameplay(BaseState):
             self.count_rations()
             self.update_trackers()
             for character in self.party:
-                character.update() #need to remove them if they die
+                character.update()
+                if not character.alive:
+                    self.party.remove(character)
+            game_actions.true_love(self.party, self.lovers, self.console)
 
         if player_input == 'i':
             self.show_inventory_screen = not self.show_inventory_screen
 
         if player_input == 't':
             if self.player_hex in ruins:
-                game_actions.search_ruins(self.party, self.console)
+                game_actions.search_ruins(self.party, self.player_hex, self.console)
                 game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
                 game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
                 self.count_rations()
                 self.update_trackers()
                 for character in self.party:
-                    character.update() #need to remove them if they die
+                    character.update()
+                    if not character.alive:
+                        self.party.remove(character)
+                game_actions.true_love(self.party, self.lovers, self.console)
 
         if player_input == 'r':
             game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.player_hex, self.console))
@@ -389,7 +339,10 @@ class Gameplay(BaseState):
             self.count_rations()
             self.update_trackers()
             for character in self.party:
-                character.update() #need to remove them if they die
+                character.update()
+                if not character.alive:
+                    self.party.remove(character)
+            game_actions.true_love(self.party, self.lovers, self.console)
 
     '''This method counts the rations in the party and updates the tracker'''
     def count_rations(self):
@@ -398,11 +351,12 @@ class Gameplay(BaseState):
             ration_count += character.possessions.count('ration')
         self.trackers['Rations'] = ration_count
 
-    '''This method updates the Gold, Day, and Party trackers'''
+    '''This method updates the Gold, Day, Party, and Item trackers'''
     def update_trackers(self):
         self.trackers['Gold'] = self.party[0].gold
         self.trackers['Day'] += 1
         self.trackers['Party'] = len(self.party)
+        self.trackers['Items'] = len(self.player.possessions)
 
     '''This method draws each hexagon and then gives it a color, and image, and any icons it may have'''
     def draw_hexagon(self, surface, center, key):
@@ -607,9 +561,10 @@ class Gameplay(BaseState):
         char_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
         attribute_y_coord = y_coord
         for attribute in self.player.__str__():
-            char_text = char_font.render(attribute, True, [80, 80, 80])
-            surface.blit(char_text, (self.x - self.x * 0.22, attribute_y_coord))
-            attribute_y_coord += char_font.get_linesize()
+            if attribute != self.player.title:
+                char_text = char_font.render(attribute, True, [80, 80, 80])
+                surface.blit(char_text, (self.x - self.x * 0.22, attribute_y_coord))
+                attribute_y_coord += char_font.get_linesize()
         item_y_coord = y_coord
         for item in self.player.possessions:
             item_text = char_font.render(f'{item.title()}', True, [80, 80, 80])
@@ -650,16 +605,8 @@ class Gameplay(BaseState):
                     surface.blit(item_text, (x_coord, item_y_coord))
                     item_y_coord += inventory_font.get_linesize()
                 x_coord += 150
-        #game_actions.inventory(self.party, inventory_font, self.inventory_screen)
-        # if self.show_inventory_screen:
-        #     self.inventory_screen.fill('gray')
-        #     surface.blit(self.inventory_screen, (0, 0))
-        #     game_actions.inventory(self.party, inventory_font, self.inventory_screen)
-
-
-        # self.bottom_panel = pygame.Surface((self.x, self.y * 0.25))
-        # self.bottom_panel.fill(parchment_color)
-        # surface.blit(self.bottom_panel, (0, self.y - self.y * 0.25))
+        
+        '''black border for console panel'''
         pygame.draw.rect(surface, "black", (0, self.y - self.y * 0.25, self.x, self.y - self.y * 0.75), 20)
         # self.knotwork = pygame.transform.scale(self.knotwork, (636, 84))
         # surface.blit(self.knotwork, (0, self.y - 84))

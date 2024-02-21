@@ -96,7 +96,6 @@ def follow_road(direction, player_hex, console):
         else:
             return None
 
-
 def cross_river(direction, player_hex, console):
     has_river ={
 		"n" : "1",
@@ -288,7 +287,7 @@ def starvation(character, party, console):
 def desertion(character, party, console, reason):
     if not character.heir or character.true_love:
         desertion_dice = randint(1,6) + randint(1,6) - party[0].wits
-        if desertion_dice >= 4:
+        if desertion_dice >= character.loyalty:
             console.display_message(f'{character.name} has grown weary of {reason} and has abandoned you!')
             party.remove(character)
         else:
@@ -349,7 +348,33 @@ def trap_lock(character, console):
     else:
         console.display_message(f'Trap malfunctions! No injury to {character}!')
 
-def true_love():
+def true_love(party, lovers, console):
+    for character in party:
+        if character.true_love:
+            lovers.append(character)
+        
+    for character in lovers:
+        return_message = ''
+        if character not in party:
+            love_roll = randint(1,6) + randint(1,6)
+            console.display_message(f'{character.name} is searching for you! {love_roll}')
+            if love_roll == 12:
+                console.display_message(f'{character.name} visits you in your dreams, and you know your love has left this world.')
+                lovers.remove(character)
+            if 12 > love_roll >= 10:
+                return_message += f'{character.name} has found you and rejoined your party! '
+                has_mount_roll = randint(1,6) + randint(1,6)
+                if has_mount_roll >= 9:
+                    return_message += 'They found a mount while you were separated. '
+                    character.mounted = True
+                    if has_mount_roll == 12:
+                        return_message += "It's a pegasus!"
+                        character.flying = True
+                console.display_message(return_message)
+                party.append(character)
+            else:
+                return
+
     '''True love will not abandon party, regardless of money/food situation.  If forced to separate, character will
     return at end of day on roll of 10 or 11 on 2d6; a 12 means they died.  If they find you again, a roll of 9+ on
     2d6 means they return with a horse; a 12 means they return with a pegasus.  
@@ -609,7 +634,7 @@ def make_offering(party, player_hex, console): #temple
             party.append(warrior_monk)
 
 
-def search_ruins(party, console): #ruins
+def search_ruins(party, player_hex, console): #ruins
     ruin_results = {2: ['e133', 'Plague'], 3: ['e135', 'Broken Columns'], 
                     4: ['e136', 'Hidden Treasures'], 5: ['e137', 'Inhabitants'], 
                     6: ['e139', 'Minor Treasures'], 7: ['e131', 'Empty Ruins'],
@@ -622,11 +647,11 @@ def search_ruins(party, console): #ruins
     if ruin_event[0] == 'e131':
         events.e131(console)
     elif ruin_event[0] == 'e132':
-        events.e132(party, console)
+        events.e132(party, player_hex, console)
     elif ruin_event[0] == 'e133':
         events.e133(party, console)
     elif ruin_event[0] == 'e134':
-        events.e134(party, console)
+        events.e134(party, player_hex, console)
     elif ruin_event[0] == 'e135':
         events.e135(party, console)
     elif ruin_event[0] == 'e136':
@@ -638,6 +663,6 @@ def search_ruins(party, console): #ruins
     elif ruin_event[0] == 'e139':
         events.e139(party, console)
     elif ruin_event[0] == 'e035':
-        events.e035(party, None, console)
+        events.e035(party, player_hex, console)
 
         

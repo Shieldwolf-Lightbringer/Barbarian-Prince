@@ -3,7 +3,7 @@ from random import randint, choice
 
 class Character:
     def __init__(self, name=None, sex=None, combat_skill=None, endurance=None, wounds=0, wealth_code=0, wits=None, heir=False,
-                 daily_wage=0, priest=False, monk=False, magician=False, wizard=False, witch=False, true_love=False,
+                 daily_wage=0, guide=False, priest=False, monk=False, magician=False, wizard=False, witch=False, true_love=False,
                  mounted=False, flying=False):
         self.name = name if name else self.random_name()
         self.sex = sex if sex else choice(['male', 'female'])
@@ -21,14 +21,20 @@ class Character:
         self.alive = True
         self.awake = True
         self.has_eaten = False
-        self.daily_wage = 0
+        self.loyalty = 4
+        self.daily_wage = daily_wage
+        self.guide = guide
         self.priest = priest
         self.monk = monk
         self.magician = magician
         self.wizard = wizard
         self.witch = witch
         self.magical = False
+        if any([self.priest, self.monk, self.magician, self.wizard, self.witch]):
+            self.magical = True
         self.true_love = true_love
+        if self.true_love:
+            self.loyalty = 20
         self.plague = False
         self.mindless = False
         self.move_speed = 1
@@ -53,32 +59,32 @@ class Character:
             self.add_item('pouch of gold')
 
     def random_name(self):
-        syllables = ['aa','ad','ae','al','am','an','ar','at','ay','az',
-                     'ba','be','bi','bo','bu',
-                     'ca','ce','ck','co','cu','cy',
-                     'da','de','di','do','du','dy',
-                     'ee','ed','el','em','en','er,','ex','ey','ez',
-                     'fa','fe','fi','fo','fr','fu',
-                     'ga','ge','gi','gn','go','gu',
-                     'ha','he','hi','hn','ho','hu','hy',
+        syllables = ['a','aa','ad','ae','al','am','an','ar','at','ay','az',
+                     'b','ba','be','bi','bo','bu',
+                     'c','ca','ce','ck','co','cu','cy',
+                     'd','da','de','di','do','du','dy',
+                     'e','ee','ed','el','em','en','er','ex','ey','ez',
+                     'f','fa','fe','fi','fo','fr','fu',
+                     'g','ga','ge','gi','gn','go','gu',
+                     'h','ha','he','hi','hn','ho','hu','hy',
                      'i','id','ie','il','im','in','io','ir','iu',
-                     'ja','je','ji','jo','ju',
-                     'ka','ke','ki','ko','ku',
-                     'la','le','lf','li','lm','ln','lo','lu','ly',
-                     'ma','me','mi','mm','mn','mo','mu','my',
-                     'na','ne','ni','nn','no','nu','ny',
+                     'j','ja','je','ji','jo','ju',
+                     'k','ka','ke','ki','ko','ku',
+                     'l','la','le','lf','li','lm','ln','lo','lu','ly',
+                     'm','ma','me','mi','mm','mn','mo','mu','my',
+                     'n','na','ne','ni','nn','no','nu','ny',
                      'o','ob','od','oe','of','og','oh','oi','ok','ol','om','on','oo','op','or','os','ot','ou','ow','oy','oz',
-                     'pa','pe','pi','po','pp','pu','py',
-                     'qu','qi',
-                     'ra','re','ri','ro','rr','ru','ry',
-                     'sa','se','sh','si','so','ss','su','sy',
-                     'ta','te','th','ti','to','tt','tu','ty',
+                     'p','pa','pe','pi','po','pp','pu','py',
+                     'q','qu','qi',
+                     'r','ra','re','ri','ro','rr','ru','ry',
+                     's','sa','se','sh','si','so','ss','su','sy',
+                     't','ta','te','th','ti','to','tt','tu','ty',
                      'u','ub','uc','ud','uf','ug','uh','uk','ul','um','un','up','ur','us','ut','ux','uz',
-                     'va','ve','vi','vo','vu',
-                     'wa','we','wi','wo','wu','wy',
-                     'xa','xe','xi','xo','xu','xy',
-                     'ya','ye','yi','yo','yu',
-                     'za','ze','zi','zo','zu','zz']
+                     'v','va','ve','vi','vo','vu',
+                     'w','wa','we','wi','wo','wu','wy',
+                     'x','xa','xe','xi','xo','xu','xy',
+                     'y','ya','ye','yi','yo','yu',
+                     'z','za','ze','zi','zo','zu','zz']
         name = ''
         num_syllables = randint(1,5)
 
@@ -91,7 +97,27 @@ class Character:
         return name.strip().title()
 
     def __str__(self):
+        self.title = ''
+        if self.heir:
+            self.title += 'Prince of the North'
+        if self.true_love:
+            self.title += 'the Beloved'
+        if self.guide:
+            self.title += 'Guide'
+        if self.magical:
+            self.title += 'the '
+            if self.priest:
+                self.title += 'Priest'
+            if self.monk:
+                self.title += 'Monk'
+            if self.magician:
+                self.title += 'Magician'
+            if self.wizard:
+                self.title += 'Wizard'
+            if self.witch:
+                self.title += 'Witch'
         return [f'{self.name}',
+                self.title,
                 f'Combat Skill: {max(self.combat_skill - self.fatigue, 0)}',
                 f'Endurance: {self.endurance}',
                 f'Wounds: {self.wounds + self.poison_wounds}',
@@ -141,8 +167,6 @@ class Character:
             self.move_speed = 2
         if self.flying:
             self.move_speed = 3
-        if any([self.priest, self.monk, self.magician, self.wizard, self.witch]):
-            self.magical = True
 
 
 treasure_table = {0:[0, 0, 0, 0, 0, 0],
