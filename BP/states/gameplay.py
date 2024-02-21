@@ -361,7 +361,7 @@ class Gameplay(BaseState):
             self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console)
             self.camera_follow(self.player_rect)
             self.location_message()
-            game_actions.encounter(self.player_hex, self.console)
+            #game_actions.encounter(self.player_hex, self.console)
             game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
             game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
             
@@ -384,7 +384,7 @@ class Gameplay(BaseState):
                     character.update() #need to remove them if they die
 
         if player_input == 'r':
-            game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.console))
+            game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.player_hex, self.console))
             game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
             self.count_rations()
             self.update_trackers()

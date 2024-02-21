@@ -1,61 +1,12 @@
-import random
-def movement(current_hex_key, direction):
-	compass = {
-		"N" : [-1, -1],
-		"NE": [100, 99],
-		"SE": [101, 100],
-		"S" : [1, 1],
-		"SW": [-99, -100],
-		"NW": [-100, -101]	
-	}
-	move = compass[direction][0]
-	if ((current_hex_key // 100) % 2) == 0:
-		move = compass[direction][0]
-	elif ((current_hex_key // 100) % 2) == 1:
-		move = compass[direction][1]
-	if ((current_hex_key + move) % 100) == 0:
-		print("You cannot move in that direction.  Choose another direction.")
-		new_hex_key = current_hex_key + 0
-	elif (current_hex_key + move) < 101:
-		print("You cannot move in that direction.  Choose another direction.")
-		new_hex_key = current_hex_key + 0
-	elif ((current_hex_key + move) % 100) > 23:
-		print("You cannot move in that direction.  Choose another direction.")
-		new_hex_key = current_hex_key + 0
-	elif current_hex_key + move > 2023:
-		print("You cannot move in that direction.  Choose another direction. ")
-		new_hex_key = current_hex_key + 0
-	else:
-		#river_crossing(current_hex_key, direction)
-		new_hex_key = current_hex_key + move
-	return new_hex_key
+'''for the river codes, the numbers correspond to the hex side the river runs along.
+   for road codes, the numbers correspond to the hex side the road traves to.'''
+compass_code = {'n' :'1',
+                'ne':'2',
+                'se':'3',
+                's' :'4',
+                'sw':'5',
+                'nw':'6'}
 
-
-def river_crossing(current_hex_key, direction):
-	has_river ={
-		"N" : "1",
-		"NE": "2",
-		"SE": "3",
-		"S" : "4",
-		"SW": "5",
-		"NW": "6"
-	}
-	if overland_map[current_hex_key][2] is not None:
-		if has_river[direction] in overland_map[current_hex_key][2]:
-			print("\nYou are attempting to cross a river.\n")
-			is_lost = random.randint(1,6) + random.randint(1,6)
-			if is_lost >= 8:
-				print("You are unable to find a suitable place to cross the river.")
-				return False
-			else: #pass the river
-				print("You have made it across the river.")
-				is_event = random.randint(1,6) + random.randint(1,6)
-				if is_event >= 10:
-					print("You have an encounter!")
-				return True
-		return True
-	return True
-		
 #{hex:["terrain", "feature", "river code", "road code"]}
 overland_map = {
 	(1,1) : ["Plains", "Town of Ogon", "4", None],
@@ -66,7 +17,7 @@ overland_map = {
 	(1,6) : ["Desert", None, None, None],
 	(1,7) : ["Hills", None, None, None],
 	(1,8) : ["Plains", None, None, None],
-	(1,9) : ["Plains", "Town of Angleae", None, "2"],
+	(1,9) : ["Plains", "Town of Angleae", None, "25"],
 	(1,10) : ["Plains", None, None, None],
 	(1,11) : ["Forest", None, None, None],
 	(1,12) : ["Plains", None, None, None],
@@ -126,7 +77,7 @@ overland_map = {
 	(3,20) : ["Plains", None, None, None],
 	(3,21) : ["Plains", None, None, None],
 	(3,22) : ["Farmland", None, None, "24"],
-	(3,23) : ["Farmland", "Drogat Castle", None, "12"],
+	(3,23) : ["Farmland", "Drogat Castle", None, "124"],
 	(4,1) : ["Forest", None, "4", None],
 	(4,2) : ["Forest", None, "126", None],
 	(4,3) : ["Mountains", None, None, None],
@@ -451,7 +402,7 @@ overland_map = {
 	(17,23) : ["Plains", None, "126", None],
 	(18,1) : ["Mountains", None, "345", None],
 	(18,2) : ["Mountains", None, "1", None],
-	(18,3) : ["Plains", None, None, "4"],
+	(18,3) : ["Plains", None, None, "3"],
 	(18,4) : ["Mountains", None, None, "12"],
 	(18,5) : ["Mountains", "Temple of Zhor", None, "3"],
 	(18,6) : ["Mountains", None, None, None],
@@ -471,18 +422,18 @@ overland_map = {
 	(18,20) : ["Forest", None, None, "36"],
 	(18,21) : ["Forest", None, None, None],
 	(18,22) : ["Farmland", None, "45", None],
-	(18,23) : ["Plains", "Bridge", "12", None],
+	(18,23) : ["Plains", "Bridge", "12", "25"],
 	(19,1) : ["Mountains", None, "4", None],
 	(19,2) : ["Mountains", None, "126", None],
 	(19,3) : ["Mountains", None, None, None],
-	(19,4) : ["Hills", None, None, "45"],
+	(19,4) : ["Hills", None, None, "46"],
 	(19,5) : ["Plains", None, None, "14"],
 	(19,6) : ["Plains", None, None, "16"],
 	(19,7) : ["Mountains", None, None, None],
 	(19,8) : ["Mountains", None, None, None],
 	(19,9) : ["Mountains", None, None, None],
 	(19,10) : ["Mountains", None, None, "34"],
-	(19,11) : ["Plains", None, None, "14"],
+	(19,11) : ["Plains", None, None, "24"],
 	(19,12) : ["Hills", None, "3", "1"],
 	(19,13) : ["Hills", None, "234", None],
 	(19,14) : ["Plains", None, "156", None],
@@ -504,7 +455,7 @@ overland_map = {
 	(20,7) : ["Hills", None, None, None],
 	(20,8) : ["Mountains", None, None, None],
 	(20,9) : ["Hills", "Ruins of Pelgar", None, "4"],
-	(20,10) : ["Hills", None, None, "16"],
+	(20,10) : ["Hills", None, None, "15"],
 	(20,11) : ["Mountains", None, "34", None],
 	(20,12) : ["Mountains", None, "156", None],
 	(20,13) : ["Hills", None, "6", None],

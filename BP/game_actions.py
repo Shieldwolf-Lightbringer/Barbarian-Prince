@@ -59,19 +59,21 @@ item_table = {'A':['healing potion', 'cure poison vial', 'gift of charm', 'endur
 # e193 shield of light
 # e194 royal helm of the northlands
 
-def encounter(hex, console):
+def encounter(hex, console, terrain_type=None):
     '''this still needs to account for roads, river rafting, and river crossings'''
-    terrain_type = getattr(travel_events, overland_map[hex][0])
+    if terrain_type is None:
+        terrain_type = getattr(travel_events, overland_map[hex][0])
     encounter_dice = randint(1,6) + randint(1,6)
     if encounter_dice >= terrain_type['event']:
         row_dice = randint(1,6)
         column_dice = randint(0,5)
         event = terrain_type[row_dice][column_dice]
-        console.display_message(f'You encounter event {event}!')
+        console.display_message(f'You encounter event {event} in the {overland_map[hex][0]}!')
 
-def get_lost(hex, console):
+def get_lost(hex, console, terrain_type=None):
     '''this still needs to account for roads, river rafting, and river crossings'''
-    terrain_type = getattr(travel_events, overland_map[hex][0])
+    if terrain_type is None:
+        terrain_type = getattr(travel_events, overland_map[hex][0])
     get_lost_dice = randint(1,6) + randint(1,6)
     if get_lost_dice >= terrain_type['lost']:
         console.display_message(f'You have gotten lost attempting to enter the {overland_map[hex][0]}.  Maybe you will find your way tomorrow.')
@@ -88,8 +90,12 @@ def follow_road(direction, player_hex, console):
     
     if overland_map[player_hex][3] is not None:
         if has_road[direction] in overland_map[player_hex][3]:
+            console.display_message('You follow the road.')
             terrain_type = getattr(travel_events, "Road")
-    '''Need to think about incoroprating road travel into getting lost and encounter functions?'''
+            return terrain_type
+        else:
+            return None
+
 
 def cross_river(direction, player_hex, console):
     has_river ={
@@ -103,11 +109,12 @@ def cross_river(direction, player_hex, console):
     if overland_map[player_hex][2] is not None:
         if has_river[direction] in overland_map[player_hex][2]:
             terrain_type = getattr(travel_events, "Cross_River")
-            console.display_message("You are attempting to cross a river.")
-            can_cross = randint(1,6) + randint(1,6)
-            if can_cross >= terrain_type["lost"]:
-                console.display_message("However, you are unable to find a suitable place to cross the river today.")
-                return False
+            if not follow_road(direction, player_hex, console):
+                console.display_message("You are attempting to cross a river.")
+                can_cross = randint(1,6) + randint(1,6)
+                if can_cross >= terrain_type["lost"]:
+                    console.display_message("However, you are unable to find a suitable place to cross the river today.")
+                    return False
             else: #pass the river
                 console.display_message("You have successfully made it across the river.")
                 river_event = randint(1,6) + randint(1,6)
@@ -115,7 +122,7 @@ def cross_river(direction, player_hex, console):
                     row_dice = randint(1,6)
                     column_dice = randint(0,5)
                     event = terrain_type[row_dice][column_dice]
-                    console.display_message(f'You encounter event {event}!')
+                    console.display_message(f'You encounter event {event} while crossing the river!')
                 return True
         return True
     return True
@@ -146,20 +153,18 @@ def move(input, player_hex, hexagon_dict, console):
         v = dir[input]
         if (player_hex[0] + v[0], player_hex[1] + v[1]) in hexagon_dict:
             if cross_river(input, player_hex, console):
-                if get_lost((player_hex[0] + v[0], player_hex[1] + v[1]), console):
+                if get_lost((player_hex[0] + v[0], player_hex[1] + v[1]), console, follow_road(input, player_hex, console)):
                     player_hex = player_hex
                 else:
                     player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
+                    encounter(player_hex, console, follow_road(input, player_hex, console))
             else:
                 player_hex = player_hex
-                return player_hex
-            
-            # if get_lost((player_hex[0] + v[0], player_hex[1] + v[1]), console):
-            #     player_hex = player_hex
-            # else:
-            #     player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
+        else:
+            player_hex = player_hex
     else:
-        player_hex = player_hex        
+        player_hex = player_hex
+
     return player_hex
 
 
@@ -353,7 +358,8 @@ def true_love():
 
 
 '''actions available in any hex'''
-def rest(party, console):
+def rest(party, player_hex, console):
+    encounter(player_hex, console)
     rest_message = ""
     for character in party:
         if character.wounds > 0:
