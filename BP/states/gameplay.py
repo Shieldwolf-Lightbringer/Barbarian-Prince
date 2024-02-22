@@ -270,6 +270,7 @@ class Gameplay(BaseState):
             self.quit = True
 
         if self.player.alive is False:
+            self.console.display_message('Sadly, O Prince, your life and your quest end here.', True)
             self.done = True
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:

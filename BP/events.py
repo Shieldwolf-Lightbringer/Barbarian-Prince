@@ -3,6 +3,7 @@ import game_actions
 from hexmap import overland_map
 from random import choice, randint
 
+# Not yet fully implemented
 def e002(party, hex, console):
     north_tragoth_river = [(1,1),(2,1),(3,1),(3,2),(4,1),(5,1),(5,2),(6,1),(7,1),(8,1),(9,1),
                            (10,1),(11,1),(12,1),(13,1),(15,1),(16,1),(17,1),(18,1),(19,1),(20,1),]
@@ -17,6 +18,72 @@ def e002(party, hex, console):
             for _ in range(thugs):
                 enemy_party.append(characters.Character('Thug Guardsman', 'male', 5, 4, wealth_code=4, mounted=True))
             console.display_message('You have the option to negotiate, evade, or fight them.')
+
+
+def e032(party, console): # Ghosts
+    num_ghosts = randint(1,6) + 1
+    ghost_party = []
+    for _ in range(num_ghosts):
+        ghost_party.append(characters.Character(name='Ghost', combat_skill=4, endurance=2))
+    console.display_message(f'A group of {num_ghosts} ghosts surprise your party. They are guarding an ancient altar. If you kill all the ghosts, you can investigate the altar if you wish.')
+    game_actions.combat(party, ghost_party, console, has_surprise='enemy')
+    
+    console.display_message('With the ghosts defeated, you turn to investigate the altar they guarded.')
+    ghost_altar_roll = randint(1,6)
+    ghost_altar = {1:'e037', 2:'e039', 3:'e041', 4:'e042', 5:'e044', 6:'nothing'}
+    ghost_altar_event = ghost_altar[ghost_altar_roll]
+    if ghost_altar_event == 'nothing': 
+        console.display_message(f'The altar is broken and the inscriptions are too weathered; any magic this once held has long since dissipated.  At least you have put the {num_ghosts} to rest.')
+    elif ghost_altar_event == 'e037': # Broken Chest
+        e037(party, console)
+    elif ghost_altar_event == 'e039': # Treasure Chest
+        e039(party, console)
+    elif ghost_altar_event == 'e041': # Vision Gem
+        e041(party, console)
+    elif ghost_altar_event == 'e042': # Alcove of Sending
+        e042(party, console)
+    elif ghost_altar_event == 'e044': # High Altar
+        e044(party, console)
+
+
+def e033(party, console): # Warrior Wraiths
+    num_wraiths = randint(2,6)
+    wraith_party = []
+    for _ in range(num_wraiths):
+        wraith_party.append(characters.Character(name='Wraith', combat_skill=6, endurance=9))
+    console.display_message(f'A group of {num_wraiths} wraiths, the remnants of long dead super warriors, swiftly assault your party!  They strike first in combat against you.')
+    game_actions.combat(party, wraith_party, console, has_first_strike='enemy')
+
+    console.display_message('With the wraiths defeated, you discover that they were guarding plunder from an ancient battle.')
+    wraith_plunder_roll = randint(1,6)
+    wraith_plunder = {1:25, 2:50, 3:60, 4:70, 5:100, 6:100}
+    wraith_plunder_value = wraith_plunder[wraith_plunder_roll]
+    gold, item = game_actions.roll_treasure(wraith_plunder_value)
+    party[0].gold += gold
+    console.display_message(f'You find {gold} gold!')
+    if item:
+        party[0].add_item(item)
+        console.display_message(f'You find a {item}!')
+
+
+def e034(party, console): # Spectre of the Inner Tomb
+    spectre_party = []
+    spectre_party.append(characters.Character(name='Spectre', combat_skill=7, endurance=3, unearthly=True))
+    console.display_message('Looking around the atrium of an old tomb, you notice a hidden passage to the interior. You pass within, but it is a long hall, taking the rest of the day to explore. You sense the malevolent presence of a Spectre. You can either retreat now, or continue.')
+    console.display_message('Choosing to press onward, at the end of the day, before the evening meal, you finally reach the inner tomb, and find the Spectre.')
+    console.display_message('Normal weapons have no effect on the spectre!  It is only hurt by poison wounds or wounds from a magic sword!  Any priest, monk, magician, wizard, or witch will have magical weapons that are poison to the Spectre.')
+    game_actions.combat(party, spectre_party, console)
+
+    console.display_message('With the spectre defeated, you turn to investigate the treasure it guarded.')
+    spectre_plunder_roll = randint(1,6)
+    spectre_plunder = {1:5, 2:12, 3:25, 4:25, 5:60, 6:110}
+    spectre_plunder_value = spectre_plunder[spectre_plunder_roll]
+    gold, item = game_actions.roll_treasure(spectre_plunder_value)
+    party[0].gold += gold
+    console.display_message(f'You find {gold} gold!')
+    if item:
+        party[0].add_item(item)
+        console.display_message(f'You find a {item}!')
 
 
 def e035(party, player_hex, console): # Spell of Chaos
@@ -67,7 +134,7 @@ def e038(party, console): # Cache under Stone
 
 
 def e039(party, console): # Treasure Chest
-    console.display_message('You find a locked chest. You know the lock may be trapped.')
+    console.display_message('You find a locked chest. You know the lock may be trapped. You can either ignore it, or attempt to open it anyway.')
     trap_roll = randint(1,6)
     if trap_roll >= 3:
         game_actions.trap_lock(party[0], console)
@@ -83,6 +150,44 @@ def e039(party, console): # Treasure Chest
             console.display_message(f'You find a {item}!')
 
 
+def e040(party, console): # Trapped Treasure Chest
+    console.display_message('You find a locked treasure chest protected by a trap. You can either ignore it, or attempt to open it anyway.')
+    trap_roll = randint(1,6)
+    if trap_roll > party[0].wits:
+        game_actions.trap_lock(party[0], console)
+
+    chest_roll = randint(1,6)
+    chest_contents = {1:5, 2:25, 3:50, 4:60, 5:70, 6:100}
+    chest_result = chest_contents[chest_roll]
+   
+    gold, item = game_actions.roll_treasure(chest_result)
+    party[0].gold += gold
+    console.display_message(f'You find {gold} gold!')
+    if item:
+        party[0].add_item(item)
+        console.display_message(f'You find a {item}!')
+
+
+def e041(party, console): # Vision Gem
+    console.display_message('You find a large, fixed stone with multiple facets. You gaze into it without thinking, and find you can look elsewhere.')
+    vision_roll = randint(1,6)
+    vision_gem_secrets = { 1:'e143', 2:'e144', 3:'e145', 4:'e146', 5:'e147', 6:'nothing of value'}
+    vision_event = vision_gem_secrets[vision_roll]
+    if vision_event == 'nothing of value': 
+        console.display_message('While fascinating, your observations of far off people and places produce nothing you can use.')
+    elif vision_event == 'e143': # Secret of the Temples
+        e143(party, console)
+    elif vision_event == 'e144': # Secret of Baron Huldra
+        e144(party, console)
+    elif vision_event == 'e145': # Secret of Lady Aeravir
+        e145(party, console)
+    elif vision_event == 'e146': # Secret of Count Drogat
+        e146(party, console)
+    elif vision_event == 'e147': # Clue to Treasure
+        e147(party, console)
+
+
+# Not yet fully implemented
 def e042(party, console): # Alcove of Sending
     console.display_message('Behind the altar, you find a small alcove inscribed with runes.')
     caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
@@ -164,6 +269,7 @@ def e044(party, console): # High Altar
                 party[0].gold = 0
 
 
+# Not yet fully implemented
 def e045(party, console): # Arch of Travel
     console.display_message('Behind the altar, you find a metal-banded archway inscribed with runes.')
     caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
@@ -176,16 +282,132 @@ def e045(party, console): # Arch of Travel
     # Arch travel adds randint(1,6) days to the day tracker.  Travel is only one-way.
                                  
 
+# Not yet fully implemented
 def e046(party, console): # Gateway to Darkness
     console.display_message('In a passage near the altar, you have found one of the dreaded black portals. The darkness within the archway absorbs all light and reflects no image, yet seems to pulse and undulate.')
     # Abandon all followers and mounts, fight guardian (7,7), travel backwards in time 2d6 days.
     # Portal is permanent once discovered and can be reused.  Each time, there is an additional guardian.
 
 
+# Not yet fully implemented
 def e047(party, console): # Mirror of Reversal
     console.display_message('Propped against a column near the altar you see an old mirror.  Looking into it, you see an image of yourself twisted into an evil shape.  This creature leaps from the mirror and attacks you!')
     evil_twin = party[0]
     # game_actions.combat(party, evil_twin), any followers accidentally strike you on d6 5+, if you win, gain wits += 1 and all wealth and possessions
+
+
+# Not fully implemented, need to loot after battle.  Maybe in combat function?
+def e051(party, console): # Bandits
+    num_bandits = len(party) + 2
+    console.display_message(f'You are ambushed by {num_bandits} bandits, who surprise you in combat.')
+    bandit_party = []
+    bandit_party.append(characters.Character(name='Bandit Chief', combat_skill=6, endurance=6, wealth_code=15))
+    for _ in range(num_bandits - 1):
+        bandit_party.append(characters.Character(name='Bandit', combat_skill=5, endurance=4, wealth_code=1))
+    game_actions.combat(party, bandit_party, console, has_surprise='enemy')
+
+
+# Not fully implemented
+def e052(party, console): # Goblins
+    num_goblins = randint(1,6) + randint(1,6)
+    console.display_message(f'You sight a band of {num_goblins} goblins, lead by a Hobgoblin, in the distance.  You can either escape the area or attempt to follow them.')
+    goblin_party = []
+    goblin_party.append(characters.Character(name='Hobgoblin', combat_skill=6, endurance=5, wealth_code=5))
+    for _ in range(num_goblins):
+        goblin_party.append(characters.Character(name='Goblin', combat_skill=3, endurance=3, wealth_code=1))
+    #game_actions.escape()
+    #game_actions.follow_characters()
+    '''If you follow them, after the follow movement (r219) roll one die. If the result exceeds your wit & wiles the band
+discovers you and attacks, but your party will get the first strike in combat (r220). If they don't discover you, roll
+one die to see where they lead you: 1-e054; 2,3,4,5,6-e053.'''
+
+
+def e053(party, other_party, console): # Campsite
+    pass
+
+
+def e054(party, console): # Goblin Keep
+    pass
+
+
+def e055(party, console): # Orcs
+    num_orcs = randint(1,6) + randint(1,6)
+    console.display_message(f'You sight a band of {num_orcs} orcs, lead by a chieftan, in the distance.  You can either escape the area or attempt to follow them.')
+    orc_party = []
+    orc_party.append(characters.Character(name='Chieftan', combat_skill=5, endurance=6, wealth_code=7))
+    for _ in range(num_orcs):
+        orc_party.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=1))
+    #game_actions.escape()
+    #game_actions.follow_characters()
+    '''If you follow them, after the follow movement roll one die. If the result exceeds your wit & wiles the Orcs
+discover you and attack, but your party gets first strike in combat (r220). If they don't discover you, roll one die
+to see where they lead you: 1-Orc Tower e056; 2,3,4,5,6-Campsite e053.
+If they lead you to a campsite, you can either avoid them by escaping to an adjacent hex (r218) or you can
+make a surprise attack in combat (r220) against them at their campsite.'''
+
+
+def e056(party, console): # Orc Tower
+    num_orcs = randint(1,6) + 1
+    console.display_message(f'You see the dark tower of an Orc Warlord.  This area is full of orc and worse things.  A war-patrol of {num_orcs} orcs, led by a demi-Troll warchief, spots you!.  You can either surrender to them or attempt to escape.')
+    orc_party = []
+    orc_party.append(characters.Character(name='Warchief', combat_skill=8, endurance=7, wealth_code=10))
+    for _ in range(num_orcs):
+        orc_party.append(characters.Character(name='Orc Warrior', combat_skill=5, endurance=5, wealth_code=2))
+    #game_actions.escape()
+    #surrender e061()
+
+
+def e057(party, console): # Troll
+    console.display_message('A huge stone-skinned Troll confronts your party.')
+    troll_party = []
+    troll_party.append(characters.Character(name='Troll', combat_skill=8, endurance=8, wealth_code=15, regenerates=True))
+    game_actions.combat(party, troll_party, console, has_surprise='enemy')
+
+    console.display_message('If you kill the troll, its stone-skin is a valuable item. Whenever you have an opportunity to buy food at a town, castle, temple, or from merchants you can sell the skin for 50 gold. It is also known that Count Drogat, of Drogat Castle, will treasure the gift should you manage to get a personal -audience with him.')
+    party[0].add_item('troll stone-skin')
+
+
+def e082(party, console): # Spectre
+    console.display_message('An unearthly spectre from the astral plane appears in the midst of your party, casting a hideous miasma in all directions.')
+    target = choice(party)
+    console.display_message(f"{target.name} is the spectre's victim!  {target.name} is turned to smoke and taken by the spectre to the astral plane, never to be seen again!")
+    if not target.heir:
+        party.remove(target)
+    elif target.heir:
+        target.alive = False
+    '''However, a spectre is a magical being, and can be stopped using any possession that protects against magic attacks or injury.'''
+
+
+def e098(party, console): # Dragon
+    console.display_message('You encounter a huge, winged, fire-breathing Dragon!')
+    dragon_party = []
+    lair_roll = randint(1,6)
+    if lair_roll <= 2:
+        dragon_party.append(characters.Character(name='Dragon', combat_skill=10, endurance=11, wealth_code=0, flying=True))
+        console.display_message('You have found the mighty beast at its lair, surrounded by treasure!')
+        gold, item = game_actions.roll_treasure(110)
+        gold2, item2 = game_actions.roll_treasure(60)
+        party[0].gold += gold, gold2
+        console.display_message(f'You find {gold} gold!')
+        if item:
+            party[0].add_item(item)
+            console.display_message(f'You find a {item}!')
+        if item2:
+            party[0].add_item(item2)
+            console.display_message(f'You find a {item2}!')
+    else:
+        dragon_party.append(characters.Character(name='Dragon', combat_skill=10, endurance=11, wealth_code=30, flying=True))
+    ''' If you must fight it in combat (r220) you cannot escape. Your options are:
+die roll evade fight
+1 escape flying r313 surprise r302
+2 escape r315 surprise r303
+3 hide r318 attack r305
+4 hide r320 attacked r306
+5 attacked r306 surprised r308
+6 surprised r308 surprised r309'''
+    '''Note: if you kill the Dragon, the Dragon's eye is greatly valued by high priests of the temples throughout the
+land, and may be of assistance in gaining an audience. Carrying the Dragon's eye counts as one load for
+transport purposes (r206).'''
 
 
 def e131(console): # Empty Ruins
@@ -200,9 +422,10 @@ def e132(party, player_hex, console): # Organized Search
         else:
             console.display_message('Despite your thoroughness, you turn up nothing of use.')
     else:
-        console.display_message('You spend the entire day fruitlessly searching the ruins, and find nothing.')
+        e131(console) # Empty Ruins
 
 
+# Not yet fully implemented
 def e133(party, console): # Plague
     console.display_message('After considerable searching during the day, you find a variety of items worth 50 gold pieces in all, among many skeletons.')
     party[0].gold += 50
@@ -226,6 +449,7 @@ def e133(party, console): # Plague
     #game_actions.escape()
 
 
+# Not yet fully implemented
 def e134(party, player_hex, console): # Unstable Ruins
     console.display_message('In the ruins there are many unstable walls and rocks, making your search very dangerous. You can either give up searching these ruins, doing nothing else today, or you can press on.')
     for character in party:
@@ -286,32 +510,105 @@ def e136(party, console): # Hidden Treasures
 
 
 def e137(party, console): # Inhabitants
-    console.display_message('You encounter living things in the ruins!')
-    # 1-e032; 2-e051; 3-e052; 4-e055; 5-e057; 6-e082
+    console.display_message('You encounter creatures in the ruins!')
+    inhabitants_roll = randint(1,6)
+    ruin_inhabitants = {1:'e032', 2:'e051', 3:'e052', 4:'e055', 5:'e057', 6:'e082'}
+    inhabitants_event = ruin_inhabitants[inhabitants_roll]
+    if inhabitants_event == 'e032':   # Ghosts
+        e032(party, console)
+    elif inhabitants_event == 'e051': # Bandits
+        e051(party, console)
+    elif inhabitants_event == 'e052': # Goblins
+        e052(party, console)
+    elif inhabitants_event == 'e055': # Orcs
+        e055(party, console)
+    elif inhabitants_event == 'e057': # Troll
+        e057(party, console)
+    elif inhabitants_event == 'e082': # Spectre
+        e082(party, console)    
 
 
+# Not yet fully implemented
 def e138(party, console): # Unclean
     console.display_message('The ruins are unclean, and have horrible, gruesome creatures populating them!')
-    # 1-e032; 2-e033; 3-e034; 4-e056; 5-e082; 6-e098
-
+    unclean_roll = randint(1,6)
+    unclean_inhabitants = {1:'e032', 2:'e033', 3:'e034', 4:'e056', 5:'e082', 6:'e098'}
+    unclean_event = unclean_inhabitants[unclean_roll]
+    if unclean_event == 'e032':   # Ghosts
+        e032(party, console)
+    elif unclean_event == 'e033': # Warrior Wraiths
+        e033(party, console)
+    elif unclean_event == 'e034': # Spectre of the Inner Tomb
+        e034(party, console)
+    elif unclean_event == 'e056': # Orc Tower
+        e056(party, console)
+    elif unclean_event == 'e082': # Spectre
+        e082(party, console)
+    elif unclean_event == 'e098': # Dragon
+        e098(party, console)  
 
 def e139(party, console): # Minor Treasures
-    # 1-wealth 25; 2-wealth 60; 3-e038; 4-e039; 5-e040; 6-e140
-    minor_treasure_roll = randint(1,2)
-    if minor_treasure_roll == 1:
+    minor_treasures = {1:25, 2:60, 3:'e038', 4:'e039', 5:'e040', 6:'e140'}
+    minor_treasure_roll = randint(1,6)
+    minor_treasure_event = minor_treasures[minor_treasure_roll]
+    if minor_treasure_event == 25:
         gold, item = game_actions.roll_treasure(25)
         party[0].gold += gold
         console.display_message(f'You find {gold} gold!')
         if item:
             party[0].add_item(item)
             console.display_message(f'You find a {item}!')
-    elif minor_treasure_roll == 2:
+    elif minor_treasure_event == 60:
         gold, item = game_actions.roll_treasure(60)
         party[0].gold += gold
         console.display_message(f'You find {gold} gold!')
         if item:
             party[0].add_item(item)
             console.display_message(f'You find a {item}!')
+    elif minor_treasure_event == 'e038': # Cache under Stone
+        e038(party, console)
+    elif minor_treasure_event == 'e039': # Treasure Chest
+        e039(party, console)
+    elif minor_treasure_event == 'e040': # Trapped Treasure Chest
+        e040(party, console)
+    elif minor_treasure_event == 'e140': # Magic Box
+        e140(party, console)
+
+
+# Not yet fully implemented
+def e140(party, console): # Magic Box
+    console.display_message('You find a magic box!')
+    pass
+
+
+# Not yet fully implemented
+def e143(party, console): # Secret of the Temples
+    console.display_message('You learn the secret of all temple priests - for the Chaga drug. This is available in any town where you buy food, for 2 gold pieces a serving.')
+    pass
+
+
+# Not yet fully implemented
+def e144(party, console): # Secret of Baron Huldra
+    console.display_message('You learn the secret of Baron Huldra.')
+    pass
+
+
+# Not yet fully implemented
+def e145(party, console): # Secret of Lady Aeravir
+    console.display_message('You learn the secret of Lady Aeravir.')
+    pass
+
+
+# Not yet fully implemented
+def e146(party, console): # Secret of Count Drogat
+    console.display_message('You learn the secret of Count Drogat.')
+    pass
+
+
+# Not yet fully implemented
+def e147(party, console): # Clue to Treasure
+    console.display_message('You learn the secret location of a nearby treasure.')
+    pass
 
 
 events_dict = {'e002': e002}

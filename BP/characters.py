@@ -4,7 +4,7 @@ from random import randint, choice
 class Character:
     def __init__(self, name=None, sex=None, combat_skill=None, endurance=None, wounds=0, wealth_code=0, wits=None, heir=False,
                  daily_wage=0, guide=False, priest=False, monk=False, magician=False, wizard=False, witch=False, true_love=False,
-                 mounted=False, flying=False):
+                 mounted=False, flying=False, unearthly=False, regenerates=False):
         self.name = name if name else self.random_name()
         self.sex = sex if sex else choice(['male', 'female'])
         self.combat_skill = combat_skill if combat_skill else randint(1,4)
@@ -44,6 +44,8 @@ class Character:
         self.hiring_bonus = {}
         self.info_bonus = {}
         self.offering_bonus = {}
+        self.unearthly = unearthly
+        self.regenerates = regenerates
         
     def determine_wealth(self, wealth_code):
         wealth_dice = randint(0,5)
@@ -142,12 +144,28 @@ class Character:
             self.possessions.remove(random_item)
 
     def update(self):
+        if self.unearthly:
+            if self.wounds > 0:
+                self.wounds = 0
+
+        if self.regenerates:
+            if self.wounds + self.poison_wounds < self.endurance:
+                self.awake = True
+                if self.wounds > 0:
+                    self.wounds -= 1
+                elif self.poison_wounds > 0:
+                    self.poison_wounds -= 1
+            else:
+                self.awake = False
+                self.alive = False
+
         if self.wounds + self.poison_wounds < self.endurance - 1:
             self.awake = True
         if self.wounds + self.poison_wounds >= self.endurance - 1:
             self.awake = False
         if self.wounds + self.poison_wounds >= self.endurance:
             self.alive = False
+
         self.has_eaten = False
         if self.fatigue > self.combat_skill:
             self.fatigue = self.combat_skill

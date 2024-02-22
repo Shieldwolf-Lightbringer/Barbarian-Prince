@@ -166,6 +166,8 @@ def move(input, player_hex, hexagon_dict, console):
 
     return player_hex
 
+def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
+    pass
 
 def talk():
     pass
@@ -331,22 +333,22 @@ def follow_characters():
 def trap_lock(character, console):
     trap_roll = randint(1,6)
     if trap_roll == 1:
-        console.display_message(f'{character} was struck by a poisoned needle!')
+        console.display_message(f'{character.name} was struck by a poisoned needle!')
         character.poison_wounds += 1
     elif trap_roll == 2:
-        console.display_message(f'{character} was struck by a burning acid explosion!')
+        console.display_message(f'{character.name} was struck by a burning acid explosion!')
         character.wounds += randint(1,6)
     elif trap_roll == 3:
-        console.display_message(f'Poison gas envelops {character}!')
+        console.display_message(f'Poison gas envelops {character.name}!')
         character.poison_wounds += randint(1,6)
     elif trap_roll == 4:
-        console.display_message(f'Plague dust inflicts sickness on {character}!')
+        console.display_message(f'Plague dust inflicts sickness on {character.name}!')
         character.plague = True
     elif trap_roll == 5:
-        console.display_message(f'Flying spikes and knives explode toward {character}!')
+        console.display_message(f'Flying spikes and knives explode toward {character.name}!')
         character.wounds += randint(4,9)
     else:
-        console.display_message(f'Trap malfunctions! No injury to {character}!')
+        console.display_message(f'Trap malfunctions! No injury to {character.name}!')
 
 def true_love(party, lovers, console):
     for character in party:
