@@ -271,7 +271,7 @@ class Gameplay(BaseState):
 
         if self.player.alive is False:
             self.console.display_message('Sadly, O Prince, your life and your quest end here.', True)
-            self.done = True
+            #self.done = True
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
@@ -295,7 +295,7 @@ class Gameplay(BaseState):
                         break
 
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_DELETE:
                 self.done = True
             if event.key == pygame.K_ESCAPE:
                 self.quit = True

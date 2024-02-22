@@ -387,7 +387,8 @@ def e098(party, console): # Dragon
         console.display_message('You have found the mighty beast at its lair, surrounded by treasure!')
         gold, item = game_actions.roll_treasure(110)
         gold2, item2 = game_actions.roll_treasure(60)
-        party[0].gold += gold, gold2
+        party[0].gold += gold 
+        party[0].gold += gold2
         console.display_message(f'You find {gold} gold!')
         if item:
             party[0].add_item(item)
