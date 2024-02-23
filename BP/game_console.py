@@ -1,4 +1,5 @@
 import pygame
+import os
 
 class Console:
     def __init__(self, screen, font, width_ratio, height_ratio):
@@ -58,6 +59,7 @@ class Console:
 
     def add_line(self, text, requires_input=False):
         if text not in self.displayed_messages:
+            self.log_message(text)
             self.displayed_messages.add(text)
             self.console_lines.append((text, requires_input))
             # max_lines = 6 #int(self.screen.get_height() * self.height_ratio / self.font.get_linesize())
@@ -127,3 +129,13 @@ class Console:
             self.add_line(line, requires_input)
 
         #return lines
+
+    def create_log(self):
+        with open('game_log.txt', 'a') as log_file:
+            pass
+        with open('game_log.txt', 'w') as log_file:
+            log_file.write('Welcome to a new game.' + '\n')
+
+    def log_message(self, message):
+        with open('game_log.txt', 'a') as log_file:
+            log_file.write(message + '\n')

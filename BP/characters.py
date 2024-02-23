@@ -14,7 +14,8 @@ class Character:
         self.poison_wounds = wounds
         self.possessions = []
         self.max_carry = 10
-        self.wits = wits
+        self.wits = wits if wits else 0
+        self.wits_bonus = 0
         self.heir = heir
         self.gold = 0
         self.determine_wealth(wealth_code)
@@ -123,7 +124,7 @@ class Character:
                 f'Combat Skill: {max(self.combat_skill - self.fatigue, 0)}',
                 f'Endurance: {self.endurance}',
                 f'Wounds: {self.wounds + self.poison_wounds}',
-                f'Wits: {self.wits}',
+                f'Wits: {self.wits + self.wits_bonus}',
                 f'Gold: {self.gold}',
                 f'Possessions: {len(self.possessions)}/{self.max_carry}']
     

@@ -372,6 +372,7 @@ def e082(party, console): # Spectre
     target = choice(party)
     console.display_message(f"{target.name} is the spectre's victim!  {target.name} is turned to smoke and taken by the spectre to the astral plane, never to be seen again!")
     if not target.heir:
+        target.alive = False
         party.remove(target)
     elif target.heir:
         target.alive = False

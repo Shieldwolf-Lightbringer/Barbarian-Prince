@@ -354,12 +354,14 @@ def true_love(party, lovers, console):
     for character in party:
         if character.true_love:
             lovers.append(character)
+            party[0].wits_bonus = 1
         
     for character in lovers:
         return_message = ''
         if character not in party and character.alive:
             love_roll = randint(1,6) + randint(1,6)
             console.display_message(f'{character.name} is searching for you! {love_roll}')
+            party[0].wits_bonus = 0
             if love_roll == 12:
                 console.display_message(f'{character.name} visits you in your dreams, and you know your love has left this world.')
                 character.alive = False

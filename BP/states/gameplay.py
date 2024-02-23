@@ -173,6 +173,7 @@ class Gameplay(BaseState):
 
     def initialize(self):
         self.console.clear_console()
+        self.console.create_log()
         self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
         self.party = []
         self.lovers = []
