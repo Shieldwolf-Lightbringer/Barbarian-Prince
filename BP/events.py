@@ -33,7 +33,7 @@ def e032(party, console): # Ghosts
     ghost_altar = {1:'e037', 2:'e039', 3:'e041', 4:'e042', 5:'e044', 6:'nothing'}
     ghost_altar_event = ghost_altar[ghost_altar_roll]
     if ghost_altar_event == 'nothing': 
-        console.display_message(f'The altar is broken and the inscriptions are too weathered; any magic this once held has long since dissipated.  At least you have put the {num_ghosts} to rest.')
+        console.display_message(f'The altar is broken and the inscriptions are too weathered; any magic this once held has long since dissipated.  At least you have put the {num_ghosts} ghosts to rest.')
     elif ghost_altar_event == 'e037': # Broken Chest
         e037(party, console)
     elif ghost_altar_event == 'e039': # Treasure Chest
@@ -70,8 +70,7 @@ def e034(party, console): # Spectre of the Inner Tomb
     spectre_party = []
     spectre_party.append(characters.Character(name='Spectre', combat_skill=7, endurance=3, unearthly=True))
     console.display_message('Looking around the atrium of an old tomb, you notice a hidden passage to the interior. You pass within, but it is a long hall, taking the rest of the day to explore. You sense the malevolent presence of a Spectre. You can either retreat now, or continue.')
-    console.display_message('Choosing to press onward, at the end of the day, before the evening meal, you finally reach the inner tomb, and find the Spectre.')
-    console.display_message('Normal weapons have no effect on the spectre!  It is only hurt by poison wounds or wounds from a magic sword!  Any priest, monk, magician, wizard, or witch will have magical weapons that are poison to the Spectre.')
+    console.display_message('Choosing to press onward, at the end of the day, before the evening meal, you finally reach the inner tomb, and find the Spectre. Normal weapons have no effect on the spectre!  It is only hurt by poison wounds or wounds from a magic sword!  Any priest, monk, magician, wizard, or witch will have magical weapons that are poison to the Spectre.')
     game_actions.combat(party, spectre_party, console)
 
     console.display_message('With the spectre defeated, you turn to investigate the treasure it guarded.')

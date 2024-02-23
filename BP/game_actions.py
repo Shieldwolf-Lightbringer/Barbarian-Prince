@@ -167,7 +167,87 @@ def move(input, player_hex, hexagon_dict, console):
     return player_hex
 
 def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
-    pass
+    miss_set = {-6, -5, -4, -3, -2, 0, 1, 2, 4, 6, 7, 9, 15}
+    hit_map = {-1: 1,
+                3: 1,
+                5: 1,
+                8: 1,
+                11: 1,
+                10: 2,
+                12: 2,
+                13: 2,
+                17: 2,
+                14: 3,
+                16: 5,
+                18: 5,
+                19: 5,
+                20: 6}
+    killed = 0
+    loot = []
+    if has_surprise == 'enemy':
+        console.display_message('The enemy has taken you by surprise!')
+        party_strike_flag = False
+        enemy_strike_flag = True
+    elif has_surprise == 'player':
+        console.display_message('You have taken the enemy by surprise!')
+        party_strike_flag = True
+        enemy_strike_flag = False
+    else:
+        console.display_message('All combatants array themselves for battle.')
+        party_strike_flag = True
+        enemy_strike_flag = True
+
+    while party[0].alive and enemies:
+        if party_strike_flag:
+            for character in party:
+                character.update()
+                if character.alive and character.awake:
+                    valid_targets = [enemy for enemy in enemies if enemy.alive]
+                    target = choice(valid_targets)
+                    strike = randint(1,6) + randint(1,6) + character.combat_skill - character.fatigue - target.combat_skill
+                    if character.total_wounds > 0:
+                        strike -= 1
+                        if character.total_wounds >= character.endurance / 2:
+                            strike -= 1
+                    if target.total_wounds >= target.endurance / 2:
+                        strike += 2
+
+                    if strike in miss_set:
+                        console.display_message(f'{character.name} missed the enemy {target.name}!')
+                    else:
+                        console.display_message(f'Hit! {character.name} struck the enemy {target.name} for {hit_map[strike]} damage!')
+                        target.wounds += hit_map[strike]
+                        target.update()
+                        if not target.awake or not target.alive:
+                            console.display_message(f'{character.name} has slain the enemy {target.name}!')
+                            loot.append(target.wealth_code)
+        if enemy_strike_flag:
+            for enemy in enemies:
+                enemy.update()
+                if enemy.alive and enemy.awake:
+                    valid_enemy_targets = [character for character in party if character.alive]
+                    enemy_target = choice(valid_enemy_targets)
+                    enemy_strike = randint(1,6) + randint(1,6) + enemy.combat_skill - enemy.fatigue - enemy_target.combat_skill
+                    if enemy.total_wounds > 0:
+                        enemy_strike -= 1
+                        if enemy.total_wounds >= enemy.endurance / 2:
+                            enemy_strike -= 1
+                    if enemy_target.total_wounds >= enemy_target.endurance / 2:
+                        enemy_strike += 2
+
+                    if enemy_strike in miss_set:
+                        console.display_message(f'{enemy.name} missed the enemy {enemy_target.name}!')
+                    else:
+                        console.display_message(f'Hit! {enemy.name} struck the enemy {enemy_target.name} for {hit_map[enemy_strike]} damage!')
+                        enemy_target.wounds += hit_map[enemy_strike]
+                        enemy_target.update()
+                        if not enemy_target.alive:
+                            console.display_message(f'{enemy.name} has slain {enemy_target.name}!')
+                            if enemy_target.heir:
+                                break
+        party_strike_flag = True
+        enemy_strike_flag = True
+
 
 def talk():
     pass
@@ -333,39 +413,48 @@ def follow_characters():
 def trap_lock(character, console):
     trap_roll = randint(1,6)
     if trap_roll == 1:
-        console.display_message(f'{character.name} was struck by a poisoned needle!')
+        console.display_message(f'{character.name} was struck by a poisoned needle for 1 poison wound!')
         character.poison_wounds += 1
     elif trap_roll == 2:
-        console.display_message(f'{character.name} was struck by a burning acid explosion!')
-        character.wounds += randint(1,6)
+        acid_damage = randint(1,6)
+        console.display_message(f'{character.name} was struck by a burning acid explosion for {acid_damage} wounds!')
+        character.wounds += acid_damage
     elif trap_roll == 3:
-        console.display_message(f'Poison gas envelops {character.name}!')
-        character.poison_wounds += randint(1,6)
+        gas_damage = randint(1,6)
+        console.display_message(f'Poison gas envelops {character.name} and inflicts {gas_damage} poison wounds!')
+        character.poison_wounds += gas_damage
     elif trap_roll == 4:
         console.display_message(f'Plague dust inflicts sickness on {character.name}!')
         character.plague = True
     elif trap_roll == 5:
-        console.display_message(f'Flying spikes and knives explode toward {character.name}!')
-        character.wounds += randint(4,9)
+        sharp_damage = randint(4,9)
+        console.display_message(f'Flying spikes and knives explode toward {character.name} and deal {sharp_damage} wounds!')
+        character.wounds += sharp_damage
     else:
         console.display_message(f'Trap malfunctions! No injury to {character.name}!')
 
 def true_love(party, lovers, console):
+    love = []
     for character in party:
         if character.true_love:
             lovers.append(character)
-            party[0].wits_bonus = 1
+            love.append(character)
+
+    if love in party and len(love) == 1:
+        party[0].wits_bonus = 1
+    else:
+        party[0].wits_bonus = 0
         
     for character in lovers:
         return_message = ''
         if character not in party and character.alive:
             love_roll = randint(1,6) + randint(1,6)
             console.display_message(f'{character.name} is searching for you! {love_roll}')
-            party[0].wits_bonus = 0
             if love_roll == 12:
                 console.display_message(f'{character.name} visits you in your dreams, and you know your love has left this world.')
                 character.alive = False
                 lovers.remove(character)
+                love.remove(character)
             if 12 > love_roll >= 10:
                 return_message += f'{character.name} has found you and rejoined your party! '
                 has_mount_roll = randint(1,6) + randint(1,6)

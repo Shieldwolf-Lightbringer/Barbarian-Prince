@@ -7,7 +7,7 @@ class Character:
                  mounted=False, flying=False, unearthly=False, regenerates=False):
         self.name = name if name else self.random_name()
         self.sex = sex if sex else choice(['male', 'female'])
-        self.combat_skill = combat_skill if combat_skill else randint(1,4)
+        self.combat_skill = combat_skill if combat_skill else randint(1,5)
         self.fatigue = 0
         self.endurance = endurance if endurance else max((self.combat_skill + randint(0,2)), 2)
         self.wounds = wounds
@@ -18,6 +18,7 @@ class Character:
         self.wits_bonus = 0
         self.heir = heir
         self.gold = 0
+        self.wealth_code = wealth_code
         self.determine_wealth(wealth_code)
         self.alive = True
         self.awake = True
@@ -47,6 +48,7 @@ class Character:
         self.offering_bonus = {}
         self.unearthly = unearthly
         self.regenerates = regenerates
+        self.update()
         
     def determine_wealth(self, wealth_code):
         wealth_dice = randint(0,5)
@@ -123,7 +125,7 @@ class Character:
                 self.title,
                 f'Combat Skill: {max(self.combat_skill - self.fatigue, 0)}',
                 f'Endurance: {self.endurance}',
-                f'Wounds: {self.wounds + self.poison_wounds}',
+                f'Wounds: {self.total_wounds}',
                 f'Wits: {self.wits + self.wits_bonus}',
                 f'Gold: {self.gold}',
                 f'Possessions: {len(self.possessions)}/{self.max_carry}']
@@ -145,12 +147,14 @@ class Character:
             self.possessions.remove(random_item)
 
     def update(self):
+        self.total_wounds = self.wounds + self.poison_wounds
+
         if self.unearthly:
             if self.wounds > 0:
                 self.wounds = 0
 
         if self.regenerates:
-            if self.wounds + self.poison_wounds < self.endurance:
+            if self.total_wounds < self.endurance:
                 self.awake = True
                 if self.wounds > 0:
                     self.wounds -= 1
@@ -160,11 +164,11 @@ class Character:
                 self.awake = False
                 self.alive = False
 
-        if self.wounds + self.poison_wounds < self.endurance - 1:
+        if self.total_wounds < self.endurance - 1:
             self.awake = True
-        if self.wounds + self.poison_wounds >= self.endurance - 1:
+        if self.total_wounds >= self.endurance - 1:
             self.awake = False
-        if self.wounds + self.poison_wounds >= self.endurance:
+        if self.total_wounds >= self.endurance:
             self.alive = False
 
         self.has_eaten = False
