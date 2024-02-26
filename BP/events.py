@@ -25,25 +25,26 @@ def e032(party, console): # Ghosts
     ghost_party = []
     for _ in range(num_ghosts):
         ghost_party.append(characters.Character(name='Ghost', combat_skill=4, endurance=2))
-    console.display_message(f'A group of {num_ghosts} ghosts surprise your party. They are guarding an ancient altar. If you kill all the ghosts, you can investigate the altar if you wish.')
-    game_actions.combat(party, ghost_party, console, has_surprise='enemy')
+    console.display_message(f'A group of {num_ghosts} ghosts attack your party. They are guarding an ancient altar. If you kill all the ghosts, you can investigate the altar if you wish.')
     
-    console.display_message('With the ghosts defeated, you turn to investigate the altar they guarded.')
-    ghost_altar_roll = randint(1,6)
-    ghost_altar = {1:'e037', 2:'e039', 3:'e041', 4:'e042', 5:'e044', 6:'nothing'}
-    ghost_altar_event = ghost_altar[ghost_altar_roll]
-    if ghost_altar_event == 'nothing': 
-        console.display_message(f'The altar is broken and the inscriptions are too weathered; any magic this once held has long since dissipated.  At least you have put the {num_ghosts} ghosts to rest.')
-    elif ghost_altar_event == 'e037': # Broken Chest
-        e037(party, console)
-    elif ghost_altar_event == 'e039': # Treasure Chest
-        e039(party, console)
-    elif ghost_altar_event == 'e041': # Vision Gem
-        e041(party, console)
-    elif ghost_altar_event == 'e042': # Alcove of Sending
-        e042(party, console)
-    elif ghost_altar_event == 'e044': # High Altar
-        e044(party, console)
+    if game_actions.combat(party, ghost_party, console, has_surprise='enemy'):
+    
+        console.display_message('With the ghosts defeated, you turn to investigate the altar they guarded.')
+        ghost_altar_roll = randint(1,6)
+        ghost_altar = {1:'e037', 2:'e039', 3:'e041', 4:'e042', 5:'e044', 6:'nothing'}
+        ghost_altar_event = ghost_altar[ghost_altar_roll]
+        if ghost_altar_event == 'nothing': 
+            console.display_message(f'The altar is broken and the inscriptions are too weathered; any magic this once held has long since dissipated.  At least you have put the {num_ghosts} ghosts to rest.')
+        elif ghost_altar_event == 'e037': # Broken Chest
+            e037(party, console)
+        elif ghost_altar_event == 'e039': # Treasure Chest
+            e039(party, console)
+        elif ghost_altar_event == 'e041': # Vision Gem
+            e041(party, console)
+        elif ghost_altar_event == 'e042': # Alcove of Sending
+            e042(party, console)
+        elif ghost_altar_event == 'e044': # High Altar
+            e044(party, console)
 
 
 def e033(party, console): # Warrior Wraiths
@@ -52,18 +53,19 @@ def e033(party, console): # Warrior Wraiths
     for _ in range(num_wraiths):
         wraith_party.append(characters.Character(name='Wraith', combat_skill=6, endurance=9))
     console.display_message(f'A group of {num_wraiths} wraiths, the remnants of long dead super warriors, swiftly assault your party!  They strike first in combat against you.')
-    game_actions.combat(party, wraith_party, console, has_first_strike='enemy')
+    
+    if game_actions.combat(party, wraith_party, console, has_first_strike='enemy'):
 
-    console.display_message('With the wraiths defeated, you discover that they were guarding plunder from an ancient battle.')
-    wraith_plunder_roll = randint(1,6)
-    wraith_plunder = {1:25, 2:50, 3:60, 4:70, 5:100, 6:100}
-    wraith_plunder_value = wraith_plunder[wraith_plunder_roll]
-    gold, item = game_actions.roll_treasure(wraith_plunder_value)
-    party[0].gold += gold
-    console.display_message(f'You find {gold} gold!')
-    if item:
-        party[0].add_item(item)
-        console.display_message(f'You find a {item}!')
+        console.display_message('With the wraiths defeated, you discover that they were guarding plunder from an ancient battle.')
+        wraith_plunder_roll = randint(1,6)
+        wraith_plunder = {1:25, 2:50, 3:60, 4:70, 5:100, 6:100}
+        wraith_plunder_value = wraith_plunder[wraith_plunder_roll]
+        gold, item = game_actions.roll_treasure(wraith_plunder_value)
+        party[0].gold += gold
+        console.display_message(f'You find {gold} gold!')
+        if item:
+            party[0].add_item(item)
+            console.display_message(f'You find a {item}!')
 
 
 def e034(party, console): # Spectre of the Inner Tomb
@@ -71,18 +73,19 @@ def e034(party, console): # Spectre of the Inner Tomb
     spectre_party.append(characters.Character(name='Spectre', combat_skill=7, endurance=3, unearthly=True))
     console.display_message('Looking around the atrium of an old tomb, you notice a hidden passage to the interior. You pass within, but it is a long hall, taking the rest of the day to explore. You sense the malevolent presence of a Spectre. You can either retreat now, or continue.')
     console.display_message('Choosing to press onward, at the end of the day, before the evening meal, you finally reach the inner tomb, and find the Spectre. Normal weapons have no effect on the spectre!  It is only hurt by poison wounds or wounds from a magic sword!  Any priest, monk, magician, wizard, or witch will have magical weapons that are poison to the Spectre.')
-    game_actions.combat(party, spectre_party, console)
+    
+    if game_actions.combat(party, spectre_party, console):
 
-    console.display_message('With the spectre defeated, you turn to investigate the treasure it guarded.')
-    spectre_plunder_roll = randint(1,6)
-    spectre_plunder = {1:5, 2:12, 3:25, 4:25, 5:60, 6:110}
-    spectre_plunder_value = spectre_plunder[spectre_plunder_roll]
-    gold, item = game_actions.roll_treasure(spectre_plunder_value)
-    party[0].gold += gold
-    console.display_message(f'You find {gold} gold!')
-    if item:
-        party[0].add_item(item)
-        console.display_message(f'You find a {item}!')
+        console.display_message('With the spectre defeated, you turn to investigate the treasure it guarded.')
+        spectre_plunder_roll = randint(1,6)
+        spectre_plunder = {1:5, 2:12, 3:25, 4:25, 5:60, 6:110}
+        spectre_plunder_value = spectre_plunder[spectre_plunder_roll]
+        gold, item = game_actions.roll_treasure(spectre_plunder_value)
+        party[0].gold += gold
+        console.display_message(f'You find {gold} gold!')
+        if item:
+            party[0].add_item(item)
+            console.display_message(f'You find a {item}!')
 
 
 def e035(party, player_hex, console): # Spell of Chaos
@@ -290,19 +293,22 @@ def e046(party, console): # Gateway to Darkness
 
 # Not yet fully implemented
 def e047(party, console): # Mirror of Reversal
+    mirror_party = []
     console.display_message('Propped against a column near the altar you see an old mirror.  Looking into it, you see an image of yourself twisted into an evil shape.  This creature leaps from the mirror and attacks you!')
     evil_twin = party[0]
+    mirror_party.append(evil_twin)
     # game_actions.combat(party, evil_twin), any followers accidentally strike you on d6 5+, if you win, gain wits += 1 and all wealth and possessions
 
 
 # Not fully implemented, need to loot after battle.  Maybe in combat function?
 def e051(party, console): # Bandits
     num_bandits = len(party) + 2
-    console.display_message(f'You are ambushed by {num_bandits} bandits, who surprise you in combat.')
+    console.display_message(f'You are ambushed by {num_bandits} bandits!')
     bandit_party = []
     bandit_party.append(characters.Character(name='Bandit Chief', combat_skill=6, endurance=6, wealth_code=15))
     for _ in range(num_bandits - 1):
         bandit_party.append(characters.Character(name='Bandit', combat_skill=5, endurance=4, wealth_code=1))
+    
     game_actions.combat(party, bandit_party, console, has_surprise='enemy')
 
 
@@ -360,10 +366,16 @@ def e057(party, console): # Troll
     console.display_message('A huge stone-skinned Troll confronts your party.')
     troll_party = []
     troll_party.append(characters.Character(name='Troll', combat_skill=8, endurance=8, wealth_code=15, regenerates=True))
-    game_actions.combat(party, troll_party, console, has_surprise='enemy')
+    troll_roll = randint(1,6)
+    if troll_roll > party[0].wits:
+        first_strike = 'enemy'
+    else:
+        first_strike = 'player'
 
-    console.display_message('If you kill the troll, its stone-skin is a valuable item. Whenever you have an opportunity to buy food at a town, castle, temple, or from merchants you can sell the skin for 50 gold. It is also known that Count Drogat, of Drogat Castle, will treasure the gift should you manage to get a personal -audience with him.')
-    party[0].add_item('troll stone-skin')
+    if game_actions.combat(party, troll_party, console, has_first_strike=first_strike):
+
+        console.display_message('With the troll dead, you harvest its stone-skin as a valuable item. Whenever you have an opportunity to buy food at a town, castle, temple, or from merchants you can sell the skin for 50 gold. It is also known that Count Drogat, of Drogat Castle, will treasure the gift should you manage to get a personal audience with him.')
+        party[0].add_item('troll stone-skin')
 
 
 def e082(party, console): # Spectre
@@ -458,7 +470,8 @@ def e134(party, player_hex, console): # Unstable Ruins
             crushing_wounds = (randint(1,6) + randint(1,6))
             console.display_message(f'{character.name} is crushed by falling rocks for {crushing_wounds} wounds!')
             character.wounds += crushing_wounds
-            if not character.alive:
+            if not character.alive and not character.heir:
+                console.display_message(f'{character.name} is crushed to death!')
                 party.remove(character)
     game_actions.search_ruins(party, player_hex, console)
 

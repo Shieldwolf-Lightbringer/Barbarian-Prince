@@ -154,15 +154,15 @@ class Character:
                 self.wounds = 0
 
         if self.regenerates:
-            if self.total_wounds < self.endurance:
+            if self.total_wounds >= self.endurance:
+                self.awake = False
+                self.alive = False
+            else:
                 self.awake = True
                 if self.wounds > 0:
                     self.wounds -= 1
                 elif self.poison_wounds > 0:
                     self.poison_wounds -= 1
-            else:
-                self.awake = False
-                self.alive = False
 
         if self.total_wounds < self.endurance - 1:
             self.awake = True

@@ -300,6 +300,8 @@ class Gameplay(BaseState):
                 self.done = True
             if event.key == pygame.K_ESCAPE:
                 self.quit = True
+            if event.key == pygame.K_1:
+                events.e057(self.party, self.console)
         
         player_input = self.console.handle_input(event)
         if player_input in ['nw','n','ne','sw','s','se']:
@@ -315,7 +317,8 @@ class Gameplay(BaseState):
             self.update_trackers()
             for character in self.party:
                 character.update()
-                if not character.alive:
+                if not character.alive and not character.heir:
+                    self.console.display_message(f'{character.name} has died!')
                     self.party.remove(character)
             game_actions.true_love(self.party, self.lovers, self.console)
 
@@ -331,7 +334,8 @@ class Gameplay(BaseState):
                 self.update_trackers()
                 for character in self.party:
                     character.update()
-                    if not character.alive:
+                    if not character.alive and not character.heir:
+                        self.console.display_message(f'{character.name} has died!')
                         self.party.remove(character)
                 game_actions.true_love(self.party, self.lovers, self.console)
 
@@ -342,7 +346,8 @@ class Gameplay(BaseState):
             self.update_trackers()
             for character in self.party:
                 character.update()
-                if not character.alive:
+                if not character.alive and not character.heir:
+                    self.console.display_message(f'{character.name} has died!')
                     self.party.remove(character)
             game_actions.true_love(self.party, self.lovers, self.console)
 
