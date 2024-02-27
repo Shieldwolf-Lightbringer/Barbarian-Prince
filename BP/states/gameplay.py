@@ -272,7 +272,8 @@ class Gameplay(BaseState):
 
         if self.player.alive is False:
             self.console.display_message('Sadly, O Prince, your life and your quest end here.', True)
-            #self.done = True
+            if event.type == pygame.KEYUP:
+                self.done = True
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
@@ -302,6 +303,8 @@ class Gameplay(BaseState):
                 self.quit = True
             if event.key == pygame.K_1:
                 events.e057(self.party, self.console)
+            if event.key == pygame.K_2:
+                events.e032(self.party, self.console)
         
         player_input = self.console.handle_input(event)
         if player_input in ['nw','n','ne','sw','s','se']:
