@@ -21,8 +21,8 @@ class Console:
         console_area.fill((220, 215, 175))
 
         self.max_displayed_lines = 6 #int(console_area_height // self.font.get_linesize())
-        start_index = max(0, len(self.console_lines) - self.max_displayed_lines)
-        visible_lines = self.console_lines[start_index:]
+        start_index = max(0, len(self.console_lines) - self.max_displayed_lines - self.scroll_offset)
+        visible_lines = self.console_lines[start_index:start_index + self.max_displayed_lines]
 
         y_position = 0
 
@@ -36,8 +36,6 @@ class Console:
                 input_required_surface = self.font.render("<Press any key to continue>", True, (255, 0, 0))
                 console_area.blit(input_required_surface, (20, y_position))
                 y_position +=  self.font.get_linesize()
-                break  # Only render the input indicator for the first message that requires input
-
 
         # Render input buffer
         input_surface = self.font.render(">>> " + self.input_buffer, True, (80, 80, 80))
@@ -57,30 +55,46 @@ class Console:
             
         self.screen.blit(console_area, (20, self.screen.get_height() - console_area_height - 20))
 
+
     def add_line(self, text, requires_input=False):
         if text not in self.displayed_messages:
             self.log_message(text)
             self.displayed_messages.add(text)
             self.console_lines.append((text, requires_input))
-            # max_lines = 6 #int(self.screen.get_height() * self.height_ratio / self.font.get_linesize())
-            # if len(self.console_lines) > max_lines:
-            #     self.console_lines.pop(0)
 
-    def handle_input(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN:
-                command_result = self.execute_command()
-                if command_result is not None:
-                    return command_result
-            elif event.key == pygame.K_BACKSPACE:
-                self.input_buffer = self.input_buffer[:-1]
-            elif event.key == pygame.K_UP:
-                self.scroll_up()
-            elif event.key == pygame.K_DOWN:
-                self.scroll_down()
-            else:
-                self.input_buffer += event.unicode
+
+    def handle_input(self, event=None):
+        if event:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    command_result = self.execute_command()
+                    if command_result is not None:
+                        return command_result
+                elif event.key == pygame.K_BACKSPACE:
+                    self.input_buffer = self.input_buffer[:-1]
+                elif event.key == pygame.K_UP:
+                    self.scroll_down()
+                elif event.key == pygame.K_DOWN:
+                    self.scroll_up()
+                else:
+                    self.input_buffer += event.unicode
+        else:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        command_result = self.execute_command()
+                        if command_result is not None:
+                            return command_result
+                    elif event.key == pygame.K_BACKSPACE:
+                        self.input_buffer = self.input_buffer[:-1]
+                    elif event.key == pygame.K_UP:
+                        self.scroll_down()
+                    elif event.key == pygame.K_DOWN:
+                        self.scroll_up()
+                    else:
+                        self.input_buffer += event.unicode
         return None
+
 
     def execute_command(self):
         command = self.input_buffer.strip().lower()
@@ -91,8 +105,8 @@ class Console:
 
 
     def display_message(self, message, requires_input=False):
-        #self.add_line(message, requires_input)
         self.wrap_text(message, requires_input)
+
 
     def clear_console(self):
         self.console_lines = []
@@ -100,14 +114,17 @@ class Console:
         self.displayed_messages = set()
         self.scroll_offset = 0
 
+
     def scroll_up(self):
         self.scroll_offset = max(0, self.scroll_offset - 1)
+
 
     def scroll_down(self):
         max_displayed_lines = 6 #int((self.screen.get_height() * self.height_ratio - 40) / self.font.get_linesize())
         max_scroll_offset = max(0, len(self.console_lines) - max_displayed_lines)
         self.scroll_offset = min(max_scroll_offset, self.scroll_offset + 1)
-        
+
+
     def wrap_text(self, text, requires_input=False):
         words = text.split()
         lines = []
@@ -128,13 +145,13 @@ class Console:
         for line in lines:
             self.add_line(line, requires_input)
 
-        #return lines
 
     def create_log(self):
         with open('game_log.txt', 'a') as log_file:
             pass
         with open('game_log.txt', 'w') as log_file:
             log_file.write('Welcome to a new game.' + '\n')
+
 
     def log_message(self, message):
         with open('game_log.txt', 'a') as log_file:

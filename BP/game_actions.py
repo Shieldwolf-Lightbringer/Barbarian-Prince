@@ -169,6 +169,7 @@ def move(input, player_hex, hexagon_dict, console):
 def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
     killed = 0
     loot = []
+    rounds = 0
     if has_surprise == 'enemy':
         console.display_message('The enemy has taken you by surprise!')
         party_strike_flag = False
@@ -195,7 +196,13 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
             enemy_first_strike_flag = False
         console.display_message(battle_begin_message)
 
+    require_player_input = True
+
     while party[0].alive and enemies:
+        if rounds == 0:
+            console.display_message('*---Combat begins---*')
+        elif rounds > 0:
+            console.display_message('*---A new round of combat begins---*')
         if party_strike_flag or party_first_strike_flag:
             for character in party:
                 if character.alive and character.awake:
@@ -236,20 +243,23 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
 
         party_strike_flag = True
         enemy_strike_flag = True
+        rounds += 1
 
-        if killed > 0 and killed != len(enemies):
+        if killed > 0 and killed > len(enemies):
             rout = randint(1, 6)
             if rout == 6:
                 console.display_message(f"The enemy has routed! {len(enemies)} foes have fled!")
                 for enemy in enemies:
                     enemies.remove(enemy)
-                break
-        else:
-            console.display_message('Do you wish to Fight or Escape?', True)
-            next_round = console.input_buffer
-            if next_round.lower() == 'f':
+
+        if require_player_input:
+            console.display_message('Do you wish to Fight or Escape?', requires_input=True)
+            player_input = console.handle_input()
+
+            if player_input == 'f':
+                console.display_message('You continue the battle...')
                 continue
-            elif next_round.lower() == 'e':
+            elif player_input == 'e':
                 escape_roll = randint(1,6)
                 if escape_roll >= 4:
                     console.display_message('Combat has ended. You have escaped from your enemies.')
@@ -258,9 +268,13 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
                     console.display_message('You have failed to escape your enemies!')
                     party_strike_flag = False
                     continue
+            require_player_input = False
+
+        else:
+            require_player_input = True
 
     if not enemies:
-        console.display_message(f'Combat has ended.  {party[0].name}, you are victorious!')
+        console.display_message(f'Combat has ended. After {rounds} rounds of combat, {party[0].name}, you are victorious!  You have slain {killed} opponents.')
         for _ in loot:
             gold, item = roll_treasure(_)
             party[0].gold += gold
@@ -269,7 +283,7 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
                 party[0].add_item(item)
                 console.display_message(f'You find a {item}!')
         return True
-    else:
+    elif not party[0].alive:
         console.display_message(f'Combat has ended.  {party[0].name}, you have been defeated!')
         return False
 
