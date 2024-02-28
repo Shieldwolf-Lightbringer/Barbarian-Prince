@@ -305,6 +305,12 @@ class Gameplay(BaseState):
                 events.e057(self.party, self.console)
             if event.key == pygame.K_2:
                 events.e032(self.party, self.console)
+            if event.key == pygame.K_0:
+                num_foes = 4
+                foes = []
+                for _ in range(num_foes):
+                    foes.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=1))
+                game_actions.combat(self.party, foes, self.console)
         
         player_input = self.console.handle_input(event)
         if player_input in ['nw','n','ne','sw','s','se']:
