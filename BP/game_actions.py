@@ -114,15 +114,17 @@ def cross_river(direction, player_hex, console):
                 if can_cross >= terrain_type["lost"]:
                     console.display_message("However, you are unable to find a suitable place to cross the river today.")
                     return False
-            else: #pass the river
-                console.display_message("You have successfully made it across the river.")
-                river_event = randint(1,6) + randint(1,6)
-                if river_event >= terrain_type['event']:
-                    row_dice = randint(1,6)
-                    column_dice = randint(0,5)
-                    event = terrain_type[row_dice][column_dice]
-                    console.display_message(f'You encounter event {event} while crossing the river!')
-                return True
+                
+                else: #pass the river
+                    console.display_message("You have successfully made it across the river.")
+                    river_event = randint(1,6) + randint(1,6)
+                    if river_event >= terrain_type['event']:
+                        row_dice = randint(1,6)
+                        column_dice = randint(0,5)
+                        event = terrain_type[row_dice][column_dice]
+                        console.display_message(f'You encounter event {event} while crossing the river!')
+                    return True
+                
         return True
     return True
 
@@ -196,7 +198,7 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
             enemy_first_strike_flag = False
         console.display_message(battle_begin_message)
 
-    require_player_input = True
+    #require_player_input = True
 
     while party[0].alive and enemies:
         if rounds == 0:
@@ -252,39 +254,44 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
                 for enemy in enemies:
                     enemies.remove(enemy)
 
-        if require_player_input:
-            console.display_message('Do you wish to Fight or Escape?', requires_input=True)
-            player_input = console.handle_input()
+        
+        #if require_player_input:
+        # console.display_message('Do you wish to Fight or Escape?', True)
+        # player_input = console.handle_input()
+        player_input = combat_option(console)
 
-            if player_input == 'f':
-                console.display_message('You continue the battle...')
+        if player_input == 'f':
+            console.display_message('You continue the battle...')
+            continue
+        if player_input == 'e':
+            escape_roll = randint(1,6)
+            if escape_roll >= 4:
+                console.display_message('Combat has ended. You have escaped from your enemies.')
+                break
+            else:
+                console.display_message('You have failed to escape your enemies!')
+                party_strike_flag = False
                 continue
-            elif player_input == 'e':
-                escape_roll = randint(1,6)
-                if escape_roll >= 4:
-                    console.display_message('Combat has ended. You have escaped from your enemies.')
-                    break
-                else:
-                    console.display_message('You have failed to escape your enemies!')
-                    party_strike_flag = False
-                    continue
-            require_player_input = False
+        # if player_input == None:
+        #     player_input = console.handle_input()
+    
+            #require_player_input = False
 
-        else:
-            require_player_input = True
 
     if not enemies:
         console.display_message(f'Combat has ended. After {rounds} rounds of combat, {party[0].name}, you are victorious!  You have slain {killed} opponents.')
-        for _ in loot:
-            gold, item = roll_treasure(_)
-            party[0].gold += gold
-            console.display_message(f'You find {gold} gold!')
+        total_gold = 0
+        for wealth_code in loot:
+            gold, item = roll_treasure(wealth_code)
+            total_gold += gold
             if item:
                 party[0].add_item(item)
                 console.display_message(f'You find a {item}!')
+        console.display_message(f'You find {total_gold} gold!')
+        party[0].gold += total_gold
         return True
     elif not party[0].alive:
-        console.display_message(f'Combat has ended.  {party[0].name}, you have been defeated!')
+        console.display_message(f'Combat has ended. {party[0].name}, you have been defeated!')
         return False
 
 
@@ -324,6 +331,17 @@ def combat_strike(attacker, target, console):
         else:
             console.display_message(f'Hit! {attacker.name} struck the enemy {target.name} for {hit_map[strike]} damage!')
             target.wounds += hit_map[strike]
+
+
+def combat_option(console):
+    console.display_message('Do you wish to Fight or Escape?', True)
+    decision = console.handle_input()
+    if decision:
+        print(decision)
+        return decision
+
+
+
 
 
 def talk():
@@ -566,13 +584,14 @@ def rest(party, player_hex, console):
             #console.display_message(f'{character.name} has rested for the day.')
             rest_message += f'{character.name} has rested for the day. '
     hunt_bonus = int(len(party) - 1)
+    rest_message += f'You have a +{hunt_bonus} bonus to hunting today.'
     console.display_message(rest_message)
     return hunt_bonus
 
 def cache_locate():
     pass
 
-def cache_stash():
+def cache_place():
     pass
 
 
@@ -648,26 +667,31 @@ def hire_followers(party, player_hex, console): #town or castle
     
     if hiring_roll == 2:
         console.display_message("A Freeman joins your party at no cost (except food and lodging).")
-        freeman = characters.Character(None, None, 3, 4)
+        freeman = characters.Character(name='Freeman', combat_skill=3, endurance=4)
         party.append(freeman)
     elif hiring_roll == 3:
         console.display_message("A Lancer with a horse can be hired for 3 gold per day.")
-        lancer = characters.Character(None, None, 5, 5, daily_wage=3, mounted=True)
+        lancer = characters.Character(name='Lancer', combat_skill=5, endurance=5, daily_wage=3, mounted=True)
         party.append(lancer)
     elif hiring_roll == 4:
         console.display_message("One or two mercenaries can be hired for 2 gold per day each.")
-        mercenary = characters.Character(None, None, 4, 4, daily_wage=2)
-        party.append(mercenary)
+        mercenary = characters.Character(name='Mercenary', combat_skill=4, endurance=4, daily_wage=2)
+        mercenaries_hired = console.handle_input()
+        for _ in range(max(mercenaries_hired, 2)):
+            party.append(mercenary)
     elif hiring_roll == 5:
         console.display_message("Horse dealer in area, you can buy horses (for mounts) at 10 gold each.")
     elif hiring_roll == 6:
-        console.display_message("Local guide available (see r205), hires for 2 gold per day.")
-        guide = characters.Character(None, None, 2, 3, daily_wage=2)
+        console.display_message("Local guide available, hire for 2 gold per day.")
+        guide = characters.Character(name='Guide', combat_skill=2, endurance=3, daily_wage=2, guide=True)
         party.append(guide)
     elif hiring_roll == 7:
         console.display_message("Henchmen available, roll one die for the number available for hire, at 1 gold per day each.")
-        henchmen = characters.Character(None, None, 3, 3, daily_wage=1)
-        party.append(henchmen)
+        henchmen_roll = randint(1,6)
+        henchmen = characters.Character(None, None, combat_skill=3, endurance=3, daily_wage=1)
+        henchmen_hired = console.handle_input()
+        for _ in range(max(henchmen_hired, henchmen_roll)):
+            party.append(henchmen)
     elif hiring_roll == 8:
         console.display_message("Slave market, see event e163")
     elif hiring_roll == 9:
@@ -676,13 +700,15 @@ def hire_followers(party, player_hex, console): #town or castle
         console.display_message("Honest horse dealer in area, can buy horses (for mounts) at 7 gold each.")
     elif hiring_roll == 11:
         console.display_message("Runaway boy or girl joins your party at no cost (except food and lodging), has combat skill 1, endurance 3.")
-        runaway = characters.Character(None, None, 1, 3)
+        runaway = characters.Character(name='Runaway Urchin', combat_skill=1, endurance=3)
         party.append(runaway)
     elif hiring_roll >= 12:
-        console.display_message("Porters in any quantity available, hire for ½ gold each per day. In addition, a local guide (r205) can be hired for 2 gold per day, has combat skill 1, endurance 2.")
-        porters = characters.Character(None, None, 1, 2, daily_wage=0.5)
-        guide = characters.Character(None, None, 1, 2, daily_wage=2)
-        party.append(porters)
+        console.display_message("Porters, in any quantity desired, are available to hire for ½ gold each per day. In addition, a local guide can be hired for 2 gold per day.")
+        porters = characters.Character(name='Porter', combat_skill=1, endurance=2, daily_wage=0.5)
+        guide = characters.Character(name='Guide', combat_skill=1, endurance=2, daily_wage=2, guide=True)
+        porters_hired = console.handle_input()
+        for _ in range(porters_hired):
+            party.append(porters)
         party.append(guide)
 
 

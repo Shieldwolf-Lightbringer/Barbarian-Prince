@@ -148,7 +148,7 @@ class Gameplay(BaseState):
         self.party = []
         self.lovers = []
         self.party.append(self.player)
-        self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
+        self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Speed': min(char.move_speed for char in self.party)}
         self.establish_data_path()
 
         self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon_outline.png')).convert_alpha()
@@ -170,6 +170,7 @@ class Gameplay(BaseState):
         self.party.append(priest)
 
         self.show_inventory_screen = False
+        self.hunt_bonus = 0
 
     def initialize(self):
         self.console.clear_console()
@@ -185,8 +186,9 @@ class Gameplay(BaseState):
         priest = characters.Character(priest=True)
         self.party.append(priest)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
-        self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Items': len(self.player.possessions)}
-        
+        self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Speed': min(char.move_speed for char in self.party)}
+        self.hunt_bonus = 0
+
     '''The camera to follow the player as they move around the game map'''
     def camera_follow(self, player_rect):
         self.player_rect.center = hexagon_dict[self.player_hex]
@@ -246,27 +248,7 @@ class Gameplay(BaseState):
         return adjacent_hexagons
 
     '''This handles mouse clicks, keystrokes, and other events'''
-    def get_event(self, event):
-        #self.console.handle_input(event)
-        # if self.player_hex[0] % 2 == 0:
-        #     dir = {
-        #         pygame.K_q: (-1, +0),
-        #         pygame.K_w: (+0, -1),
-        #         pygame.K_e: (+1, +0),
-        #         pygame.K_a: (-1, +1),
-        #         pygame.K_s: (+0, +1),
-        #         pygame.K_d: (+1, +1)
-        #         }
-        # elif self.player_hex[0] % 2 == 1:
-        #     dir = {
-        #         pygame.K_q: (-1, -1),
-        #         pygame.K_w: (+0, -1),
-        #         pygame.K_e: (+1, -1),
-        #         pygame.K_a: (-1, +0),
-        #         pygame.K_s: (+0, +1),
-        #         pygame.K_d: (+1, +0)
-        #         }
-        
+    def get_event(self, event):       
         if event.type == pygame.QUIT:
             self.quit = True
 
@@ -305,60 +287,66 @@ class Gameplay(BaseState):
                 events.e057(self.party, self.console)
             if event.key == pygame.K_2:
                 events.e032(self.party, self.console)
-            if event.key == pygame.K_0:
+            if event.key == pygame.K_3:
                 num_foes = 4
                 foes = []
                 for _ in range(num_foes):
                     foes.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=1))
                 game_actions.combat(self.party, foes, self.console)
+            if event.key == pygame.K_0:
+                for char in self.party:
+                    char.flying = True
         
         player_input = self.console.handle_input(event)
-        if player_input in ['nw','n','ne','sw','s','se']:
-            direction = player_input
-            self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console)
-            self.camera_follow(self.player_rect)
-            self.location_message()
-            #game_actions.encounter(self.player_hex, self.console)
-            game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
-            game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+
+        self.daily_cycle(player_input)
+
+        # if player_input in ['nw','n','ne','sw','s','se']:
+        #     direction = player_input
+        #     self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console)
+        #     self.camera_follow(self.player_rect)
+        #     self.location_message()
+        #     #game_actions.encounter(self.player_hex, self.console)
+        #     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
+        #     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
             
-            self.count_rations()
-            self.update_trackers()
-            for character in self.party:
-                character.update()
-                if not character.alive and not character.heir:
-                    self.console.display_message(f'{character.name} has died!')
-                    self.party.remove(character)
-            game_actions.true_love(self.party, self.lovers, self.console)
+        #     self.count_rations()
+        #     self.update_trackers()
+        #     for character in self.party:
+        #         character.update()
+        #         if not character.alive and not character.heir:
+        #             self.console.display_message(f'{character.name} has died!')
+        #             self.party.remove(character)
+        #     game_actions.true_love(self.party, self.lovers, self.console)
 
-        if player_input == 'i':
-            self.show_inventory_screen = not self.show_inventory_screen
+        # if player_input == 'i':
+        #     self.show_inventory_screen = not self.show_inventory_screen
 
-        if player_input == 't':
-            if self.player_hex in ruins:
-                game_actions.search_ruins(self.party, self.player_hex, self.console)
-                game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
-                game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-                self.count_rations()
-                self.update_trackers()
-                for character in self.party:
-                    character.update()
-                    if not character.alive and not character.heir:
-                        self.console.display_message(f'{character.name} has died!')
-                        self.party.remove(character)
-                game_actions.true_love(self.party, self.lovers, self.console)
+        # if player_input == 't':
+        #     if self.player_hex in ruins:
+        #         game_actions.search_ruins(self.party, self.player_hex, self.console)
+        #         game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
+        #         game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+        #         self.count_rations()
+        #         self.update_trackers()
+        #         for character in self.party:
+        #             character.update()
+        #             if not character.alive and not character.heir:
+        #                 self.console.display_message(f'{character.name} has died!')
+        #                 self.party.remove(character)
+        #         game_actions.true_love(self.party, self.lovers, self.console)
 
-        if player_input == 'r':
-            game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.player_hex, self.console))
-            game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-            self.count_rations()
-            self.update_trackers()
-            for character in self.party:
-                character.update()
-                if not character.alive and not character.heir:
-                    self.console.display_message(f'{character.name} has died!')
-                    self.party.remove(character)
-            game_actions.true_love(self.party, self.lovers, self.console)
+        # if player_input == 'r':
+        #     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.player_hex, self.console))
+        #     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+        #     self.count_rations()
+        #     self.update_trackers()
+        #     for character in self.party:
+        #         character.update()
+        #         if not character.alive and not character.heir:
+        #             self.console.display_message(f'{character.name} has died!')
+        #             self.party.remove(character)
+        #     game_actions.true_love(self.party, self.lovers, self.console)
 
     '''This method counts the rations in the party and updates the tracker'''
     def count_rations(self):
@@ -372,7 +360,8 @@ class Gameplay(BaseState):
         self.trackers['Gold'] = self.party[0].gold
         self.trackers['Day'] += 1
         self.trackers['Party'] = len(self.party)
-        self.trackers['Items'] = len(self.player.possessions)
+        #self.trackers['Items'] = len(self.player.possessions)
+        self.trackers['Speed'] = min(char.move_speed for char in self.party)
 
     '''This method draws each hexagon and then gives it a color, and image, and any icons it may have'''
     def draw_hexagon(self, surface, center, key):
@@ -503,25 +492,6 @@ class Gameplay(BaseState):
         y = key[1] + ((HEX_RADIUS * 0.9) * sin(angle + radians(-90)))
         return int(x), int(y)
 
-    # '''This method prepares text for display to the screen'''
-    # def wrap_text(self, text, font, max_width):
-    #     words = text.split()
-    #     lines = []
-    #     current_line = ""
-
-    #     for word in words:
-    #         test_line = current_line + word + " "
-    #         test_width, _ = font.size(test_line)
-
-    #         if test_width <= max_width:
-    #             current_line = test_line
-    #         else:
-    #             lines.append(current_line)
-    #             current_line = word + " "
-
-    #     lines.append(current_line)
-
-    #     return lines
     
     '''This method displays a message for the player when they arrive in a hex containing a feature'''
     def location_message(self):
@@ -533,7 +503,23 @@ class Gameplay(BaseState):
             self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
         elif self.player_hex in ruins:
             self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
-    
+
+
+    '''This method displays a message for the player on certain days'''
+    def time_message(self):
+        e001_text = "Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks, their allies will arm and you will lose your kingdom forever. To escape the mercenary royal guard, your loyal body servant Ogab smuggled you into a merchant caravan to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, loosen your swordbelt, and get ready to start the first day of your adventure. Important Note: if you finish actions for a day on any hex north of the Tragoth River, the mercenary royal guardsmen may find you."
+        day70_text = "Ten weeks have passed, and you have been unable to raise sufficient funds or forces to retake your kingdom.  Perhaps the fates may offer you another chance in the future, but for now you must remain in exile."
+
+        if self.trackers["Day"] == 1:
+            self.console.display_message(e001_text)
+            self.location_message()
+        
+        if self.trackers["Day"] > 7 and (self.trackers["Day"] - 1) % 7 == 0:
+            self.console.display_message(f'A week has passed. You have {10 - int((self.trackers["Day"] - 1) / 7)} weeks remaining.')
+                
+        if self.trackers["Day"] == 71:
+            self.console.display_message(day70_text)
+
 
     '''This method draws all the map elements to the screen and highlights hexes adjacent to the player'''
     def draw(self, surface):
@@ -560,7 +546,7 @@ class Gameplay(BaseState):
         surface.blit(self.map_surface, self.map_surface_rect)
         surface.blit(self.map_surface.subsurface(self.camera), (0, 0))
 
-
+        ### side info panel ###
         self.side_panel = pygame.Surface((self.x * 0.25, self.y * 0.75))
         self.side_panel.fill(parchment_color)
         surface.blit(self.side_panel, (self.x - self.x * 0.25, 0))
@@ -596,7 +582,7 @@ class Gameplay(BaseState):
             character_y_coord += char_font.get_linesize()
 
 
-        # self.show_inventory_screen = False
+        ### party stats and inventory screen ###
         if self.show_inventory_screen:
             inventory_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
             self.inventory_screen = pygame.Surface((self.x * 0.75, self.y * 0.75))
@@ -627,35 +613,57 @@ class Gameplay(BaseState):
         # self.knotwork = pygame.transform.scale(self.knotwork, (636, 84))
         # surface.blit(self.knotwork, (0, self.y - 84))
 
-        e001_text = "Evil events have overtaken your Northlands Kingdom. Your father, the old king, is dead - assassinated by rivals to the throne. These usurpers now hold the palace with their mercenary royal guard. You have escaped, and must collect 500 gold pieces to raise a force to smash them and retake your heritage. Furthermore, the usurpers have powerful friends overseas. If you can't return to take them out in ten weeks, their allies will arm and you will lose your kingdom forever. To escape the mercenary royal guard, your loyal body servant Ogab smuggled you into a merchant caravan to the southern border. Now, at dawn you roll out of the merchant wagons into a ditch, dust off your clothes, loosen your swordbelt, and get ready to start the first day of your adventure. Important Note: if you finish actions for a day on any hex north of the Tragoth River, the mercenary royal guardsmen may find you."
-        day70_text = "Ten weeks have passed, and you have been unable to raise sufficient funds or forces to retake your kingdom.  Perhaps the fates may offer you another chance in the future, but for now you must remain in exile."
-
-        #self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
-        # intro_text = self.wrap_text(e001_text, self.console_font, int(self.x * 0.9))
-        # day70_loss_text = self.wrap_text(day70_text, self.console_font, int(self.x * 0.9))
-
-        #self.console = Console(surface, self.console_font, 1.0, 0.25)
-        if self.trackers["Day"] == 1:
-            # for line in intro_text:
-            #     self.console.display_message(line)
-            self.console.display_message(e001_text)
-            self.location_message()
-                
-        if self.trackers["Day"] == 71:
-            self.console.display_message(day70_text)
-            # for line in day70_loss_text:
-            #     self.console.display_message(line)
-                
+        self.time_message()        
         self.console.render()
 
 
-    def daily_actions_and_events(self):
-        # self.count_rations()
-        # self.update_trackers()
-        self.choose_daily_action()
-        game_actions.hunt()
-        game_actions.eat_meal()
-        self.count_rations()
-        self.update_trackers()
-        for character in self.party:
-            character.update()
+    '''This method handles the daily cycle of game play (choose actions, encounters, hunt, eat meals, etc.)'''
+    def daily_cycle(self, player_input):
+        if player_input in ['nw','n','ne','sw','s','se','i','t','r','o','p','h','q','c']:
+            daily_action_done = False
+            if not daily_action_done:
+                ### morning ###
+                daily_action_done = self.choose_daily_action(player_input)
+
+            if daily_action_done:
+                ### afternoon ###
+                game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, self.hunt_bonus)
+
+                ### evening ###
+                game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
+
+                ### daily updates ###
+                self.count_rations()
+                self.update_trackers()
+                for character in self.party:
+                    character.update()
+                    if not character.alive and not character.heir:
+                            self.console.display_message(f'{character.name} has died!')
+                            self.party.remove(character)
+                game_actions.true_love(self.party, self.lovers, self.console)
+
+
+    '''This method handles the choice of action in the daily cycle'''
+    def choose_daily_action(self, player_input):
+        if player_input in ['nw','n','ne','sw','s','se']:
+            direction = player_input
+            self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console)
+            self.camera_follow(self.player_rect)
+            self.location_message()
+            return True
+            
+            
+        if player_input == 'i':
+            self.show_inventory_screen = not self.show_inventory_screen
+            return False
+
+        if player_input == 't':
+            if self.player_hex in ruins:
+                game_actions.search_ruins(self.party, self.player_hex, self.console)
+                return True
+            return False            
+
+        if player_input == 'r':
+            self.hunt_bonus = game_actions.rest(self.party, self.player_hex, self.console)
+            return True
+            

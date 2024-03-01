@@ -33,7 +33,7 @@ class Console:
 
             if requires_input:
             # Render an indicator that more input is needed for this message
-                input_required_surface = self.font.render("<Press any key to continue>", True, (255, 0, 0))
+                input_required_surface = self.font.render("What is your choice? " + self.input_buffer, True, (255, 0, 0))
                 console_area.blit(input_required_surface, (20, y_position))
                 y_position +=  self.font.get_linesize()
 
