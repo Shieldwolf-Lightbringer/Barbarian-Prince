@@ -65,6 +65,8 @@ class Console:
 
     def handle_input(self, event=None):
         if event:
+            if event.type == pygame.TEXTINPUT:
+                self.input_buffer += event.text
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     command_result = self.execute_command()
@@ -76,10 +78,12 @@ class Console:
                     self.scroll_down()
                 elif event.key == pygame.K_DOWN:
                     self.scroll_up()
-                else:
-                    self.input_buffer += event.unicode
+                # else:
+                #     self.input_buffer += event.unicode
         else:
             for event in pygame.event.get():
+                if event.type == pygame.TEXTINPUT:
+                    self.input_buffer += event.text
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         command_result = self.execute_command()
@@ -91,8 +95,8 @@ class Console:
                         self.scroll_down()
                     elif event.key == pygame.K_DOWN:
                         self.scroll_up()
-                    else:
-                        self.input_buffer += event.unicode
+                    # else:
+                    #     self.input_buffer += event.unicode
         return None
 
 

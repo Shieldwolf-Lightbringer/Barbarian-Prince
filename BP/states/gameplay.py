@@ -254,7 +254,7 @@ class Gameplay(BaseState):
 
         if self.player.alive is False:
             self.console.display_message('Sadly, O Prince, your life and your quest end here.', True)
-            if event.type == pygame.KEYUP:
+            if event.type == pygame.KEYDOWN:
                 self.done = True
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -293,6 +293,8 @@ class Gameplay(BaseState):
                 for _ in range(num_foes):
                     foes.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=1))
                 game_actions.combat(self.party, foes, self.console)
+            if event.key == pygame.K_9:
+                self.party[0].gold += 50
             if event.key == pygame.K_0:
                 for char in self.party:
                     char.flying = True
@@ -491,8 +493,7 @@ class Gameplay(BaseState):
         x = key[0] + ((HEX_RADIUS * 0.9) * cos(angle + radians(-90)))
         y = key[1] + ((HEX_RADIUS * 0.9) * sin(angle + radians(-90)))
         return int(x), int(y)
-
-    
+ 
     '''This method displays a message for the player when they arrive in a hex containing a feature'''
     def location_message(self):
         if self.player_hex in castles:
@@ -503,7 +504,6 @@ class Gameplay(BaseState):
             self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
         elif self.player_hex in ruins:
             self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
-
 
     '''This method displays a message for the player on certain days'''
     def time_message(self):
@@ -519,7 +519,6 @@ class Gameplay(BaseState):
                 
         if self.trackers["Day"] == 71:
             self.console.display_message(day70_text)
-
 
     '''This method draws all the map elements to the screen and highlights hexes adjacent to the player'''
     def draw(self, surface):
@@ -667,3 +666,34 @@ class Gameplay(BaseState):
             self.hunt_bonus = game_actions.rest(self.party, self.player_hex, self.console)
             return True
             
+        if player_input == 'o':
+            if self.player_hex in temples:
+                game_actions.make_offering(self.party, self.player_hex, self.console)
+                return True
+            return False
+        
+        if player_input == 'p':
+            if any(self.player_hex in key for key in [temples, towns, castles]):
+                game_actions.seek_audience(self.party, self.player_hex, self.console)
+                return True
+            return False
+        
+        if player_input == 'h':
+            if any(self.player_hex in key for key in [towns, castles]):
+                game_actions.hire_followers(self.party, self.player_hex, self.console)
+                return True
+            return False
+        
+        if player_input == 'q':
+            if any(self.player_hex in key for key in [temples, towns, castles]):
+                game_actions.seek_news_and_information(self.party, self.player_hex, self.console)
+                return True
+            return False
+        
+        if player_input == 'c':
+            if 'cache' in self.player_hex:
+                game_actions.cache_locate()
+                return True
+            else:
+                game_actions.cache_place()
+                return True

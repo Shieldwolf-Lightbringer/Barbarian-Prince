@@ -597,13 +597,13 @@ def cache_place():
 
 '''actions available in certain hexes'''
 
-def seek_news_and_information(character, player_hex, console): #town, temple, or castle
-    gather_info_roll = randint(1,6) + randint(1,6) + character.info_bonus[player_hex]
-    if character.gold >= 5:
+def seek_news_and_information(party, player_hex, console): #town, temple, or castle
+    gather_info_roll = randint(1,6) + randint(1,6) #+ character.info_bonus[player_hex]
+    if party[0].gold >= 5:
         console.display_message('Do you wish to spend 5 gold to loosen tongues? (y/n)') #need to handle choice
-        character.gold -= 5
+        party[0].gold -= 5
         gather_info_roll += 1
-    if character.wits >= 5:
+    if party[0].wits >= 5:
         gather_info_roll += 1
 
     if gather_info_roll == 2:
@@ -611,7 +611,7 @@ def seek_news_and_information(character, player_hex, console): #town, temple, or
     
     elif gather_info_roll == 3:
         console.display_message("You discover a thieves' den and pillage it while they are out.  You gain 50 gold.")
-        character.gold += 50
+        party[0].gold += 50
     
     elif gather_info_roll == 4:
         temples = {(7,11):"Branwyn's Temple",
@@ -621,21 +621,21 @@ def seek_news_and_information(character, player_hex, console): #town, temple, or
                    (20,18):'Temple of Duffyd'}
         secret_rites = choice(temples)
         console.display_message('You learn of secret rites at {secret_rites}.  You gain a small advantage when making offerings there.')
-        if secret_rites in character.offering_bonus:
-            character.offering_bonus[secret_rites] += 1
+        if secret_rites in party[0].offering_bonus:
+            party[0].offering_bonus[secret_rites] += 1
         else:
-            character.offering_bonus[secret_rites] = 1
+            party[0].offering_bonus[secret_rites] = 1
             
     elif gather_info_roll == 5:
         console.display_message('Your inquiries uncover no news of note; but you feel at home in this place and gain a small bonus when seeking information or hirelings.')
-        if player_hex in character.info_bonus:
-            character.info_bonus[player_hex] += 1
+        if player_hex in party[0].info_bonus:
+            party[0].info_bonus[player_hex] += 1
         else:
-            character.info_bonus[player_hex] = 1
-        if player_hex in character.hiring_bonus:
-            character.hiring_bonus[player_hex] += 1
+            party[0].info_bonus[player_hex] = 1
+        if player_hex in party[0].hiring_bonus:
+            party[0].hiring_bonus[player_hex] += 1
         else:
-            character.hiring_bonus[player_hex] = 1
+            party[0].hiring_bonus[player_hex] = 1
     
     elif gather_info_roll == 6:
         console.display_message('A large caravan is in town.  If you wish to visit them today, see event e129.')
@@ -645,7 +645,7 @@ def seek_news_and_information(character, player_hex, console): #town, temple, or
     
     elif gather_info_roll == 8:
         console.display_message('A cutpurse picks your pocket, stealing half your gold!')
-        character.gold /= 2
+        party[0].gold //= 2
     
     elif gather_info_roll == 9:
         console.display_message('You attract the attention of the local constabulary, see event e050.')
@@ -655,7 +655,7 @@ def seek_news_and_information(character, player_hex, console): #town, temple, or
     
     elif gather_info_roll == 11:
         console.display_message("You discover the local thieves' guild and are 'invited' to join.  If you do, you participate in a theft tonight and then flee the hex.  If you pay the guild their cut, you may return to this hex in the future. ")
-        character.gold += 200
+        party[0].gold += 200
     
     elif gather_info_roll >= 12:
         console.display_message('A secret informant offers you valuable information for 10 gold.')
@@ -663,7 +663,7 @@ def seek_news_and_information(character, player_hex, console): #town, temple, or
 
 
 def hire_followers(party, player_hex, console): #town or castle
-    hiring_roll = randint(1,6) + randint(1,6) + party[0].hiring_bonus[player_hex]
+    hiring_roll = randint(1,6) + randint(1,6) #+ party[0].hiring_bonus[player_hex]
     
     if hiring_roll == 2:
         console.display_message("A Freeman joins your party at no cost (except food and lodging).")
@@ -785,7 +785,7 @@ def seek_audience(party, player_hex, console): #town, temple, or castle
 
 
 def make_offering(party, player_hex, console): #temple
-    offering_roll = randint(1,6) + randint(1,6) + party[0].offering_bonus[player_hex]
+    offering_roll = randint(1,6) + randint(1,6) #+ party[0].offering_bonus[player_hex]
     console.display_message('You must spend 1 gold for proper herbs and sacrifice to make an offering.')
     if party[0].gold >= 10:
         console.display_message('If you wish, you may spend 10 gold on fine herbs and sacrifices for the offering. (y/n)?') #need to handle choice
