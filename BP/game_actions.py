@@ -198,8 +198,6 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
             enemy_first_strike_flag = False
         console.display_message(battle_begin_message)
 
-    #require_player_input = True
-
     while party[0].alive and enemies:
         if rounds == 0:
             console.display_message('*---Combat begins---*')
@@ -254,11 +252,8 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
                 for enemy in enemies:
                     enemies.remove(enemy)
 
-        
-        #if require_player_input:
-        # console.display_message('Do you wish to Fight or Escape?', True)
-        # player_input = console.handle_input()
-        player_input = combat_option(console)
+        console.display_message('Do you wish to Fight or Escape?', True)
+        player_input = console.handle_player_response()
 
         if player_input == 'f':
             console.display_message('You continue the battle...')
@@ -272,11 +267,6 @@ def combat(party, enemies, console, has_surprise=None, has_first_strike=None):
                 console.display_message('You have failed to escape your enemies!')
                 party_strike_flag = False
                 continue
-        # if player_input == None:
-        #     player_input = console.handle_input()
-    
-            #require_player_input = False
-
 
     if not enemies:
         console.display_message(f'Combat has ended. After {rounds} rounds of combat, {party[0].name}, you are victorious!  You have slain {killed} opponents.')
@@ -331,17 +321,6 @@ def combat_strike(attacker, target, console):
         else:
             console.display_message(f'Hit! {attacker.name} struck the enemy {target.name} for {hit_map[strike]} damage!')
             target.wounds += hit_map[strike]
-
-
-def combat_option(console):
-    console.display_message('Do you wish to Fight or Escape?', True)
-    decision = console.handle_input()
-    if decision:
-        print(decision)
-        return decision
-
-
-
 
 
 def talk():
@@ -599,12 +578,15 @@ def cache_place():
 
 def seek_news_and_information(party, player_hex, console): #town, temple, or castle
     gather_info_roll = randint(1,6) + randint(1,6) #+ character.info_bonus[player_hex]
+    console.display_message(f'Initial roll: {gather_info_roll}')
     if party[0].gold >= 5:
         console.display_message('Do you wish to spend 5 gold to loosen tongues? (y/n)') #need to handle choice
         party[0].gold -= 5
         gather_info_roll += 1
+        console.display_message(f'Plus bribe bonus: {gather_info_roll}')
     if party[0].wits >= 5:
         gather_info_roll += 1
+        console.display_message(f'Plus wits bonus: {gather_info_roll}')
 
     if gather_info_roll == 2:
         console.display_message('Your inquiries uncover no news of note; nothing seems to be happening.')
@@ -620,7 +602,7 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
                    (18,5):'Temple of Zhor',
                    (20,18):'Temple of Duffyd'}
         secret_rites = choice(temples)
-        console.display_message('You learn of secret rites at {secret_rites}.  You gain a small advantage when making offerings there.')
+        console.display_message(f'You learn of secret rites at {secret_rites}.  You gain a small advantage when making offerings there.')
         if secret_rites in party[0].offering_bonus:
             party[0].offering_bonus[secret_rites] += 1
         else:

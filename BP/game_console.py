@@ -20,7 +20,7 @@ class Console:
         console_area = pygame.Surface((self.screen.get_width() - 40, console_area_height))
         console_area.fill((220, 215, 175))
 
-        self.max_displayed_lines = 6 #int(console_area_height // self.font.get_linesize())
+        self.max_displayed_lines = 5 #int(console_area_height // self.font.get_linesize())
         start_index = max(0, len(self.console_lines) - self.max_displayed_lines - self.scroll_offset)
         visible_lines = self.console_lines[start_index:start_index + self.max_displayed_lines]
 
@@ -63,41 +63,29 @@ class Console:
             self.console_lines.append((text, requires_input))
 
 
-    def handle_input(self, event=None):
-        if event:
+    def handle_input(self, event):
+        if event.type == pygame.TEXTINPUT:
+            self.input_buffer += event.text
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                command_result = self.execute_command()
+                if command_result is not None:
+                    return command_result
+            elif event.key == pygame.K_BACKSPACE:
+                self.input_buffer = self.input_buffer[:-1]
+            elif event.key == pygame.K_UP:
+                self.scroll_down()
+            elif event.key == pygame.K_DOWN:
+                self.scroll_up()
+
+    
+    def handle_player_response(self):
+        for event in pygame.event.get():
             if event.type == pygame.TEXTINPUT:
                 self.input_buffer += event.text
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    command_result = self.execute_command()
-                    if command_result is not None:
-                        return command_result
-                elif event.key == pygame.K_BACKSPACE:
-                    self.input_buffer = self.input_buffer[:-1]
-                elif event.key == pygame.K_UP:
-                    self.scroll_down()
-                elif event.key == pygame.K_DOWN:
-                    self.scroll_up()
-                # else:
-                #     self.input_buffer += event.unicode
-        else:
-            for event in pygame.event.get():
-                if event.type == pygame.TEXTINPUT:
-                    self.input_buffer += event.text
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        command_result = self.execute_command()
-                        if command_result is not None:
-                            return command_result
-                    elif event.key == pygame.K_BACKSPACE:
-                        self.input_buffer = self.input_buffer[:-1]
-                    elif event.key == pygame.K_UP:
-                        self.scroll_down()
-                    elif event.key == pygame.K_DOWN:
-                        self.scroll_up()
-                    # else:
-                    #     self.input_buffer += event.unicode
-        return None
+                    return self.input_buffer
 
 
     def execute_command(self):
