@@ -20,6 +20,128 @@ def e002(party, hex, console):
             console.display_message('You have the option to negotiate, evade, or fight them.')
 
 
+def e003(party, console): # Swordsman on horse
+    pass
+
+
+def e004(party, console): # Mercenary Band
+    pass
+
+
+def e005(party, console): # Amazons
+    pass
+
+
+def e006(party, console): # Dwarf
+    pass
+
+
+def e007(party, console): # Elf
+    pass
+
+
+def e008(party, console): # Halfling
+    pass
+
+
+def e009(party, console): # Farm
+    pass
+
+
+def e010(party, console): # Starving Farmer
+    pass
+
+
+def e011(party, console): # Peaceful Farmer
+    pass
+
+
+def e012(party, console): # Farmer with Protector
+    pass
+
+
+def e013(party, console): # Rich Peasant Family
+    pass
+
+
+def e014(party, console): # Hostile Reaver Clan
+    pass
+
+
+def e015(party, console): # Friendly Reaver Clan
+    pass
+
+
+def e016(console): # Magician's Home
+    pass
+
+
+def e017(party, console): # Peasant Mob in Hot Pursuit
+    pass
+
+
+def e018(party, console): # Priest
+    pass
+
+
+def e019(party, console): # Hermit Monk
+    pass
+
+
+def e020(party, console): # Travelling Monk
+    pass
+
+
+def e021(party, console): # Warrior Monks
+    pass
+
+
+def e022(party, console): # Random Monks
+    random_monks_roll = randint(1,3)
+    if random_monks_roll == 1:
+        e019(party, console)
+    elif random_monks_roll == 2:
+        e020(party, console)
+    elif random_monks_roll == 3:
+        e021(party, console)
+
+
+def e023(party, console): # Wizard
+    pass
+
+
+def e024(party, console): # Wizard Mind-Control Attack
+    pass
+
+
+def e025(party, console): # Wizard Advice
+    pass
+
+
+def e026(party, console): # Search For Treasure
+    pass
+
+
+def e027(party, console): # Ancient Treasure
+    pass
+
+
+def e028(party, console): # Cave Tombs
+    pass
+
+
+def e029(party, console): # Danger and Treasure
+    pass
+
+
+def e030(party, console): # Mummies
+    pass
+
+
+def e031(party, console): # Looted Tomb
+    pass
+
+
 def e032(party, console): # Ghosts
     num_ghosts = randint(1,6) + 1
     ghost_party = []
@@ -107,6 +229,10 @@ def e035(party, player_hex, console): # Spell of Chaos
             player_hex = game_actions.move(random_move, player_hex, hexagon_dict, console)
             game_actions.starvation(party[0], party, console)
             days_mindless += 1
+
+
+def e036(party, console): # Golem at the Gate
+    pass
 
 
 def e037(party, console): # Broken Chest
@@ -300,6 +426,18 @@ def e047(party, console): # Mirror of Reversal
     # game_actions.combat(party, evil_twin), any followers accidentally strike you on d6 5+, if you win, gain wits += 1 and all wealth and possessions
 
 
+def e048(party, console): # Fugitive
+    pass
+
+
+def e049(party, console): # Travelling Minstrel
+    pass
+
+
+def e050(console): # Local Constabulary
+    pass
+
+
 # Not fully implemented, need to loot after battle.  Maybe in combat function?
 def e051(party, console): # Bandits
     num_bandits = len(party) + 2
@@ -378,6 +516,102 @@ def e057(party, console): # Troll
         party[0].add_item('troll stone-skin')
 
 
+def e058(party, console): # Band of Dwarves
+    pass
+
+
+def e059(party, console): # Dwarf Mines
+    pass
+
+
+def e060(party, console): # Arrested
+    pass
+
+
+def e061(party, console): # Marked For Death (Arrested)
+    pass
+
+
+def e062(party, console): # Thrown in the Dungeon (Arrested)
+    pass
+
+
+def e063(party, console): # Imprisoned (Arrested)
+    pass
+
+
+def e064(party, console): # Hidden Ruins
+    pass
+
+
+def e065(party, console): # Hidden Town
+    pass
+
+
+def e066(party, console): # Secret Temple
+    pass
+
+
+def e067(party, console): # Abandoned Mines
+    pass
+
+
+def e068(party, console): # Wizard's Abode
+    pass
+
+
+def e069(party, console): # Wounded Warrior
+    pass
+
+
+def e070(party, console): # Halfling Town
+    pass
+
+
+def e071(party, console): # Elven Band
+    pass
+
+
+def e072(party, console): # Following an Elven Band
+    pass
+
+
+def e073(party, console): # Witch
+    pass
+
+
+def e074(party, console): # Giant Spiders
+    pass
+
+
+def e075(party, console): # Pack of Wolves
+    pass
+
+
+def e076(party, console): # Great Hunting Cat
+    pass
+
+
+def e077(party, console): # Herd of Wild Horses
+    pass
+
+
+def e078(party, console): # Bad Going
+    pass
+
+
+def e079(party, console): # Heavy Rains
+    pass
+
+
+def e080(party, console): # Pixies
+    pass
+
+
+def e081(party, console): # Mounted Patrol
+    pass
+
+
 def e082(party, console): # Spectre
     console.display_message('An unearthly spectre from the astral plane appears in the midst of your party, casting a hideous miasma in all directions.')
     target = choice(party)
@@ -388,6 +622,66 @@ def e082(party, console): # Spectre
     elif target.heir:
         target.alive = False
     '''However, a spectre is a magical being, and can be stopped using any possession that protects against magic attacks or injury.'''
+
+
+def e083(party, console): # Wild Boar Charge
+    pass
+
+
+def e084(party, console): # Bear Comes to Dinner
+    pass
+
+
+def e085(party, console): # Narrow Ledges
+    pass
+
+
+def e086(party, console): # High Pass
+    pass
+
+
+def e087(party, console): # Impassable Woods
+    pass
+
+
+def e088(party, console): # Rock Fall
+    pass
+
+
+def e089(party, console): # Impassable Morass
+    pass
+
+
+def e090(party, console): # Quicksand
+    pass
+
+
+def e091(party, console): # Poison Snake
+    pass
+
+
+def e092(party, console): # Flood
+    pass
+
+
+def e093(party, console): # Poison Plants
+    pass
+
+
+def e094(party, console): # Crocodiles
+    pass
+
+
+def e095(party, console): # Mounts at Risk
+    pass
+
+
+def e096(party, console): # Mounts Die
+    pass
+
+
+def e097(party, console): # Marsh Gas and Rot
+    pass
 
 
 def e098(party, console): # Dragon
@@ -421,6 +715,148 @@ die roll evade fight
     '''Note: if you kill the Dragon, the Dragon's eye is greatly valued by high priests of the temples throughout the
 land, and may be of assistance in gaining an audience. Carrying the Dragon's eye counts as one load for
 transport purposes (r206).'''
+
+
+def e099(party, console): # Roc
+    pass
+
+
+def e100(party, console): # Griffon
+    pass
+
+
+def e101(party, console): # Harpy
+    pass
+
+
+def e102(party, console): # Light Rainstorm (Flying)
+    pass
+
+
+def e103(party, console): # Bad Headwinds (Flying)
+    pass
+
+
+def e104(party, console): # Good Tailwinds (Flying)
+    pass
+
+
+def e105(party, console): # Storm Clouds Ahead (Flying)
+    pass
+
+
+def e106(party, console): # Heavy Overcast (Flying)
+    pass
+
+
+def e107(party, console): # Falcon Scout (Flying)
+    pass
+
+
+def e108(party, console): # Hawkmen Attack (Flying)
+    pass
+
+
+def e109(party, console): # Wild Pegasus (Flying)
+    pass
+
+
+def e110(party, console): # Air Spirit (Flying)
+    pass
+
+
+def e111(party, console): # Storm Demon (Flying)
+    pass
+
+
+def e112(party, console): # Meet Eagle Clan (Flying)
+    pass
+
+
+def e113(party, console): # Eagle Ambush (Flying)
+    pass
+
+
+def e114(party, console): # Eagle Hunt (Flying)
+    pass
+
+
+def e115(party, console): # Eagle Lair (Flying)
+    pass
+
+
+def e116(party, console): # Eagle Help (Flying)
+    pass
+
+
+def e117(party, console): # Eagle Allies (Flying)
+    pass
+
+
+def e118(party, console): # Giant
+    pass
+
+
+def e119(party, console): # Flash Flood
+    pass
+
+
+def e120(party, console): # Exhaustion
+    pass
+
+
+def e121(party, console): # Sunstroke
+    pass
+
+
+def e122(party, console): # Raftsmen
+    pass
+
+
+def e123(party, console): # Knight at the Bridge
+    pass
+
+
+def e124(party, console): # Raft
+    pass
+
+
+def e125(party, console): # Raft Overturns
+    pass
+
+
+def e126(party, console): # Raft Caught in Current
+    pass
+
+
+def e127(party, console): # Raft in Rough Water
+    pass
+
+
+def e128(party, console): # Merchant
+    pass
+
+
+def e129(console): # Merchant Caravan
+    console.display_message('You meet a merchant caravan camped for the night. You may halt for the day with them to talk and trade, or you can ignore them and end if this event.')
+    caravan_roll = randint(1,6) + randint(1,6)
+    merchant_caravan = {2  :'Learn unique secrets from various caravan members, see el62',
+                        3  :'Learn of a monastery in this hex, if you go to look see e022.',
+                        4  :'Merchants have anti-poison talisman/amulet for sale for 25 gold, for details of its use sec el 87.',
+                        5  :'Merchants noticed farms in this hex, if you go to look sec e009.',
+                        6  :'Meet an independent merchant in the caravan, see e128.',
+                        7  :'Caravan guards become hostile, you must flee the hex, see escape r218.',
+                        8  :'Caravan healer has potions for sale, 6 gold each, for use see e180.',
+                        9  :'Caravan has up to six spare horses for sale, 7 gold pieces each.',
+                        10 :'Caravan has coffle of slaves for sale, see e163.',
+                        11 :'Talk with caravan guards give you hints to a treasure, see e147.',
+                        12 :'Caravan passed a nearby ruin yesterday, roll one die for which adjacent hex contains the ruins (1-N,2-NE, 3-SE, 4-S, 5-SW, 6-NW).'}
+    caravan_result = merchant_caravan[caravan_roll]
+    console.display_message(f'{caravan_result}')
+
+
+def e130(party, console): # Meet a High Lord
+    pass
 
 
 def e131(console): # Empty Ruins
@@ -561,6 +997,7 @@ def e138(party, console): # Unclean
     elif unclean_event == 'e098': # Dragon
         e098(party, console)  
 
+
 def e139(party, console): # Minor Treasures
     minor_treasures = {1:25, 2:60, 3:'e038', 4:'e039', 5:'e040', 6:'e140'}
     minor_treasure_roll = randint(1,6)
@@ -595,6 +1032,14 @@ def e140(party, console): # Magic Box
     pass
 
 
+def e141(party, console): # Hydra's Teeth
+    pass
+
+
+def e142(party, console): # Gems
+    pass
+
+
 # Not yet fully implemented
 def e143(party, console): # Secret of the Temples
     console.display_message('You learn the secret of all temple priests - for the Chaga drug. This is available in any town where you buy food, for 2 gold pieces a serving.')
@@ -625,4 +1070,161 @@ def e147(party, console): # Clue to Treasure
     pass
 
 
-events_dict = {'e002': e002}
+def e148(party, console): # Seneschal Requires Bribe
+    pass
+
+
+def e149(party, console): # Must Learn Court Manners
+    pass
+
+
+def e150(party, console): # Pay Your Respects
+    pass
+
+
+def e151(party, console): # Find Favor
+    pass
+
+
+def e152(party, console): # Noble Ally
+    pass
+
+
+def e153(party, console): # Master of the Household
+    pass
+
+
+def e154(party, console): # Meet Lord's Daughter
+    pass
+
+
+def e155(party, console): # Audience with High Priest
+    pass
+
+
+def e156(party, console): # Audience with Town Mayor
+    pass
+
+
+def e157(party, console): # Letter of Recommendation
+    pass
+
+
+def e158(party, console): # Hostile Guards
+    pass
+
+
+def e159(party, console): # Must Purify Yourself
+    pass
+
+
+def e160(party, console): # Audience with Lady Aeravir
+    pass
+
+
+def e161(party, console): # Audience with Count Drogat
+    pass
+
+
+def e162(party, console): # Learn Secrets
+    pass
+
+
+def e163(party, console): # Slave Market
+    pass
+
+
+def e164(party, console): # Giant Lizard (Godzilla)
+    pass
+
+
+def e165(party, console): # Hidden Elven Town
+    pass
+
+
+def e166(party, console): # Hidden Elven Fortress
+    pass
+
+
+### Items ###
+
+def e180(party, console): # Healing Potion
+    pass
+
+
+def e181(party, console): # Cure Poison Vial
+    pass
+
+
+def e182(party, console): # Gift of Charm
+    pass
+
+
+def e183(party, console): # Endurance Sash
+    pass
+
+
+def e184(party, console): # Resistance Talisman
+    pass
+
+
+def e185(party, console): # Poison Drug
+    pass
+
+
+def e186(party, console): # Magic Sword
+    pass
+
+
+def e187(party, console): # Anti-Poison Amulet
+    pass
+
+
+def e188(party, console): # Pegasus Mount
+    pass
+
+
+def e189(party, console): # Charisma Talisman
+    pass
+
+
+def e190(party, console): # Nerve Gas Bomb
+    pass
+
+
+def e191(party, console): # Resistance Ring
+    pass
+
+
+def e192(party, console): # Resurrection Necklace
+    pass
+
+
+def e193(party, console): # Shield of Light
+    pass
+
+
+def e194(party, console): # Royal Helm of the Northlands
+    pass
+
+
+def e195(party, console): # Random Items Reference
+    random_item_roll = randint(1,6) + randint(1,6)
+    random_items = {2 : e191(),
+                    3 : e186(),
+                    4 : e182(),
+                    5 : e184(),
+                    6 : e181(),
+                    7 : e180(),
+                    8 : e185(),
+                    9 : e193(),
+                    10: e183(), 
+                    11: e189(), 
+                    12: e192()}
+    random_item_result = random_items[random_item_roll]
+    return random_item_result
+
+
+
+
+

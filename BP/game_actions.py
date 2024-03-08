@@ -620,7 +620,8 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
             party[0].hiring_bonus[player_hex] = 1
     
     elif gather_info_roll == 6:
-        console.display_message('A large caravan is in town.  If you wish to visit them today, see event e129.')
+        console.display_message('A large caravan is in town.  You may visit them today, if you wish.')
+        events.e129(console)
     
     elif gather_info_roll == 7:
         console.display_message('Discover cheaper lodgings and food, pay half the normal price here.')
@@ -630,10 +631,12 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
         party[0].gold //= 2
     
     elif gather_info_roll == 9:
-        console.display_message('You attract the attention of the local constabulary, see event e050.')
+        console.display_message('You attract the attention of the local constabulary.')
+        events.e050(console)
     
     elif gather_info_roll == 10:
-        console.display_message('You discover the residence of a local magician, see event e016.')
+        console.display_message('You discover the residence of a local magician.')
+        events.e016(console)
     
     elif gather_info_roll == 11:
         console.display_message("You discover the local thieves' guild and are 'invited' to join.  If you do, you participate in a theft tonight and then flee the hex.  If you pay the guild their cut, you may return to this hex in the future. ")
@@ -641,7 +644,10 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
     
     elif gather_info_roll >= 12:
         console.display_message('A secret informant offers you valuable information for 10 gold.')
-        secret_info = choice(['bogus secrets that prove worthless', 'event e147', 'event e143', 'event e144', 'event e145', 'event e146'])
+        if party[0].gold >= 10:
+            party[0].gold -= 10
+            secret_info = choice(['bogus secrets that prove worthless', 'event e147', 'event e143', 'event e144', 'event e145', 'event e146'])
+            console.display_message(f'The informant reveals {secret_info} before slipping away into the crowds.')
 
 
 def hire_followers(party, player_hex, console): #town or castle
