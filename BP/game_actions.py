@@ -700,76 +700,172 @@ def hire_followers(party, player_hex, console): #town or castle
         party.append(guide)
 
 
-def seek_audience(party, player_hex, console): #town, temple, or castle
-    pass
-    # if current_hex_key in (101, 109, 216, 419, 422, 719, 916, 1004, 1009, 1415, 1501, 1720):
-	# 	audience_town = d6(2)
-	# 	if audience_town == 2:
-	# 		# 2 Grievously insult the town council, e062.
-	# 		# 3 A slanderous aside about the mayor's wife is blamed on you, e060.
-	# 		# 4 Meet hostile guards, e158.
-	# 		# 5 Encounter the Master of the Household, e153.
-	# 		# 6,7,8 Audience refused today, you may try again.
-	# 		# 9,10 Audience permitted, el56.
-	# 		# 11 Meet daughter of the mayor, e154.
-	# 		# 12 Audience permitted, e156.
+def seek_audience(party, player_hex, console, temples, towns, castles): #town, temple, or castle
+    if player_hex in towns:
+        town_audience_roll = randint(1,6) + randint(1,6)
+        if town_audience_roll == 2:
+            console.display_message('You have greviously insulted the town council!')
+            events.e062(party, console)
+        elif town_audience_roll == 3:
+            console.display_message("A slanderous aside about the mayor's wife is blamed on you.")
+            events.e062(party, console)
+        elif town_audience_roll == 4:
+            console.display_message('You are confronted by hostile guards.')
+            events.e158(party, console)
+        elif town_audience_roll == 5:
+            console.display_message('You meet the Master of the Household.')
+            events.e153(party, console)
+        elif town_audience_roll in [6, 7, 8]:
+            console.display_message('Audience refused today.')
+        elif town_audience_roll in [9, 10, 12]:
+            console.display_message('You are permitted audience with the Town Mayor.')
+            events.e156(party, console)
+        elif town_audience_roll == 11:
+            console.display_events('You meet the daughter of the mayor.')
+            events.e154(party, console)
 
-	# if current_hex_key in (711, 1021, 1309, 1805, 2018):
-	# 	audience_temple = d6(2)
-	# 	if audience_temple == 2:
-	# 		# 2 Anger temple guards, e063.
-	# 		# 3 Priestess resents a lewd remark, e060.
-	# 		# 4 Encounter hostile guards, e158.
-	# 		# 5 Audience refused today, you may try again.
-	# 		# 6 Must purify yourself, e159
-	# 		# 7 Audience refused today, you may try again.
-	# 		# 8 Allowed audience if you give temple a Dragon's eye, go to e155; otherwise you must deal with the Master of the Household, e153.
-	# 		# 9 Permitted to pay your respects, e250
-	# 		# 10 You must purify yourself, e159.
-	# 		# 11+ Audience permitted, e155
+    if player_hex in temples:
+        temple_audience_roll = randint(1,6) + randint(1,6)
+        if temple_audience_roll == 2:
+            console.display_message('You anger the temple guards!')
+            events.e063(party, console)
+        elif temple_audience_roll == 3:
+            console.display_message('A priestess resents a lewd remark.')
+            events.e060(party, console)
+        elif temple_audience_roll == 4:
+            console.display_message('You are confronted by hostile guards.')
+            events.e158(party, console)
+        elif temple_audience_roll in [5, 7]:
+            console.display_message('Audience refused today.')
+        elif temple_audience_roll in [6, 10]:
+            console.display_message('You must purify yourself.')
+            events.e159(party, console)
+        elif temple_audience_roll == 8:
+            if 'dragon eye' in party[0].possessions:
+                console.display_message('Your gift of a Dragon eye permits audience.')
+                party[0].possessions.remove('dragon eye')
+            else:
+                console.display_message('You meet the Master of the Household.')
+                events.e153(party, console)
+        elif temple_audience_roll == 9:
+            console.display_message('You are invited to pay your respects.')
+            events.e150(party, console)
+        elif temple_audience_roll >= 11:
+            console.display_message('You are permitted audience with the High Priest.')
+            events.e155(party, console)
 
-	# if current_hex_key == 323:
-	# 	audience_drogat = d6(2)
-	# 	if audience_drogat == 2:
-	# 		# 2 You are the Count's next victim; see e061.
-	# 		# 3 The Captain of the Guard dislikes your haircut; see e062.
-	# 		# 4 Meet the daughter of the Count, e154.
-	# 		# 5 Encounter the Master of the Household, e153.
-	# 		# 6 Confronted by hostile guards, e158.
-	# 		# 7 Gain an audience (e161) if you give the Roc's Beak to the Doorman; otherwise you are deemed unworthy and unwise, and are arrested (e060).
-	# 		# 8 Seneschal requires a bribe, e148.
-	# 		# 9 Must learn court manners, e149.
-	# 		# 10 Find favour in the eyes of the Count, e151.
-	# 		# 11+ Audience granted with Count, e161.
+    if player_hex in castles:
+        if player_hex == (3,23):
+            if castles[player_hex][2]:
+                drogat_audience_roll = randint(1,6) + randint(1,6)
+                if drogat_audience_roll == 2:
+                    console.display_message("You are the Count's next victim!")
+                    events.e061(party, console)
+                elif drogat_audience_roll == 3:
+                    console.display_message('The Captain of the Guard dislikes your haircut.')
+                    events.e062(party, console)
+                elif drogat_audience_roll == 4:
+                    console.display_message('You meet the daughter of the Count.')
+                    events.e154(party, console)
+                elif drogat_audience_roll == 5:
+                    console.display_message('You meet the Master of the Household.')
+                    events.e153(party, console)
+                elif drogat_audience_roll == 6:
+                    console.display_message('You are confronted by hostile guards.')
+                    events.e158(party, console)
+                elif drogat_audience_roll == 7:
+                    if 'roc beak' in party[0].possessions:
+                        console.display_message('Your gift of a Roc beak permits audience.')
+                        party[0].possessions.remove('roc beak')
+                        events.e161(party, console)
+                    else:
+                        console.display_message('The Doorman deems you unworthy and unwise; and has you arrested!')
+                        events.e060(party, console)
+                elif drogat_audience_roll == 8:
+                    console.display_message('The Seneschal requires a bribe.')
+                    events.e148(party, console)
+                elif drogat_audience_roll == 9:
+                    console.display_message('You must learn court manners.')
+                    events.e149(party, console)
+                elif drogat_audience_roll == 10:
+                    console.display_message('You find favor in the eyes of the Count.')
+                    events.e151(party, console)
+                elif drogat_audience_roll >= 11:
+                    console.display_message('You are granted audience with the Count.')
+                    events.e161(party, console)
 
-	# if current_hex_key == 1212:
-	# 	audience_huldra = d6(2)
-	# 	if audience_huldra == 2:
-	# 		# 2 Audience permanently refused, cannot try again.
-	# 		# 3 Meet Baron's Daughter, e154.
-	# 		# 4 Must learn court manners, e149.
-	# 		# 5 Confronted by hostile guards, e158.
-	# 		# 6,7 Audience refused today, you may try again.
-	# 		# 8 Encounter the Master of the Household, e153.
-	# 		# 9 Seneschal requires a bribe, e148.
-	# 		# 10,11 Pay your respects to the Baron, e150.
-	# 		# 12 Find favour in the eyes of the Baron, e151.
-	# 		# 13+ Baron becomes your Noble ally, e152.
-
-	# if current_hex_key == 1923:
-	# 	audience_aeravir = d6(2)
-	# 	if audience_aeravir == 2:
-	# 		# 2 You insult the Lady's dignity, arrested e060.
-	# 		# 3 You must purify yourself first, e159.
-	# 		# 4 Untoward remark makes the guards hostile, e158.
-	# 		# 5 Must learn better court manners, e149.
-	# 		# 6 Meet the Master of the Household, e153.
-	# 		# 7 Gain an audience (e160) if you give the Griffon's Claw, otherwise audience refused but you may try again.
-	# 		# 8 Audience refused, but you may try again.
-	# 		# 9 Seneschal requires a bribe, e148.
-	# 		# 10 Audience granted, e160.
-	# 		# 11 Meet daughter of the Lady Aeravir, e154.
-	# 		# 12+ Audience granted, e160.
+        if player_hex == (12,12) or castles[player_hex][0] == 'Dwarf Mines':
+            if castles[player_hex][2]:
+                huldra_audience_roll = randint(1,6) + randint(1,6)
+                if huldra_audience_roll == 2:
+                    console.display_message('Audience permanently refused.  You may never try again.')
+                    castles[player_hex][2] = False
+                elif huldra_audience_roll == 3:
+                    console.display_message('You meet the daughter of the Baron.')
+                    events.e154(party, console)
+                elif huldra_audience_roll == 4:
+                    console.display_message('You must learn court manners.')
+                    events.e149(party, console)
+                elif huldra_audience_roll == 5:
+                    console.display_message('You are confronted by hostile guards.')
+                    events.e158(party, console)
+                elif huldra_audience_roll in [6, 7]:
+                    console.display_message('Audience refused today.')
+                elif huldra_audience_roll == 8:
+                    console.display_message('You meet the Master of the Household.')
+                    events.e153(party, console)
+                elif huldra_audience_roll == 9:
+                    console.display_message('The Seneschal requires a bribe.')
+                    events.e148(party, console)
+                elif huldra_audience_roll in [10, 11]:
+                    console.display_message('You are invited to pay your respects to the Baron.')
+                    events.e150(party, console)
+                elif huldra_audience_roll == 12:
+                    console.display_message('You find favor in the eyes of the Baron.')
+                    events.e151(party, console)
+                elif huldra_audience_roll >= 13:
+                    console.display_message('The Baron becomes your Noble ally!')
+                    events.e152(party, console)
+            
+        if player_hex == (19,23):
+            if castles[player_hex][2]:
+                aeravir_audience_roll = randint(1,6) + randint(1,6)
+                if aeravir_audience_roll == 2:
+                    console.display_message("You insult the Lady's dignity, and are arrested.")
+                    events.e060(party, console)
+                elif aeravir_audience_roll == 3:
+                    console.display_message('You must purify yourself.')
+                    events.e159(party, console)
+                elif aeravir_audience_roll == 4:
+                    console.display_message('An untoward remark makes the guards hostile.')
+                    events.e158(party, console)
+                elif aeravir_audience_roll == 5:
+                    console.display_message('You must learn court manners.')
+                    events.e149(party, console)
+                elif aeravir_audience_roll == 6:
+                    console.display_message('You meet the Master of the Household.')
+                    events.e153(party, console)
+                elif aeravir_audience_roll == 7:
+                    if 'griffon claw' in party[0].possessions:
+                        console.display_message('Your gift of a Griffon claw permits audience.')
+                        party[0].possessions.remove('griffon claw')
+                        events.e160(party, console)
+                    else:
+                        console.display_message('Audience refused today.')
+                elif aeravir_audience_roll == 8:
+                    console.display_message('Audience refused today.')
+                elif aeravir_audience_roll == 9:
+                    console.display_message('The Seneschal requires a bribe.')
+                    events.e148(party, console)
+                elif aeravir_audience_roll == 10:
+                    console.display_message('You are granted audience with the Lady.')
+                    events.e160(party, console)
+                elif aeravir_audience_roll == 11:
+                    console.display_message('You meet the daughter of Lady Aeravir.')
+                    events.e154(party, console)
+                elif aeravir_audience_roll >= 12:
+                    console.display_message('You are granted audience with the Lady.')
+                    events.e160(party, console)
 
 
 def make_offering(party, player_hex, console): #temple
@@ -830,7 +926,7 @@ def search_ruins(party, player_hex, console): #ruins
     ruin_event = ruin_results[ruin_search_roll]
     console.display_message(f'Your search of the ruins has uncovered {ruin_event[1]}!')
     if ruin_event[0] == 'e131':
-        events.e131(console)
+        events.e131(party, console)
     elif ruin_event[0] == 'e132':
         events.e132(party, player_hex, console)
     elif ruin_event[0] == 'e133':

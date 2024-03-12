@@ -82,9 +82,9 @@ towns = {(1,1):['Ogon', (pygame.Rect(0, 240, 80, 80))],
          (15,1):['Weshor', (pygame.Rect(0, 320, 80, 80))],
          (14,15):['Tulith', (pygame.Rect(0, 240, 80, 80))],
          (17,20):['Lullwyn', (pygame.Rect(0, 240, 80, 80))]}
-castles = {(3,23):['Drogat Castle', (pygame.Rect(0, 400, 80, 80))],
-           (12,12):['Huldra Castle', (pygame.Rect(0, 400, 80, 80))],
-           (19,23):['Aeravir Castle', (pygame.Rect(0, 400, 80, 80))]}
+castles = {(3,23):['Drogat Castle', (pygame.Rect(0, 400, 80, 80)), True],
+           (12,12):['Huldra Castle', (pygame.Rect(0, 400, 80, 80)), True],
+           (19,23):['Aeravir Castle', (pygame.Rect(0, 400, 80, 80)), True]}
 temples = {(7,11):["Branwyn's Temple", (pygame.Rect(80, 320, 80, 80))],
            (10,21):['Sulwyth Temple', (pygame.Rect(80, 80, 80, 80))],
            (13,9):["Donat's Temple", (pygame.Rect(80, 240, 80, 80))],
@@ -291,12 +291,17 @@ class Gameplay(BaseState):
                 num_foes = 4
                 foes = []
                 for _ in range(num_foes):
-                    foes.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=1))
+                    foes.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=4))
                 game_actions.combat(self.party, foes, self.console)
-            if event.key == pygame.K_9:
+            if event.key == pygame.K_8:
                 self.party[0].gold += 50
+            if event.key == pygame.K_9:
+                for char in self.party:
+                    char.mounted = True
+                    char.flying = False
             if event.key == pygame.K_0:
                 for char in self.party:
+                    char.mounted = False
                     char.flying = True
         
         player_input = self.console.handle_input(event)
@@ -624,7 +629,7 @@ class Gameplay(BaseState):
                 ### morning ###
                 daily_action_done = self.choose_daily_action(player_input)
 
-            if daily_action_done:
+            if daily_action_done and self.player.alive:
                 ### afternoon ###
                 game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, self.hunt_bonus)
 
@@ -674,7 +679,7 @@ class Gameplay(BaseState):
         
         if player_input == 'p':
             if any(self.player_hex in key for key in [temples, towns, castles]):
-                game_actions.seek_audience(self.party, self.player_hex, self.console)
+                game_actions.seek_audience(self.party, self.player_hex, self.console, temples, towns, castles)
                 return True
             return False
         

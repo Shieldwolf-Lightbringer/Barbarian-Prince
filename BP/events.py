@@ -72,7 +72,7 @@ def e015(party, console): # Friendly Reaver Clan
     pass
 
 
-def e016(console): # Magician's Home
+def e016(party, console): # Magician's Home
     pass
 
 
@@ -434,7 +434,7 @@ def e049(party, console): # Travelling Minstrel
     pass
 
 
-def e050(console): # Local Constabulary
+def e050(party, console): # Local Constabulary
     pass
 
 
@@ -513,7 +513,7 @@ def e057(party, console): # Troll
     if game_actions.combat(party, troll_party, console, has_first_strike=first_strike):
 
         console.display_message('With the troll dead, you harvest its stone-skin as a valuable item. Whenever you have an opportunity to buy food at a town, castle, temple, or from merchants you can sell the skin for 50 gold. It is also known that Count Drogat, of Drogat Castle, will treasure the gift should you manage to get a personal audience with him.')
-        party[0].add_item('troll stone-skin')
+        party[0].add_item('trollskin')
 
 
 def e058(party, console): # Band of Dwarves
@@ -818,26 +818,45 @@ def e123(party, console): # Knight at the Bridge
 
 
 def e124(party, console): # Raft
+    console.display_message('')
     pass
 
 
 def e125(party, console): # Raft Overturns
+    console.display_message('')
     pass
 
 
 def e126(party, console): # Raft Caught in Current
+    console.display_message('')
     pass
 
 
 def e127(party, console): # Raft in Rough Water
+    console.display_message('')
     pass
 
-
+# Not fully implemented
 def e128(party, console): # Merchant
-    pass
+    console.display_message('You meet a friendly merchant. You can either pass by and ignore him, ending this encounter, or you can stop to chat and barter')
+    merchant_roll = randint(1,6) + randint(1,6)
+    merchant = {2  : 'Merchant has pegasus mount for sale, 50 gold.',
+                3  : 'Merchant mentions cave tombs in this hex, if you go to look, see e028',
+                4  : 'Merchant has cure-poison vials for sale, each costs 10 gold (see e181 for details of its use).',
+                5  : 'Merchant mentions a farm nearby in this hex, if you investigate see e009',
+                6  : 'Merchant has food for store, 1 gold per 2 food units, up to a maximum of eight (8) units may be purchased',
+                7  : 'Merchant may outwit you, roll one die, if it exceeds your wit & wiles you spend 10 gold needlessly (or all your money, if you have less)',
+                8  : 'Merchant has healing potions for sale, each costs 5 gold (see e180 for use)',
+                9  : 'Merchant has two horses for sale, 6 gold pieces each',
+                10 : 'Merchant has coffle of slaves for sale, see e163',
+                11 : 'Merchant provides some final clues about a treasure, see e147.',
+                12 : 'Learn unique secrets from the merchant, see e162.'}
+    merchant_result = merchant[merchant_roll]
+    console.display_message(f'{merchant_result}')
 
 
-def e129(console): # Merchant Caravan
+# Not fully implemented
+def e129(party, console): # Merchant Caravan
     console.display_message('You meet a merchant caravan camped for the night. You may halt for the day with them to talk and trade, or you can ignore them and end if this event.')
     caravan_roll = randint(1,6) + randint(1,6)
     merchant_caravan = {2  :'Learn unique secrets from various caravan members, see el62',
@@ -859,7 +878,7 @@ def e130(party, console): # Meet a High Lord
     pass
 
 
-def e131(console): # Empty Ruins
+def e131(party, console): # Empty Ruins
     console.display_message('You spend the entire day fruitlessly searching the ruins, and find nothing.')
 
 
@@ -978,7 +997,7 @@ def e137(party, console): # Inhabitants
         e082(party, console)    
 
 
-# Not yet fully implemented
+# Not yet fully implemented, need to be able to search again if desired after surviving encounter
 def e138(party, console): # Unclean
     console.display_message('The ruins are unclean, and have horrible, gruesome creatures populating them!')
     unclean_roll = randint(1,6)
@@ -1026,18 +1045,65 @@ def e139(party, console): # Minor Treasures
         e140(party, console)
 
 
-# Not yet fully implemented
+# Not yet fully implemented, need to be able to carry it UNTIL party contains appropriate character
 def e140(party, console): # Magic Box
     console.display_message('You find a magic box!')
-    pass
+    caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
+    if caster_in_party:
+        caster_character = [character for character in party if character.magician or character.wizard or character.witch]
+        if caster_character:
+            caster_companion = choice(caster_character)
+            console.display_message(f'{caster_companion.name} knows the secrets to the box and is able to open it for you to examine the contents.')
+            magic_box_roll = randint(1,6)
+            if magic_box_roll == 1:
+                e141(party, console)
+            elif magic_box_roll == 2:
+                e142(party, console)
+            elif magic_box_roll == 3:
+                gold, item = game_actions.roll_treasure(60)
+                party[0].gold += gold
+                console.display_message(f'You find {gold} gold!')
+                if item:
+                    party[0].add_item(item)
+                    console.display_message(f'You find a {item}!')
+            elif magic_box_roll == 4:
+                gold, item = game_actions.roll_treasure(110)
+                party[0].gold += gold
+                console.display_message(f'You find {gold} gold!')
+                if item:
+                    party[0].add_item(item)
+                    console.display_message(f'You find a {item}!')
+            elif magic_box_roll == 5:
+                e195(party, console)
+            elif magic_box_roll == 6:
+                console.display_message('The box contains nothing but rubbish.')
 
 
+# Not yet fully implemented
 def e141(party, console): # Hydra's Teeth
-    pass
+    hydra_teeth_quantity = randint(1,6) + randint(1,6)
+    console.display_message(f'You find {hydra_teeth_quantity} hydra teeth.')
+    '''The magician/ wizard/witch explains that whenever you
+scatter these teeth on the ground, that number of undead warriors will rise and fight in your party for one
+combat (r220) at your command. These undead teeth-warriors are combat skill 5, endurance 4, and wealth 0.
+They will only last for that combat, and then disappear. However, you can scatter the teeth at any instant to use
+them that one time, including at the start or during any combat.'''
 
 
 def e142(party, console): # Gems
-    pass
+    console.display_message('The box contains a horde of gems!')
+    gold1, item1 = game_actions.roll_treasure(100)
+    gold2, item2 = game_actions.roll_treasure(100)
+    party[0].gold += gold1, gold2
+    console.display_message(f'The gems are worth {gold1 + gold2} gold!')
+    caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
+    if caster_in_party:
+        caster_character = [character for character in party if character.magician or character.wizard or character.witch]
+        if caster_character:
+            caster_companion = choice(caster_character)
+            console.display_message(f'{caster_companion.name} tells you that one of the gems is a Vision Gem and encourages you to peer into it.')
+            e041(party, console)
+
 
 
 # Not yet fully implemented
@@ -1115,19 +1181,83 @@ def e158(party, console): # Hostile Guards
 
 
 def e159(party, console): # Must Purify Yourself
+    console.display_message('')
     pass
 
 
 def e160(party, console): # Audience with Lady Aeravir
-    pass
+    console.display_message('You are allowed a semi-private interview with the ruler of Aeravir Castle.')
+    aeravir_roll = randint(1,6)
+    aeravir_interview_results = '''
+1
+she listens graciously, but has no interest in Northlands problems, you cannot seek another
+audience with her, and this results in nothing.
+2
+she listens but seems distracted, audience ends without result, and you cannot seek an audience
+again some other day.
+3
+she takes pity on you, and gives you a gift of wealth 60 to help in your quest, but decrees that you
+cannot seek another audience with her.
+4
+she finds you favourably endowed with virtue. You and your entire party can eat (r215) and lodge
+(r217) at her castle for as long as you wish, whenever you wish. In addition, she provides you with a
+gift of wealth 110 to help you on your quest. However, you cannot seek another audience with her.
+5
+she has seductive charms; roll one die for the number of days that pass before you come to your
+senses again! After the time track is advanced, roll one die on this table again to see what the Lady
+thinks. Meantime, your entire party has been living in the castle, but any true love (r228) has
+deserted in despair, and you cannot roll for her return until after you leave this hex.
+6
+the Lady decides to support your cause fully. She gives you one die roll times 150 in gold, and an
+escort of three stalwart knights, each of which is combat skill 7, endurance 6, mounts for your entire
+party, and one spare pack-horse. Tonight she will hold a grand feast for you and all your party,
+providing food (r215) and lodging (r217) free. If any party members have wounds, her healers will
+cure all wounds tonight as well, even poisoned wounds.
+'''
 
 
 def e161(party, console): # Audience with Count Drogat
-    pass
+    console.display_message('You are allowed a semi-private interview with the ruler of Drogat Castle.')
+    drogat_roll = randint(1,6)
+    if 'trollskin' in party[0].possessions:
+        drogat_roll += 1
+        party[0].possessions.remove('trollskin')
+    drogat_interview_results = '''
+1 Count's eyes glow like red coals - you are his next victim, see e061!
+2
+Count listens with half an ear, audience ends with no result, but you can seek another audience
+some other day.
+3
+Count is in a humorous mood, gives you flippant advice and sends you forth. You must leave Drogat
+Castle tomorrow, and are advised to never seek an audience with the Count again unless you carry
+a Letter of Recommendation.
+4
+Count takes an interest in your situation, and provides you with 100 gold and a treasure worth wealth
+110 to further your cause.
+5
+ if you have killed (personally) at least five men or creatures the Count takes an interest in you.
+Otherwise you are dismissed, and cannot seek an audience again with the Count until you have
+killed five. If the Count takes an interest, he will go so far as to provide 500 gold, a treasure of wealth
+110, and two winged pegasus mounts. You are advised to never seek an audience with the Count
+again, since he is in one of his rare good moods.
+6
+the Count listens to your story with interest. Upon leaning the names of the northern usurpers he
+declares that they were the very ones who did him ill deeds many years ago. He immediately rallies
+his army to your cause, and uses his powerful magic to transport you, your party, him, and his army
+to the Northland capital to retake your throne. You immediately win.'''
 
 
 def e162(party, console): # Learn Secrets
-    pass
+    console.display_message('You finally accumulate enough hints and bits of unrelated information to learn of the important secrets of this region.')
+    secrets_roll = randint(1,6)
+    region_secrets = {1: e143(party, console),
+                       2: e143(party, console),
+                       3: e144(party, console),
+                       4: e144(party, console),
+                       5: e145(party, console),
+                       6: e146(party, console)}
+    secret_learned = region_secrets[secrets_roll]
+    return secret_learned
 
 
 def e163(party, console): # Slave Market
@@ -1135,7 +1265,11 @@ def e163(party, console): # Slave Market
 
 
 def e164(party, console): # Giant Lizard (Godzilla)
-    pass
+    giant_lizard_party = []
+    console.display_message('A huge, giant lizard that shakes the earth as it walks attacks you!')
+    giant_lizard = characters.Character(name='Giant Lizard', combat_skill=10, endurance=12)
+    giant_lizard_party.append(giant_lizard)
+    game_actions.combat(party, giant_lizard_party, console, has_first_strike='party')
 
 
 def e165(party, console): # Hidden Elven Town
@@ -1149,78 +1283,136 @@ def e166(party, console): # Hidden Elven Fortress
 ### Items ###
 
 def e180(party, console): # Healing Potion
-    pass
+    '''This potion can be applied once to any character (including yourself) at the end of the day, after the evening
+meal (r215). The potion immediately cures all wounds except poison wounds.'''
 
 
 def e181(party, console): # Cure Poison Vial
-    pass
+    '''Any character can drink this vial once during the evening meal (r215). It will cure all poison wounds overnight.
+Only poison wounds are cured, it has no effect on regular wounds.'''
 
 
 def e182(party, console): # Gift of Charm
-    pass
+    '''This is a small item of no real value, but with a magic aura. You can give this gift to any character(s) you
+encounter as part of any talk or negotiate option. When you use it, you can then roll a second and a third time
+for that option, and select whichever result you prefer. Once given away, the gift is gone and useless unless the
+receiver later fights you in combat and you kill him. Then you can recover the gift as part of the defeated's
+possessions.'''
 
 
 def e183(party, console): # Endurance Sash
-    pass
+    '''You wear this sash around your waist, and its magic adds one (+1) to your normal endurance level. The effect
+is permanent as long as you retain your possessions. You cannot wear more than one sash, additional ones
+can be cached (r214) or given to other characters in your party.
+'''
 
 
 def e184(party, console): # Resistance Talisman
-    pass
+    '''This jewelled talisman allows you to resist all magic spells and attacks. Whenever magic is used, you can call
+upon the talisman to negate it. However, the talisman may be unable to contain a strong spell, so each time it is
+used roll one die, a result of 6 means the spell is stopped but the talisman is shattered and broken in the
+process'''
 
 
 def e185(party, console): # Poison Drug
-    pass
+    '''This drug can be applied to the weapons of any one character in your party. Its use means that whenever that
+character strikes in combat (r220) and inflicts wounds, for each normal wound given, one extra poison wound is
+also given.
+After a combat where the poisoned weapon is used, roll one die. A 6 means the poison has worn off, and the
+weapon returns to normal. Since a character often has multiple weapons, he has the option of using his
+poisoned weapon, or a normal weapon, as desired.'''
 
 
 def e186(party, console): # Magic Sword
-    pass
+    '''A character can carry this special sword among his weapons. The magic sword adds one (+1) to the combat
+skill of the character with it. In addition, the blade's magic means that every wound it inflicts counts as poisoned
+too.'''
 
 
 def e187(party, console): # Anti-Poison Amulet
-    pass
+    '''This protects against all poison wounds. Any poison wound inflicted is ignored if the target has this amulet.
+Normal wounds still take effect. When a poison wound is prevented, roll two dice. If the total is 12, the amulet
+has reached its limit, cannot absorb more poison, and must be discarded.'''
 
 
 def e188(party, console): # Pegasus Mount
-    pass
+    '''You have acquired a pegasus — a winged horse that allows you to travel airborne. The pegasus is like a
+normal mount in all other respects, including the same transport ability (r206), food requirements (r215), and
+lodging when in towns, castles, or temples (r217). You can use the pegasus as a normal mount on the ground,
+if desired.'''
 
 
 def e189(party, console): # Charisma Talisman
-    pass
+    '''The character that wears this talisman improves his "stature" and charisma in the eyes of others. If you wear it,
+add one (+1) to your wit & wiles in any event or option that involves or results from talk or negotiation. This
+talisman does not improve your wit & wiles when trying to evade, hide, attack, or surprise. Like many magical
+devices, this talisman's spell may eventually wear out. After each use, roll two dice, if the total is 12 it has worn
+out and must be discarded.'''
 
 
 def e190(party, console): # Nerve Gas Bomb
-    pass
+    '''This sealed jar is filled with a deadly and quick-acting gas created by a master alchemist. If you surprise an
+enemy in combat (r220), instead of your initial strikes, your entire party can stand off and let you hurl the bomb.
+When you do, roll one die for each character encountered: 1,2,3,4-character killed by gas; 5-character flees
+from gas, takes his wealth and possessions with him; 6-character unaffected by gas.
+The jar with the gas is rather heavy, and counts as one (1) load to transport (r206).'''
 
 
 def e191(party, console): # Resistance Ring
-    pass
+    '''This ring creates a magic aura around the wearer. Every time the wearer is wounded, roll two dice:
+2 thru 8 blow warded by ring, ignore wounds.
+9,10,11 blow skids around aura and strikes home, take normal wound result minus one wound
+(deflected in the skidding)
+12 ring fails, blow has normal effect, and ring melts on your finger, causing injury and one extra
+wound.
+The ring can be used to ward poison wounds like normal wounds. The ring can also be used to ward magic
+attacks against the wearer, but will not protect others in the party. In a magic attack, two rolls must be made,
+and the single worst result (to the wearer) is applied.'''
 
 
 def e192(party, console): # Resurrection Necklace
-    pass
+    '''This necklace of black opals and tiny bones holds the secret of a second life. If the wearer dies for any reason,
+including voluntary suicide, at the end of that day the character rises from the dead. The necklace disintegrates
+as the character revives, and thus only works once. The resurrection occurs in the same hex, but the character
+is now free to select any action on the next day.
+A character revived by the necklace, having been left for dead, will have lost all possessions and money, and
+the entire party will have scattered, although a lover might return (see r228). A character revived by the
+necklace has a somewhat ghoulish cast, and is a bit weaker. Endurance is reduced by one. Such appearances
+are favoured at Drogat Castle, you learn, and so you can add one (+1) if seeking an audience (r211) with Count
+Drogat.'''
 
 
 def e193(party, console): # Shield of Light
-    pass
+    '''This enchanted shield will flash and shine in the eyes of any attacker. When a character has this shield, any
+opponent in combat has his combat skill reduced by one (-1). If the character with the shield dies, the shield will
+dull and die, becoming useless. At the end of each combat where the shield is used, roll one die. If a 6 results,
+the shield is so banged and damaged by battle that it is now useless.
+To preserve the shield, you may elect to not use it in some combats. You can change your mind during the
+battle, but must then check for damage after the battle anyway.'''
 
 
 def e194(party, console): # Royal Helm of the Northlands
-    pass
+    '''This ancient and sacred treasure has long been lost. Myths and tales still relate the great exploits of its wearers.
+Now you hold this treasure that gives you automatic and indisputable right to the Northlands throne.
+If you return to either Ogon (0101) or Weshor (1501) towns with the helm, you will be instantly hailed as the
+rightful King of the Northlands, and win the game.
+In the meantime, possession of the helm increases your stature and self-confidence, so increase your wit &
+wiles by one (+1).'''
 
 
 def e195(party, console): # Random Items Reference
     random_item_roll = randint(1,6) + randint(1,6)
-    random_items = {2 : e191(),
-                    3 : e186(),
-                    4 : e182(),
-                    5 : e184(),
-                    6 : e181(),
-                    7 : e180(),
-                    8 : e185(),
-                    9 : e193(),
-                    10: e183(), 
-                    11: e189(), 
-                    12: e192()}
+    random_items = {2 : e191(party, console),
+                    3 : e186(party, console),
+                    4 : e182(party, console),
+                    5 : e184(party, console),
+                    6 : e181(party, console),
+                    7 : e180(party, console),
+                    8 : e185(party, console),
+                    9 : e193(party, console),
+                    10: e183(party, console), 
+                    11: e189(party, console), 
+                    12: e192(party, console)}
     random_item_result = random_items[random_item_roll]
     return random_item_result
 
