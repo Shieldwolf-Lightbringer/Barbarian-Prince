@@ -675,49 +675,61 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
 
 def hire_followers(party, player_hex, console): #town or castle
     hiring_roll = randint(1,6) + randint(1,6) #+ party[0].hiring_bonus[player_hex]
+    if player_hex in party[0].hiring_bonus:
+        hiring_roll += party[0].hiring_bonus[player_hex]
     
     if hiring_roll == 2:
         console.display_message("A Freeman joins your party at no cost (except food and lodging).")
         freeman = characters.Character(name='Freeman', combat_skill=3, endurance=4)
         party.append(freeman)
+
     elif hiring_roll == 3:
         console.display_message("A Lancer with a horse can be hired for 3 gold per day.")
         lancer = characters.Character(name='Lancer', combat_skill=5, endurance=5, daily_wage=3, mounted=True)
         party.append(lancer)
+
     elif hiring_roll == 4:
         console.display_message("One or two mercenaries can be hired for 2 gold per day each.")
         mercenary = characters.Character(name='Mercenary', combat_skill=4, endurance=4, daily_wage=2)
-        mercenaries_hired = console.handle_input()
+        mercenaries_hired = choice([0, 1, 2]) ### console.handle_player_response()
         for _ in range(max(mercenaries_hired, 2)):
             party.append(mercenary)
+
     elif hiring_roll == 5:
         console.display_message("Horse dealer in area, you can buy horses (for mounts) at 10 gold each.")
+
     elif hiring_roll == 6:
         console.display_message("Local guide available, hire for 2 gold per day.")
         guide = characters.Character(name='Guide', combat_skill=2, endurance=3, daily_wage=2, guide=True)
         party.append(guide)
+
     elif hiring_roll == 7:
         console.display_message("Henchmen available, roll one die for the number available for hire, at 1 gold per day each.")
         henchmen_roll = randint(1,6)
         henchmen = characters.Character(None, None, combat_skill=3, endurance=3, daily_wage=1)
-        henchmen_hired = console.handle_input()
+        henchmen_hired = randint(0, henchmen_roll) ### console.handle_player_response()
         for _ in range(max(henchmen_hired, henchmen_roll)):
             party.append(henchmen)
+
     elif hiring_roll == 8:
         console.display_message("Slave market, see event e163")
+
     elif hiring_roll == 9:
         console.display_message("Nothing available, but you gain some news and information, see r209 but subtract one (-1) from your dice roll there.")
+
     elif hiring_roll == 10:
         console.display_message("Honest horse dealer in area, can buy horses (for mounts) at 7 gold each.")
+
     elif hiring_roll == 11:
         console.display_message("Runaway boy or girl joins your party at no cost (except food and lodging), has combat skill 1, endurance 3.")
         runaway = characters.Character(name='Runaway Urchin', combat_skill=1, endurance=3)
         party.append(runaway)
+
     elif hiring_roll >= 12:
         console.display_message("Porters, in any quantity desired, are available to hire for ½ gold each per day. In addition, a local guide can be hired for 2 gold per day.")
         porters = characters.Character(name='Porter', combat_skill=1, endurance=2, daily_wage=0.5)
         guide = characters.Character(name='Guide', combat_skill=1, endurance=2, daily_wage=2, guide=True)
-        porters_hired = console.handle_input()
+        porters_hired = choice([0, 1, 2]) ### console.handle_player_response()
         for _ in range(porters_hired):
             party.append(porters)
         party.append(guide)
