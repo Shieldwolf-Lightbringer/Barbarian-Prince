@@ -361,21 +361,18 @@ def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains
             if player_hex in farmlands:
                 encounter = randint(1,6)
                 if encounter == 5:
-                    mob = (randint(1,6) + randint(1,6)) * 2
-                    console.display_message(f'You are pursued by a large mob of {mob} angry farmers and villagers!')
-                    if hunter.combat_skill + randint(1,6) - hunter.fatigue < 10:
-                        hunter.wounds += randint(1,3)
+                    events.e017(party, console)
+
                 elif encounter == 6:
-                    constables = randint(6,11)
-                    console.display_message(f'Your illegal hunting has attracted the attention of {constables} members of the local constabulary!')
-                    if hunter.combat_skill + randint(1,6) - hunter.fatigue < 12:
-                        hunter.wounds += randint(1,6)
+                    console.display_message('Your illegal hunting has attracted the attention of the local constabulary!')
+                    events.e050(party, console, 2)
 
 def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis):
     gold_spent = 0
+    meal_cost = where_is_player(player_hex, castles, temples, towns)[2]
     food_message = ""
     if any(player_hex in key for key in [castles, temples, towns]):
-        lodging(party, console)
+        lodging(party, player_hex, console, castles, temples, towns)
         for character in reversed(party):
             if 'ration' in character.possessions:
                 food_message += f'{character.name} has eaten. '
@@ -386,15 +383,18 @@ def eat_meal(party, player_hex, console, castles, temples, towns, deserts, oasis
                     character.max_carry = min(character.max_carry * 2, 10)
                 if character.fatigue > 0:
                     character.fatigue -= 1
-            elif party[0].gold >= 1 + gold_spent:
-                gold_spent += 1
+            elif party[0].gold >= meal_cost + gold_spent:
+                gold_spent += meal_cost
                 food_message += f'{character.name} has purchased a meal. '
                 #console.display_message(f'{character.name} has purchased a meal.')
                 character.has_eaten = True
             else:
                 console.display_message(f'{party[0].name} does not have enough gold to purchase a meal for {character.name}!')
                 starvation(character, party, console)
+        if player_hex in party[0].food_mod:
+            gold_spent = int(gold_spent * party[0].food_mod[player_hex])
         party[0].gold -= gold_spent
+        food_message += f'You have spent {gold_spent} gold.'
                 
     elif player_hex in deserts and player_hex not in oasis:
         for character in reversed(party):
@@ -449,9 +449,10 @@ def desertion(character, party, console, reason):
         else:
             console.display_message(f'Despite {reason}, {character.name} has decided to remain your companion!')
 
-def lodging(party, console):
+def lodging(party, player_hex, console, castles, temples, towns):
     rooms = 0.0
     stables = 0
+    lodging_cost = where_is_player(player_hex, castles, temples, towns)[3]
     for character in party:
         if any([character.heir, character.priest, character.monk, character.magician, character.wizard, character.witch]):
             rooms += 1
@@ -461,17 +462,32 @@ def lodging(party, console):
             stables += 1
 
     rooms = int(rooms) + (rooms > int(rooms))
-    if party[0].gold >= rooms + stables:
-        console.display_message(f'You rent {rooms} rooms and {stables} stables for the night, costing you {rooms + stables} gold.')
-        party[0].gold -= rooms + stables
-    elif rooms + stables > party[0].gold >= rooms:
-        console.display_message(f'You rent {rooms} rooms for the night, costing you {rooms} gold.')
+    lodging_total = lodging_cost * (rooms + stables)
+    if player_hex in party[0].room_mod:
+        lodging_total = int(lodging_total * party[0].room_mod[player_hex])
+
+    if party[0].gold >= lodging_total:
+        console.display_message(f'You rent {rooms} rooms and {stables} stables for the night, costing you {lodging_total} gold.')
+        party[0].gold -= lodging_total
+    elif lodging_total > party[0].gold >= lodging_cost * rooms:
+        console.display_message(f'You rent {rooms} rooms for the night, costing you {lodging_cost * rooms} gold.')
         '''Need to implement mounts going missing on d6 of 4+'''
-        party[0].gold -= rooms
+        party[0].gold -= lodging_cost * rooms
     else:
         console.display_message(f'{party[0].name} does not have enough gold to rent rooms and the party is forced to sleep in the street!')
         for character in party:
             desertion(character, party, console, 'poverty')
+
+def where_is_player(player_hex, castles, temples, towns):
+    ### dict codes (hex_key):['name', spritesheet slice, food cost, room/stable cost, audience possible]
+    if player_hex in castles:
+        return castles[player_hex]
+    elif player_hex in temples:
+        return temples[player_hex]
+    elif player_hex in towns:
+        return towns[player_hex]
+    else:
+        return [0, 0, 0, 0, 0]
 
 def escape():
     '''move randomly to adjacent hex, no new events.  Cannot cross river unless flying.'''
@@ -579,6 +595,9 @@ def cache_place():
 def seek_news_and_information(party, player_hex, console): #town, temple, or castle
     gather_info_roll = randint(1,6) + randint(1,6) #+ character.info_bonus[player_hex]
     console.display_message(f'Initial roll: {gather_info_roll}')
+    if player_hex in party[0].info_bonus:
+        gather_info_roll += party[0].info_bonus[player_hex]
+        console.display_message(f'Plus info bonus: {gather_info_roll}')
     if party[0].gold >= 5:
         console.display_message('Do you wish to spend 5 gold to loosen tongues? (y/n)') #need to handle choice
         party[0].gold -= 5
@@ -596,17 +615,19 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
         party[0].gold += 50
     
     elif gather_info_roll == 4:
-        temples = {(7,11):"Branwyn's Temple",
-                   (10,21):'Sulwyth Temple',
-                   (13,9):"Donat's Temple",
-                   (18,5):'Temple of Zhor',
-                   (20,18):'Temple of Duffyd'}
-        secret_rites = choice(temples)
-        console.display_message(f'You learn of secret rites at {secret_rites}.  You gain a small advantage when making offerings there.')
-        if secret_rites in party[0].offering_bonus:
-            party[0].offering_bonus[secret_rites] += 1
+        rites_temples = [[(7,11),"Branwyn's Temple"],
+                   [(10,21),'Sulwyth Temple'],
+                   [(13,9),"Donat's Temple"],
+                   [(18,5),'Temple of Zhor'],
+                   [(20,18),'Temple of Duffyd']]
+        secret_rites = choice(rites_temples)
+        console.display_message(f'You learn of secret rites at {secret_rites[1]}.  You gain a small advantage when making offerings there.')
+        if secret_rites[0] in party[0].offering_bonus:
+            rites_location = secret_rites[0]
+            party[0].offering_bonus[rites_location] += 1
         else:
-            party[0].offering_bonus[secret_rites] = 1
+            rites_location = secret_rites[0]
+            party[0].offering_bonus[rites_location] = 1
             
     elif gather_info_roll == 5:
         console.display_message('Your inquiries uncover no news of note; but you feel at home in this place and gain a small bonus when seeking information or hirelings.')
@@ -621,10 +642,12 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
     
     elif gather_info_roll == 6:
         console.display_message('A large caravan is in town.  You may visit them today, if you wish.')
-        events.e129(console)
+        events.e129(party, console)
     
     elif gather_info_roll == 7:
         console.display_message('Discover cheaper lodgings and food, pay half the normal price here.')
+        party[0].food_mod[player_hex] = 0.5
+        party[0].room_mod[player_hex] = 0.5
     
     elif gather_info_roll == 8:
         console.display_message('A cutpurse picks your pocket, stealing half your gold!')
@@ -632,11 +655,11 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
     
     elif gather_info_roll == 9:
         console.display_message('You attract the attention of the local constabulary.')
-        events.e050(console)
+        events.e050(party, console)
     
     elif gather_info_roll == 10:
         console.display_message('You discover the residence of a local magician.')
-        events.e016(console)
+        events.e016(party, console)
     
     elif gather_info_roll == 11:
         console.display_message("You discover the local thieves' guild and are 'invited' to join.  If you do, you participate in a theft tonight and then flee the hex.  If you pay the guild their cut, you may return to this hex in the future. ")
@@ -702,61 +725,63 @@ def hire_followers(party, player_hex, console): #town or castle
 
 def seek_audience(party, player_hex, console, temples, towns, castles): #town, temple, or castle
     if player_hex in towns:
-        town_audience_roll = randint(1,6) + randint(1,6)
-        if town_audience_roll == 2:
-            console.display_message('You have greviously insulted the town council!')
-            events.e062(party, console)
-        elif town_audience_roll == 3:
-            console.display_message("A slanderous aside about the mayor's wife is blamed on you.")
-            events.e062(party, console)
-        elif town_audience_roll == 4:
-            console.display_message('You are confronted by hostile guards.')
-            events.e158(party, console)
-        elif town_audience_roll == 5:
-            console.display_message('You meet the Master of the Household.')
-            events.e153(party, console)
-        elif town_audience_roll in [6, 7, 8]:
-            console.display_message('Audience refused today.')
-        elif town_audience_roll in [9, 10, 12]:
-            console.display_message('You are permitted audience with the Town Mayor.')
-            events.e156(party, console)
-        elif town_audience_roll == 11:
-            console.display_events('You meet the daughter of the mayor.')
-            events.e154(party, console)
-
-    if player_hex in temples:
-        temple_audience_roll = randint(1,6) + randint(1,6)
-        if temple_audience_roll == 2:
-            console.display_message('You anger the temple guards!')
-            events.e063(party, console)
-        elif temple_audience_roll == 3:
-            console.display_message('A priestess resents a lewd remark.')
-            events.e060(party, console)
-        elif temple_audience_roll == 4:
-            console.display_message('You are confronted by hostile guards.')
-            events.e158(party, console)
-        elif temple_audience_roll in [5, 7]:
-            console.display_message('Audience refused today.')
-        elif temple_audience_roll in [6, 10]:
-            console.display_message('You must purify yourself.')
-            events.e159(party, console)
-        elif temple_audience_roll == 8:
-            if 'dragon eye' in party[0].possessions:
-                console.display_message('Your gift of a Dragon eye permits audience.')
-                party[0].possessions.remove('dragon eye')
-            else:
+        if towns[player_hex][4]:
+            town_audience_roll = randint(1,6) + randint(1,6)
+            if town_audience_roll == 2:
+                console.display_message('You have greviously insulted the town council!')
+                events.e062(party, console)
+            elif town_audience_roll == 3:
+                console.display_message("A slanderous aside about the mayor's wife is blamed on you.")
+                events.e062(party, console)
+            elif town_audience_roll == 4:
+                console.display_message('You are confronted by hostile guards.')
+                events.e158(party, console)
+            elif town_audience_roll == 5:
                 console.display_message('You meet the Master of the Household.')
                 events.e153(party, console)
-        elif temple_audience_roll == 9:
-            console.display_message('You are invited to pay your respects.')
-            events.e150(party, console)
-        elif temple_audience_roll >= 11:
-            console.display_message('You are permitted audience with the High Priest.')
-            events.e155(party, console)
+            elif town_audience_roll in [6, 7, 8]:
+                console.display_message('Audience refused today.')
+            elif town_audience_roll in [9, 10, 12]:
+                console.display_message('You are permitted audience with the Town Mayor.')
+                events.e156(party, console)
+            elif town_audience_roll == 11:
+                console.display_events('You meet the daughter of the mayor.')
+                events.e154(party, console)
+
+    if player_hex in temples:
+        if temples[player_hex][4]:
+            temple_audience_roll = randint(1,6) + randint(1,6)
+            if temple_audience_roll == 2:
+                console.display_message('You anger the temple guards!')
+                events.e063(party, console)
+            elif temple_audience_roll == 3:
+                console.display_message('A priestess resents a lewd remark.')
+                events.e060(party, console)
+            elif temple_audience_roll == 4:
+                console.display_message('You are confronted by hostile guards.')
+                events.e158(party, console)
+            elif temple_audience_roll in [5, 7]:
+                console.display_message('Audience refused today.')
+            elif temple_audience_roll in [6, 10]:
+                console.display_message('You must purify yourself.')
+                events.e159(party, console)
+            elif temple_audience_roll == 8:
+                if 'dragon eye' in party[0].possessions:
+                    console.display_message('Your gift of a Dragon eye permits audience.')
+                    party[0].possessions.remove('dragon eye')
+                else:
+                    console.display_message('You meet the Master of the Household.')
+                    events.e153(party, console)
+            elif temple_audience_roll == 9:
+                console.display_message('You are invited to pay your respects.')
+                events.e150(party, console)
+            elif temple_audience_roll >= 11:
+                console.display_message('You are permitted audience with the High Priest.')
+                events.e155(party, console)
 
     if player_hex in castles:
         if player_hex == (3,23):
-            if castles[player_hex][2]:
+            if castles[player_hex][4]:
                 drogat_audience_roll = randint(1,6) + randint(1,6)
                 if drogat_audience_roll == 2:
                     console.display_message("You are the Count's next victim!")
@@ -795,11 +820,11 @@ def seek_audience(party, player_hex, console, temples, towns, castles): #town, t
                     events.e161(party, console)
 
         if player_hex == (12,12) or castles[player_hex][0] == 'Dwarf Mines':
-            if castles[player_hex][2]:
+            if castles[player_hex][4]:
                 huldra_audience_roll = randint(1,6) + randint(1,6)
                 if huldra_audience_roll == 2:
                     console.display_message('Audience permanently refused.  You may never try again.')
-                    castles[player_hex][2] = False
+                    castles[player_hex][4] = False
                 elif huldra_audience_roll == 3:
                     console.display_message('You meet the daughter of the Baron.')
                     events.e154(party, console)
@@ -828,7 +853,7 @@ def seek_audience(party, player_hex, console, temples, towns, castles): #town, t
                     events.e152(party, console)
             
         if player_hex == (19,23):
-            if castles[player_hex][2]:
+            if castles[player_hex][4]:
                 aeravir_audience_roll = randint(1,6) + randint(1,6)
                 if aeravir_audience_roll == 2:
                     console.display_message("You insult the Lady's dignity, and are arrested.")

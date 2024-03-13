@@ -77,8 +77,14 @@ def e016(party, console): # Magician's Home
 
 
 def e017(party, console): # Peasant Mob in Hot Pursuit
-    pass
-
+    mob = (randint(1,6) + randint(1,6)) * 2
+    console.display_message(f'A large mob of {mob} angry farmers and villagers are after you! You are trapped and must fight your way out.')
+    mob_party = []
+    mob_party.append(characters.Character(name='Peasant Leader', combat_skill=3, endurance=2, wealth_code=2))
+    for _ in range(mob - 1):
+        mob_party.append(characters.Character(name=choice(['Angry Farmer', 'Angry Peasant', 'Angry Villager']), combat_skill=2, endurance=2))
+    
+    game_actions.combat(party, mob_party, console)
 
 def e018(party, console): # Priest
     pass
@@ -434,8 +440,20 @@ def e049(party, console): # Travelling Minstrel
     pass
 
 
-def e050(party, console): # Local Constabulary
-    pass
+def e050(party, console, bonus=0): # Local Constabulary
+    constable_party = []
+    if randint(1,6) > 5:
+        mounted_constables = randint(1,6) + 1 + bonus
+        for _ in range(mounted_constables):
+            constable_party.append(characters.Character(name='Mounted Constable', combat_skill=5, endurance=4, wealth_code=4, mounted=True))
+        console.display_message(f'You are confronted by {mounted_constables} mounted constables.')    
+    else:
+        constables = randint(1,6) + 3 + bonus
+        for _ in range(constables):
+            constable_party.append(characters.Character(name='Constable', combat_skill=5, endurance=4, wealth_code=4))
+        console.display_message(f'You are confronted by {constables} constables.')
+
+    game_actions.combat(party, constable_party, console)
 
 
 # Not fully implemented, need to loot after battle.  Maybe in combat function?

@@ -70,26 +70,27 @@ swamps = [(1,14),(1,15),(2,13),(2,14),(3,12),(3,13),(4,11),(5,11),(6,9),(6,11),(
           (16,17),(16,22),(16,23),(17,21),(18,16),(20,16)] #complete
 swamps_blue = (213, 236, 244)
 
-towns = {(1,1):['Ogon', (pygame.Rect(0, 240, 80, 80))],
-         (1,9):['Angleae', (pygame.Rect(0, 240, 80, 80))],
-         (2,16):['Galden', (pygame.Rect(0, 320, 80, 80))],
-         (4,19):['Halowich', (pygame.Rect(0, 240, 80, 80))],
-         (4,22):['Lower Drogat', (pygame.Rect(0, 320, 80, 80))],
-         (7,19):['Brigud', (pygame.Rect(0, 320, 80, 80))],
-         (9,16):['Erwyn', (pygame.Rect(0, 320, 80, 80))],
-         (10,4):['Cumry', (pygame.Rect(0, 240, 80, 80))],
-         (10,9):['Cawther', (pygame.Rect(0, 320, 80, 80))],
-         (15,1):['Weshor', (pygame.Rect(0, 320, 80, 80))],
-         (14,15):['Tulith', (pygame.Rect(0, 240, 80, 80))],
-         (17,20):['Lullwyn', (pygame.Rect(0, 240, 80, 80))]}
-castles = {(3,23):['Drogat Castle', (pygame.Rect(0, 400, 80, 80)), True],
-           (12,12):['Huldra Castle', (pygame.Rect(0, 400, 80, 80)), True],
-           (19,23):['Aeravir Castle', (pygame.Rect(0, 400, 80, 80)), True]}
-temples = {(7,11):["Branwyn's Temple", (pygame.Rect(80, 320, 80, 80))],
-           (10,21):['Sulwyth Temple', (pygame.Rect(80, 80, 80, 80))],
-           (13,9):["Donat's Temple", (pygame.Rect(80, 240, 80, 80))],
-           (18,5):['Temple of Zhor', (pygame.Rect(80, 0, 80, 80))],
-           (20,18):['Temple of Duffyd', (pygame.Rect(80, 160, 80, 80))]}
+### dict codes (hex_key):['name', spritesheet slice, food cost, room/stable cost, audience possible]
+towns = {(1,1):['Ogon', (pygame.Rect(0, 240, 80, 80)), 1, 1, True],
+         (1,9):['Angleae', (pygame.Rect(0, 240, 80, 80)), 1, 1, True],
+         (2,16):['Galden', (pygame.Rect(0, 320, 80, 80)), 1, 1, True],
+         (4,19):['Halowich', (pygame.Rect(0, 240, 80, 80)), 1, 1, True],
+         (4,22):['Lower Drogat', (pygame.Rect(0, 320, 80, 80)), 1, 1, True],
+         (7,19):['Brigud', (pygame.Rect(0, 320, 80, 80)), 1, 1, True],
+         (9,16):['Erwyn', (pygame.Rect(0, 320, 80, 80)), 1, 1, True],
+         (10,4):['Cumry', (pygame.Rect(0, 240, 80, 80)), 1, 1, True],
+         (10,9):['Cawther', (pygame.Rect(0, 320, 80, 80)), 1, 1, True],
+         (15,1):['Weshor', (pygame.Rect(0, 320, 80, 80)), 1, 1, True],
+         (14,15):['Tulith', (pygame.Rect(0, 240, 80, 80)), 1, 1, True],
+         (17,20):['Lullwyn', (pygame.Rect(0, 240, 80, 80)), 1, 1, True]}
+castles = {(3,23):['Drogat Castle', (pygame.Rect(0, 400, 80, 80)), 1, 1, True],
+           (12,12):['Huldra Castle', (pygame.Rect(0, 400, 80, 80)), 1, 1, True],
+           (19,23):['Aeravir Castle', (pygame.Rect(0, 400, 80, 80)), 1, 1, True]}
+temples = {(7,11):["Branwyn's Temple", (pygame.Rect(80, 320, 80, 80)), 1, 1, True],
+           (10,21):['Sulwyth Temple', (pygame.Rect(80, 80, 80, 80)), 1, 1, True],
+           (13,9):["Donat's Temple", (pygame.Rect(80, 240, 80, 80)), 1, 1, True],
+           (18,5):['Temple of Zhor', (pygame.Rect(80, 0, 80, 80)), 1, 1, True],
+           (20,18):['Temple of Duffyd', (pygame.Rect(80, 160, 80, 80)), 1, 1, True]}
 oasis = [(2,6),(14,9),(16,7),(16,9)]
 ruins = {(2,6):['The Dead Plains', (pygame.Rect(0, 80, 80, 80))],
          (9,1):["Jakor's Keep", (pygame.Rect(0, 0, 80, 80))],
@@ -295,6 +296,7 @@ class Gameplay(BaseState):
                 game_actions.combat(self.party, foes, self.console)
             if event.key == pygame.K_8:
                 self.party[0].gold += 50
+                #game_actions.where_is_player(self.player_hex, castles, temples, towns)
             if event.key == pygame.K_9:
                 for char in self.party:
                     char.mounted = True

@@ -42,10 +42,13 @@ class Character:
         self.move_speed = 1
         self.mounted = mounted
         self.flying = flying
-        self.audience_bonus = {}
-        self.hiring_bonus = {}
-        self.info_bonus = {}
-        self.offering_bonus = {}
+        if self.heir:
+            self.audience_bonus = {}
+            self.hiring_bonus = {}
+            self.info_bonus = {}
+            self.offering_bonus = {}
+            self.food_mod = {}
+            self.room_mod = {}
         self.unearthly = unearthly
         self.regenerates = regenerates
         self.update()
