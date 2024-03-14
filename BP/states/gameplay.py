@@ -675,7 +675,7 @@ class Gameplay(BaseState):
             
         if player_input == 'o':
             if self.player_hex in temples:
-                game_actions.make_offering(self.party, self.player_hex, self.console)
+                game_actions.make_offering(self.party, self.player_hex, self.console, temples)
                 return True
             return False
         

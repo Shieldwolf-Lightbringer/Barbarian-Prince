@@ -384,19 +384,22 @@ def e044(party, console): # High Altar
             invocations_roll = randint(1,6)
             if invocations_roll == 1:
                 console.display_message(f'{invoker.name} is incinerated in godly fires and dies!')
+                invoker.alive = False
                 party.remove(invoker)
             elif invocations_roll == 2:
                 console.display_message('Lightning and earthquakes destroy the high altar! Everyone is injured by flying stones and fire!')
                 for character in party:
-                    character.wounds += randint(1,6)
+                    godly_wrath_roll = randint(1,6)
+                    console.display_message(f'{character.name} suffers {godly_wrath_roll} wounds from flying stone and fire!')
+                    character.wounds += godly_wrath_roll
             elif invocations_roll == 3:
                 console.display_message(f'It was an altar to the wrong god, {invoker.name} suffers 1 wound for the transgression.')
                 invoker.wounds += 1
             elif invocations_roll == 4:
                 console.display_message('A voice of the gods sounds forth and gives you a riddle none can solve, and a prophecy none can understand.')
             elif invocations_roll == 5:
-                console.display_message('Voices of the gods give a prophecy that seems to promise treasure! See event 147.')
-                #e147(party, console)
+                console.display_message('Voices of the gods give a prophecy that seems to promise treasure!')
+                e147(party, console)
             elif invocations_roll == 6:
                 console.display_message('One of the gods appears, issuing thunderbolts and flames, pledging support to your cause. In an astral vision you see the gods striking down the usurpers to your throne, and telling Northlands priests that your reign shall be holy. You will regain your throne and win the game if you can return alive to the northlands (any hex north of the Tragoth River) within the next 30 days. However, experiencing the power of the gods directly has weakened your human frame, your endurance is permanently reduced by one.  In gratitude for the godly support, you must give all your money away to the gods of the altar instantly, or be struck down dead.')
                 party[0].endurance -= 1
@@ -1101,6 +1104,7 @@ def e140(party, console): # Magic Box
 def e141(party, console): # Hydra's Teeth
     hydra_teeth_quantity = randint(1,6) + randint(1,6)
     console.display_message(f'You find {hydra_teeth_quantity} hydra teeth.')
+    party[0].possessions.append(f'{hydra_teeth_quantity} hydra teeth')
     '''The magician/ wizard/witch explains that whenever you
 scatter these teeth on the ground, that number of undead warriors will rise and fight in your party for one
 combat (r220) at your command. These undead teeth-warriors are combat skill 5, endurance 4, and wealth 0.

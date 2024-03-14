@@ -441,13 +441,14 @@ def starvation(character, party, console):
     '''Need to implement mount starvation'''
 
 def desertion(character, party, console, reason):
-    if not character.heir or character.true_love:
-        desertion_dice = randint(1,6) + randint(1,6) - party[0].wits
-        if desertion_dice >= character.loyalty:
-            console.display_message(f'{character.name} has grown weary of {reason} and has abandoned you!')
-            party.remove(character)
-        else:
-            console.display_message(f'Despite {reason}, {character.name} has decided to remain your companion!')
+    if not character.heir:
+        if not character.true_love:
+            desertion_dice = randint(1,6) + randint(1,6) - party[0].wits
+            if desertion_dice >= character.loyalty:
+                console.display_message(f'{character.name} has grown weary of {reason} and has abandoned you!')
+                party.remove(character)
+            else:
+                console.display_message(f'Despite {reason}, {character.name} has decided to remain your companion!')
 
 def lodging(party, player_hex, console, castles, temples, towns):
     rooms = 0.0
@@ -592,8 +593,8 @@ def cache_place():
 
 '''actions available in certain hexes'''
 
-def seek_news_and_information(party, player_hex, console): #town, temple, or castle
-    gather_info_roll = randint(1,6) + randint(1,6) #+ character.info_bonus[player_hex]
+def seek_news_and_information(party, player_hex, console, roll_mod=0): #town, temple, or castle
+    gather_info_roll = randint(1,6) + randint(1,6) + roll_mod
     console.display_message(f'Initial roll: {gather_info_roll}')
     if player_hex in party[0].info_bonus:
         gather_info_roll += party[0].info_bonus[player_hex]
@@ -607,7 +608,7 @@ def seek_news_and_information(party, player_hex, console): #town, temple, or cas
         gather_info_roll += 1
         console.display_message(f'Plus wits bonus: {gather_info_roll}')
 
-    if gather_info_roll == 2:
+    if gather_info_roll <= 2:
         console.display_message('Your inquiries uncover no news of note; nothing seems to be happening.')
     
     elif gather_info_roll == 3:
@@ -715,7 +716,8 @@ def hire_followers(party, player_hex, console): #town or castle
         console.display_message("Slave market, see event e163")
 
     elif hiring_roll == 9:
-        console.display_message("Nothing available, but you gain some news and information, see r209 but subtract one (-1) from your dice roll there.")
+        console.display_message("Nothing available, but you gain some news and information.")
+        seek_news_and_information(party, player_hex, console, roll_mod=-1)
 
     elif hiring_roll == 10:
         console.display_message("Honest horse dealer in area, can buy horses (for mounts) at 7 gold each.")
@@ -739,6 +741,9 @@ def seek_audience(party, player_hex, console, temples, towns, castles): #town, t
     if player_hex in towns:
         if towns[player_hex][4]:
             town_audience_roll = randint(1,6) + randint(1,6)
+            if player_hex in party[0].audience_bonus:
+                town_audience_roll += party[0].audience_bonus[player_hex]
+
             if town_audience_roll == 2:
                 console.display_message('You have greviously insulted the town council!')
                 events.e062(party, console)
@@ -763,6 +768,9 @@ def seek_audience(party, player_hex, console, temples, towns, castles): #town, t
     if player_hex in temples:
         if temples[player_hex][4]:
             temple_audience_roll = randint(1,6) + randint(1,6)
+            if player_hex in party[0].audience_bonus:
+                temple_audience_roll += party[0].audience_bonus[player_hex]
+
             if temple_audience_roll == 2:
                 console.display_message('You anger the temple guards!')
                 events.e063(party, console)
@@ -795,6 +803,9 @@ def seek_audience(party, player_hex, console, temples, towns, castles): #town, t
         if player_hex == (3,23):
             if castles[player_hex][4]:
                 drogat_audience_roll = randint(1,6) + randint(1,6)
+                if player_hex in party[0].audience_bonus:
+                    drogat_audience_roll += party[0].audience_bonus[player_hex]
+
                 if drogat_audience_roll == 2:
                     console.display_message("You are the Count's next victim!")
                     events.e061(party, console)
@@ -834,6 +845,9 @@ def seek_audience(party, player_hex, console, temples, towns, castles): #town, t
         if player_hex == (12,12) or castles[player_hex][0] == 'Dwarf Mines':
             if castles[player_hex][4]:
                 huldra_audience_roll = randint(1,6) + randint(1,6)
+                if player_hex in party[0].audience_bonus:
+                    huldra_audience_roll += party[0].audience_bonus[player_hex]
+
                 if huldra_audience_roll == 2:
                     console.display_message('Audience permanently refused.  You may never try again.')
                     castles[player_hex][4] = False
@@ -867,6 +881,9 @@ def seek_audience(party, player_hex, console, temples, towns, castles): #town, t
         if player_hex == (19,23):
             if castles[player_hex][4]:
                 aeravir_audience_roll = randint(1,6) + randint(1,6)
+                if player_hex in party[0].audience_bonus:
+                    aeravir_audience_roll += party[0].audience_bonus[player_hex]
+
                 if aeravir_audience_roll == 2:
                     console.display_message("You insult the Lady's dignity, and are arrested.")
                     events.e060(party, console)
@@ -905,7 +922,7 @@ def seek_audience(party, player_hex, console, temples, towns, castles): #town, t
                     events.e160(party, console)
 
 
-def make_offering(party, player_hex, console): #temple
+def make_offering(party, player_hex, console, temples): #temple
     offering_roll = randint(1,6) + randint(1,6) #+ party[0].offering_bonus[player_hex]
     console.display_message('You must spend 1 gold for proper herbs and sacrifice to make an offering.')
     if party[0].gold >= 10:
@@ -915,41 +932,101 @@ def make_offering(party, player_hex, console): #temple
             offering_roll += 1
     else:
         party[0].gold -= 1
+    if player_hex in party[0].offering_bonus:
+        offering_roll += party[0].offering_bonus[player_hex]
+        bonus = party[0].offering_bonus[player_hex]
+    else:
+        bonus = 0
     
     console.display_message('You spend the day preparing, waiting in line, and finally giving an offering at the temple altar.') 
+    console.display_message(f'Roll: {offering_roll}, Bonus: {bonus}')
+    party[0].offering_bonus[player_hex] = 0
 
     if offering_roll == 2:
-        console.display_message('You commit a magnificent error in the rites, the entire temple becomes impure and abandoned, no longer functions as a temple for the rest of the game. You are arrested and sentenced to death, e061.')
+        console.display_message('You commit a magnificent error in the rites, the entire temple becomes impure and abandoned and no longer functions as a temple for the rest of the game. You are arrested and sentenced to death.')
+        temples.remove([player_hex])
+        events.e061(party, console)
+
     if offering_roll == 3:
         console.display_message('Good Omens, but no special result.')
+
     if offering_roll == 4:
-        console.display_message('Bad Omens, you are travelling under a curse. Roll one die for each of your followers, any result except a 1 means they believe the omens and immediately desert you. You cannot seek to hire any followers (r210) in this hex for the rest of the game.')
+        console.display_message('Bad Omens, you are travelling under a curse.')
+        for character in party:
+            if not character.heir:
+                if not character.true_love:
+                    omen_dice = randint(1,6)
+                    if omen_dice > 1:
+                        console.display_message(f'{character.name} believes the ill omens and has abandoned you!')
+                        party.remove(character)
+                    else:
+                        console.display_message(f'Despite the dark omens, {character.name} has decided to remain your companion!')       
+    
     if offering_roll == 5:
-        console.display_message('High Priest insulted by your northern manners, arrested e060.')
-    if offering_roll == 6:
-        console.display_message('Good Omens, you get free food (r215) and lodging (r217) tonight.')
-    if offering_roll == 7:
+        console.display_message('High Priest insulted by your northern manners and has you arrested.')
+        events.e060(party, console)
+
+    if offering_roll == 6:  ### Need to figure out how to make this last only one night
+        console.display_message('Good Omens, you receive free food and lodging tonight.')
+        party[0].food_mod[player_hex] = 0
+        party[0].room_mod[player_hex] = 0
+
+    if offering_roll == 7: ### Need to figure out how to make this last only for next day
         console.display_message('Favourable Omens for further worship, if you try this Offerings action again tomorrow, you can add one (+1) to your dice roll. Otherwise no effect.')
+        if player_hex in party[0].offering_bonus:
+            party[0].offering_bonus[player_hex] += 1
+        else:
+            party[0].offering_bonus[player_hex] = 1
+
     if offering_roll == 8:
         console.display_message('Gods favour your questions, priests assign a monk to your party. The monk has combat skill 2, endurance 3, serves as a guide when leaving this or any adjacent hex only.')
-        monk = characters.Character(None, None, 2, 3, monk=True)
+        monk = characters.Character(combat_skill=2, endurance=3, monk=True)
         party.append(monk)
+
     if offering_roll == 9:
-        console.display_message('Special omen and riddle provides a clue to treasures, see e147.')
-    if offering_roll == 10:
-        console.display_message('Fall in love with priestess (see r229). You immediately escape (r218) with her and can never return to this hex. She is combat skill 2, endurance 4, and has wealth 100 in temple treasures she has stolen!')
-        priestess_love = characters.Character(None, 'female', 2, 4, wealth_code=100, priest=True, true_love=True)
+        console.display_message('Special omen and riddle provides a clue to treasures.')
+        events.e147(party, console)
+
+    if offering_roll == 10:  ### Need to implement temple hex ban somehow
+        console.display_message('You fall in love with a priestess. You immediately escape (r218) with her and can never return to this hex. She is combat skill 2, endurance 4, and has wealth 100 in temple treasures she has stolen!')
+        priestess_love = characters.Character(sex='female', combat_skill=2, endurance=4, wealth_code=100, priest=True, true_love=True)
         party.append(priestess_love)
+
     if offering_roll == 11:
-        console.display_message('The High Priest requires an audience with you; see e155.')
+        console.display_message('The High Priest requires an audience with you.')
+        events.e155(party, console)
+
     if offering_roll == 12 or offering_roll == 13:
-        console.display_message('High Priest spends afternoon talking with you, provides you with final clues to some secret information, roll one die: 1,2-e144; 3,4-e145; 5,6-e146. Alternately, instead of the secret information, you can use his influence in attempting Offerings again tomorrow, and add three (+3) to your dice roll here.')
+        console.display_message('High Priest spends afternoon talking with you.')
+        high_priest_roll = randint(1,2)
+        if high_priest_roll == 1:
+            console.display_message('The High Priest provides you with final clues to some secret information.')
+            high_priest_secret_info = randint(1,3)
+            if high_priest_secret_info == 1:
+                events.e144(party, console)
+            elif high_priest_secret_info == 2:
+                events.e145(party, console)
+            elif high_priest_secret_info == 3:
+                events.e146(party, console)
+        if high_priest_roll == 2:
+            console.display_message('You can use his influence in attempting Offerings again tomorrow, and add three (+3) to your dice roll here.')
+            if player_hex in party[0].offering_bonus:
+                party[0].offering_bonus[player_hex] += 3
+            else:
+                party[0].offering_bonus[player_hex] = 3
+
     if offering_roll >= 14:
-        console.display_message('Gods declare your cause a religious crusade, and the Staff of Command is passed into your hands. If you bring this possession to any hex north of the Tragoth River you will command instant obedience throughout the Northlands, regain your throne and win the game. In the meantime you are given a pair of warrior monks (combat skill 5, endurance 6) with mounts to join your party and help you return northward.')
-        party[0].add_item('Staff of Command')
-        for _ in range(2):
-            warrior_monk = characters.Character(None, None, 5, 6, monk=True, mounted=True)
-            party.append(warrior_monk)
+        party[0].offering_bonus[player_hex] = 0
+        if 'Staff of Command' not in party[0].possessions:
+            console.display_message('Gods declare your cause a religious crusade, and the Staff of Command is passed into your hands. If you bring this possession to any hex north of the Tragoth River you will command instant obedience throughout the Northlands, regain your throne and win the game. In the meantime you are given a pair of warrior monks (combat skill 5, endurance 6) with mounts to join your party and help you return northward.')
+            party[0].add_item('Staff of Command')
+            for _ in range(2):
+                warrior_monk = characters.Character(combat_skill=5, endurance=6, monk=True, mounted=True)
+                party.append(warrior_monk)
+        else:
+            console.display_message('You fall in love with a priestess.')
+            priestess_love = characters.Character(sex='female', combat_skill=2, endurance=4, wealth_code=10, priest=True, true_love=True)
+            party.append(priestess_love)
 
 
 def search_ruins(party, player_hex, console): #ruins
