@@ -643,6 +643,7 @@ class Gameplay(BaseState):
                 self.update_trackers()
                 for character in self.party:
                     character.update()
+                    character.update_end_of_day()
                     if not character.alive and not character.heir:
                             self.console.display_message(f'{character.name} has died!')
                             self.party.remove(character)
