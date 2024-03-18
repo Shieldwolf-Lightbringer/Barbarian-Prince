@@ -2,10 +2,12 @@ import pygame
 from random import randint, choice
 
 class Character:
-    def __init__(self, name=None, sex=None, combat_skill=None, endurance=None, wounds=0, wealth_code=0, wits=None, heir=False,
+    def __init__(self, name=None, title=None, race=None, sex=None, combat_skill=None, endurance=None, wounds=0, wealth_code=0, wits=None, heir=False,
                  daily_wage=0, guide=False, priest=False, monk=False, magician=False, wizard=False, witch=False, true_love=False,
                  mounted=False, flying=False, unearthly=False, regenerates=False):
         self.name = name if name else self.random_name()
+        self.title = title
+        self.race = race if race else 'human'
         self.sex = sex if sex else choice(['male', 'female'])
         self.combat_skill = combat_skill if combat_skill else randint(1,5)
         self.fatigue = 0
@@ -105,27 +107,11 @@ class Character:
         return name.strip().title()
 
     def __str__(self):
-        self.title = ''
         if self.heir:
-            self.title += 'Prince of the North'
-        if self.true_love:
-            self.title += 'the Beloved'
-        if self.guide:
-            self.title += 'Guide'
-        if self.magical:
-            self.title += 'the '
-            if self.priest:
-                self.title += 'Priest'
-            if self.monk:
-                self.title += 'Monk'
-            if self.magician:
-                self.title += 'Magician'
-            if self.wizard:
-                self.title += 'Wizard'
-            if self.witch:
-                self.title += 'Witch'
+            self.title = 'Prince of the North'
+
         return [f'{self.name}',
-                self.title,
+                f'{self.title}',
                 f'Combat Skill: {max(self.combat_skill - self.fatigue, 0)}',
                 f'Endurance: {self.endurance}',
                 f'Wounds: {self.total_wounds}',

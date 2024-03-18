@@ -163,9 +163,9 @@ class Gameplay(BaseState):
         self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
         self.knotwork = pygame.image.load(path.join(self.img_folder, 'knotwork.png')).convert_alpha()
 
-        sword_maiden = characters.Character(None, 'female', 7, 7, 0, 0, true_love=True)
-        wizard = characters.Character(wizard=True)
-        priest = characters.Character(priest=True)
+        sword_maiden = characters.Character(title='the Swordmaiden', sex='female', combat_skill=7, endurance=7, true_love=True)
+        wizard = characters.Character(title= 'the Wizard', wizard=True)
+        priest = characters.Character(title= 'the Priest', priest=True, daily_wage=1)
         self.party.append(sword_maiden)
         self.party.append(wizard)
         self.party.append(priest)
@@ -176,15 +176,15 @@ class Gameplay(BaseState):
     def initialize(self):
         self.console.clear_console()
         self.console.create_log()
-        self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
+        self.player = characters.Character('Cal Arath', sex='male', combat_skill=8, endurance=9, wealth_code=2, wits=randint(2,6), heir=True)
         self.party = []
         self.lovers = []
         self.party.append(self.player)
-        sword_maiden = characters.Character(None, 'female', 7, 7, 0, 0, true_love=True)
+        sword_maiden = characters.Character(title='the Swordmaiden', sex='female', combat_skill=7, endurance=7, true_love=True)
         self.party.append(sword_maiden)
-        wizard = characters.Character(wizard=True)
+        wizard = characters.Character(title= 'the Wizard', wizard=True)
         self.party.append(wizard)
-        priest = characters.Character(priest=True)
+        priest = characters.Character(title= 'the Priest', priest=True, daily_wage=1)
         self.party.append(priest)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Speed': min(char.move_speed for char in self.party)}
@@ -294,9 +294,11 @@ class Gameplay(BaseState):
                 for _ in range(num_foes):
                     foes.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=4))
                 game_actions.combat(self.party, foes, self.console)
+            if event.key == pygame.K_7:
+                self.party.append(characters.Character(title='the Random'))
             if event.key == pygame.K_8:
                 self.party[0].gold += 50
-                #game_actions.where_is_player(self.player_hex, castles, temples, towns)
+
             if event.key == pygame.K_9:
                 for char in self.party:
                     char.mounted = True
@@ -613,6 +615,9 @@ class Gameplay(BaseState):
                     surface.blit(item_text, (x_coord, item_y_coord))
                     item_y_coord += inventory_font.get_linesize()
                 x_coord += 150
+                if x_coord >= self.x * 0.65:
+                    x_coord = 20
+                    y_coord = 300
         
         '''black border for console panel'''
         pygame.draw.rect(surface, "black", (0, self.y - self.y * 0.25, self.x, self.y - self.y * 0.75), 20)
@@ -646,6 +651,13 @@ class Gameplay(BaseState):
                     character.update_end_of_day()
                     if not character.alive and not character.heir:
                             self.console.display_message(f'{character.name} has died!')
+                            self.party.remove(character)
+                    if character.daily_wage > 0:
+                        if self.party[0].gold >= character.daily_wage:
+                            self.party[0].gold -= character.daily_wage
+                            self.console.display_message(f'You have paid {character.name} their daily wage of {character.daily_wage} gold.')
+                        else:
+                            self.console.display_message(f'Having no money to pay {character.name} their daily wage, they depart.')
                             self.party.remove(character)
                 game_actions.true_love(self.party, self.lovers, self.console)
 

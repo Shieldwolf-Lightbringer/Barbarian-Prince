@@ -16,7 +16,7 @@ def e002(party, hex, console):
             enemy_party = []
             console.display_message(f'{thugs} Mercenary thugs, dressed by the usurpers as their royal guardsmen, are riding towards you!')
             for _ in range(thugs):
-                enemy_party.append(characters.Character('Thug Guardsman', 'male', 5, 4, wealth_code=4, mounted=True))
+                enemy_party.append(characters.Character('Thug Guardsman', combat_skill=5, endurance=4, wealth_code=4, mounted=True))
             console.display_message('You have the option to negotiate, evade, or fight them.')
 
 

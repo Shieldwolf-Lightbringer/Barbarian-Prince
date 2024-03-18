@@ -681,19 +681,19 @@ def hire_followers(party, player_hex, console): #town or castle
     
     if hiring_roll == 2:
         console.display_message("A Freeman joins your party at no cost (except food and lodging).")
-        freeman = characters.Character(name='Freeman', combat_skill=3, endurance=4)
+        freeman = characters.Character(title='the Freeman', combat_skill=3, endurance=4)
         party.append(freeman)
 
     elif hiring_roll == 3:
         console.display_message("A Lancer with a horse can be hired for 3 gold per day.")
-        lancer = characters.Character(name='Lancer', combat_skill=5, endurance=5, daily_wage=3, mounted=True)
+        lancer = characters.Character(title='the Lancer', combat_skill=5, endurance=5, daily_wage=3, mounted=True)
         party.append(lancer)
 
     elif hiring_roll == 4:
         console.display_message("One or two mercenaries can be hired for 2 gold per day each.")
-        mercenary = characters.Character(name='Mercenary', combat_skill=4, endurance=4, daily_wage=2)
         mercenaries_hired = choice([0, 1, 2]) ### console.handle_player_response()
         for _ in range(max(mercenaries_hired, 2)):
+            mercenary = characters.Character(title='the Mercenary', combat_skill=4, endurance=4, daily_wage=2)
             party.append(mercenary)
 
     elif hiring_roll == 5:
@@ -701,15 +701,15 @@ def hire_followers(party, player_hex, console): #town or castle
 
     elif hiring_roll == 6:
         console.display_message("Local guide available, hire for 2 gold per day.")
-        guide = characters.Character(name='Guide', combat_skill=2, endurance=3, daily_wage=2, guide=True)
+        guide = characters.Character(title='the Guide', combat_skill=2, endurance=3, daily_wage=2, guide=True)
         party.append(guide)
 
     elif hiring_roll == 7:
         console.display_message("Henchmen available, roll one die for the number available for hire, at 1 gold per day each.")
         henchmen_roll = randint(1,6)
-        henchmen = characters.Character(None, None, combat_skill=3, endurance=3, daily_wage=1)
         henchmen_hired = randint(0, henchmen_roll) ### console.handle_player_response()
         for _ in range(max(henchmen_hired, henchmen_roll)):
+            henchmen = characters.Character(title='the Henchman', combat_skill=3, endurance=3, daily_wage=1)
             party.append(henchmen)
 
     elif hiring_roll == 8:
@@ -724,15 +724,15 @@ def hire_followers(party, player_hex, console): #town or castle
 
     elif hiring_roll == 11:
         console.display_message("Runaway boy or girl joins your party at no cost (except food and lodging), has combat skill 1, endurance 3.")
-        runaway = characters.Character(name='Runaway Urchin', combat_skill=1, endurance=3)
+        runaway = characters.Character(title='the Runaway', combat_skill=1, endurance=3)
         party.append(runaway)
 
     elif hiring_roll >= 12:
         console.display_message("Porters, in any quantity desired, are available to hire for ½ gold each per day. In addition, a local guide can be hired for 2 gold per day.")
-        porters = characters.Character(name='Porter', combat_skill=1, endurance=2, daily_wage=0.5)
-        guide = characters.Character(name='Guide', combat_skill=1, endurance=2, daily_wage=2, guide=True)
+        guide = characters.Character(title='Guide', combat_skill=1, endurance=2, daily_wage=2, guide=True)
         porters_hired = choice([0, 1, 2]) ### console.handle_player_response()
         for _ in range(porters_hired):
+            porters = characters.Character(title='Porter', combat_skill=1, endurance=2, daily_wage=0.5)
             party.append(porters)
         party.append(guide)
 
@@ -989,7 +989,7 @@ def make_offering(party, player_hex, console, temples): #temple
 
     if offering_roll == 10:  ### Need to implement temple hex ban somehow
         console.display_message('You fall in love with a priestess. You immediately escape (r218) with her and can never return to this hex. She is combat skill 2, endurance 4, and has wealth 100 in temple treasures she has stolen!')
-        priestess_love = characters.Character(sex='female', combat_skill=2, endurance=4, wealth_code=100, priest=True, true_love=True)
+        priestess_love = characters.Character(title='the Priestess', sex='female', combat_skill=2, endurance=4, wealth_code=100, priest=True, true_love=True)
         party.append(priestess_love)
 
     if offering_roll == 11:
@@ -1021,11 +1021,11 @@ def make_offering(party, player_hex, console, temples): #temple
             console.display_message('Gods declare your cause a religious crusade, and the Staff of Command is passed into your hands. If you bring this possession to any hex north of the Tragoth River you will command instant obedience throughout the Northlands, regain your throne and win the game. In the meantime you are given a pair of warrior monks (combat skill 5, endurance 6) with mounts to join your party and help you return northward.')
             party[0].add_item('Staff of Command')
             for _ in range(2):
-                warrior_monk = characters.Character(combat_skill=5, endurance=6, monk=True, mounted=True)
+                warrior_monk = characters.Character(title='Warrior Monk', combat_skill=5, endurance=6, monk=True, mounted=True)
                 party.append(warrior_monk)
         else:
             console.display_message('You fall in love with a priestess.')
-            priestess_love = characters.Character(sex='female', combat_skill=2, endurance=4, wealth_code=10, priest=True, true_love=True)
+            priestess_love = characters.Character(title='the Priestess', sex='female', combat_skill=2, endurance=4, wealth_code=10, priest=True, true_love=True)
             party.append(priestess_love)
 
 
