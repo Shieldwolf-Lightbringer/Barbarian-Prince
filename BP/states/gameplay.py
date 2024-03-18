@@ -163,9 +163,9 @@ class Gameplay(BaseState):
         self.icon_spritesheet_color = pygame.image.load(path.join(self.img_folder, 'icon_spritesheet_color.png')).convert_alpha()
         self.knotwork = pygame.image.load(path.join(self.img_folder, 'knotwork.png')).convert_alpha()
 
-        sword_maiden = characters.Character(title='the Swordmaiden', sex='female', combat_skill=7, endurance=7, true_love=True)
-        wizard = characters.Character(title= 'the Wizard', wizard=True)
-        priest = characters.Character(title= 'the Priest', priest=True, daily_wage=1)
+        sword_maiden = characters.Character(title='Swordmaiden', sex='female', combat_skill=7, endurance=7, true_love=True)
+        wizard = characters.Character(title= 'Wizard', wizard=True)
+        priest = characters.Character(title= 'Priest', priest=True)
         self.party.append(sword_maiden)
         self.party.append(wizard)
         self.party.append(priest)
@@ -180,11 +180,11 @@ class Gameplay(BaseState):
         self.party = []
         self.lovers = []
         self.party.append(self.player)
-        sword_maiden = characters.Character(title='the Swordmaiden', sex='female', combat_skill=7, endurance=7, true_love=True)
+        sword_maiden = characters.Character(title='Swordmaiden', sex='female', combat_skill=7, endurance=7, true_love=True)
         self.party.append(sword_maiden)
-        wizard = characters.Character(title= 'the Wizard', wizard=True)
+        wizard = characters.Character(title= 'Wizard', wizard=True)
         self.party.append(wizard)
-        priest = characters.Character(title= 'the Priest', priest=True, daily_wage=1)
+        priest = characters.Character(title= 'Priest', priest=True)
         self.party.append(priest)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Speed': min(char.move_speed for char in self.party)}
@@ -285,17 +285,17 @@ class Gameplay(BaseState):
             if event.key == pygame.K_ESCAPE:
                 self.quit = True
             if event.key == pygame.K_1:
-                events.e057(self.party, self.console)
+                events.e010(self.party, self.console, 'raid')
             if event.key == pygame.K_2:
-                events.e032(self.party, self.console)
+                events.e011(self.party, self.console, 'raid')
             if event.key == pygame.K_3:
                 num_foes = 4
                 foes = []
                 for _ in range(num_foes):
-                    foes.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=4))
+                    foes.append(characters.Character(title='Warrior', race='Orc', combat_skill=4, endurance=5, wealth_code=4))
                 game_actions.combat(self.party, foes, self.console)
             if event.key == pygame.K_7:
-                self.party.append(characters.Character(title='the Random'))
+                self.party.append(characters.Character(title='Random Dude', daily_wage=randint(0,2)))
             if event.key == pygame.K_8:
                 self.party[0].gold += 50
 

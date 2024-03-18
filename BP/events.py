@@ -16,7 +16,7 @@ def e002(party, hex, console):
             enemy_party = []
             console.display_message(f'{thugs} Mercenary thugs, dressed by the usurpers as their royal guardsmen, are riding towards you!')
             for _ in range(thugs):
-                enemy_party.append(characters.Character('Thug Guardsman', combat_skill=5, endurance=4, wealth_code=4, mounted=True))
+                enemy_party.append(characters.Character(title='Usurper Thug', combat_skill=5, endurance=4, wealth_code=4, mounted=True))
             console.display_message('You have the option to negotiate, evade, or fight them.')
 
 
@@ -45,44 +45,102 @@ def e008(party, console): # Halfling
 
 
 def e009(party, console): # Farm
-    pass
+    console.display_message('You spot a small farm ahead. You may detour around it, but that will consume the rest of the day, ending all travel for today. Alternately, you can go up to it. If you approach the farm, you must decide whether to make it a friendly approach, or a raid.')
+    approach = choice(['friendly', 'raid'])
+    farm_type_roll = randint(1,6) + randint(1,6)
+    if farm_type_roll in [2, 3, 10]:
+        e012(party, console, approach)
+    elif farm_type_roll in [4, 7]:
+        e011(party, console, approach)
+    elif farm_type_roll == 5:
+        e014(party, console, approach)
+    elif farm_type_roll == 6:
+        e010(party, console, approach)
+    elif farm_type_roll == 8:
+        e013(party, console, approach)
+    elif farm_type_roll == 9:
+        e015(party, console, approach)
+    elif farm_type_roll in [11, 12]:
+        e016(party, console, approach)
 
 
-def e010(party, console): # Starving Farmer
-    pass
+def e010(party, console, approach=None): # Starving Farmer
+    if approach == 'raid':
+        console.display_message('The farmer and his family are quickly killed, no combat is necessary, but you find he was poor and starving, no food or money are gained.')
+    else:
+        console.display_message('The farmer has had a ruined harvest and his family is now starving. He begs the charity of 5 food units from you.')
+        charity_option = choice(['yes', 'no'])
+        if party[0].possessions.count('ration') < 5:
+            console.display_message('However, without enough food to spare you are forced to leave the farmer and his family to their fate.')
+        elif party[0].possessions.count('ration') >= 5:
+            if charity_option == 'yes':
+                console.display_message('You give the farmer and his family the rations they requested, and they praise you and bless you for your generosity.')
+                for _ in range(5):
+                    party[0].possessions.remove('ration')
+            elif charity_option == 'no':
+                console.display_message('Despite having the rations to spare, you refuse the farmer and his family.  All of your followers are disgusted by your evil temper.')
+                for character in party:
+                    game_actions.desertion(character, party, console, 'your evil temper')
 
 
-def e011(party, console): # Peaceful Farmer
-    pass
+def e011(party, console, approach=None): # Peaceful Farmer
+    if approach == 'raid':
+        console.display_message('The farmer and his family attempt to fight off your raid!')
+        farmer_party = []
+        farmer_party.append(characters.Character(name='Farmer Clan', title='Farmer Clan', combat_skill=4, endurance=7, wealth_code=1))
+        if game_actions.combat(party, farmer_party, console):
+            food_plunder = randint(1,6) * 4
+            console.display_message(f'Having slaughtered the entire family, you find {food_plunder} rations as plunder.')
+            game_actions.distribute_rations(party, food_plunder)
+    else:
+        console.display_message('The farmer is generous, provides food and lodging for your entire party tonight at no cost. Tomorrow morning, he will sell you food units at the rate of 4 units per gold piece, and will sell as much as you wish to buy.')
+        game_actions.purchase_rations(party, console)
+        if randint(1,6) == 6:
+            console.display_message("As you are leaving, the farmer's youngest son joins you for a life of adventure.")
+            party.append(characters.Character(title='Young Farmer', sex='male', combat_skill=3, endurance=4, guide=True))
+
+def e012(party, console, approach=None): # Farmer with Protector
+    if approach == 'raid':
+        console.display_message('')
+    else:
+        console.display_message('')
 
 
-def e012(party, console): # Farmer with Protector
-    pass
+def e013(party, console, approach=None): # Rich Peasant Family
+    if approach == 'raid':
+        console.display_message('')
+    else:
+        console.display_message('')
 
 
-def e013(party, console): # Rich Peasant Family
-    pass
+def e014(party, console, approach=None): # Hostile Reaver Clan
+    if approach == 'raid':
+        console.display_message('')
+    else:
+        console.display_message('')
 
 
-def e014(party, console): # Hostile Reaver Clan
-    pass
+def e015(party, console, approach=None): # Friendly Reaver Clan
+    if approach == 'raid':
+        console.display_message('')
+    else:
+        console.display_message('')
 
 
-def e015(party, console): # Friendly Reaver Clan
-    pass
-
-
-def e016(party, console): # Magician's Home
-    pass
+def e016(party, console, approach=None): # Magician's Home
+    if approach == 'raid':
+        console.display_message('')
+    else:
+        console.display_message('')
 
 
 def e017(party, console): # Peasant Mob in Hot Pursuit
     mob = (randint(1,6) + randint(1,6)) * 2
     console.display_message(f'A large mob of {mob} angry farmers and villagers are after you! You are trapped and must fight your way out.')
     mob_party = []
-    mob_party.append(characters.Character(name='Peasant Leader', combat_skill=3, endurance=2, wealth_code=2))
+    mob_party.append(characters.Character(title='Peasant Leader', combat_skill=3, endurance=2, wealth_code=2))
     for _ in range(mob - 1):
-        mob_party.append(characters.Character(name=choice(['Angry Farmer', 'Angry Peasant', 'Angry Villager']), combat_skill=2, endurance=2))
+        mob_party.append(characters.Character(title=choice(['Angry Farmer', 'Angry Peasant', 'Angry Villager']), combat_skill=2, endurance=2))
     
     game_actions.combat(party, mob_party, console)
 
@@ -152,7 +210,7 @@ def e032(party, console): # Ghosts
     num_ghosts = randint(1,6) + 1
     ghost_party = []
     for _ in range(num_ghosts):
-        ghost_party.append(characters.Character(name='Ghost', combat_skill=4, endurance=2))
+        ghost_party.append(characters.Character(title='Ghost', race='Undead', combat_skill=4, endurance=2))
     console.display_message(f'A group of {num_ghosts} ghosts attack your party. They are guarding an ancient altar. If you kill all the ghosts, you can investigate the altar if you wish.')
     
     if game_actions.combat(party, ghost_party, console, has_surprise='enemy'):
@@ -179,7 +237,7 @@ def e033(party, console): # Warrior Wraiths
     num_wraiths = randint(2,6)
     wraith_party = []
     for _ in range(num_wraiths):
-        wraith_party.append(characters.Character(name='Wraith', combat_skill=6, endurance=9))
+        wraith_party.append(characters.Character(title='Warrior Wraith', race='Undead', combat_skill=6, endurance=9))
     console.display_message(f'A group of {num_wraiths} wraiths, the remnants of long dead super warriors, swiftly assault your party!  They strike first in combat against you.')
     
     if game_actions.combat(party, wraith_party, console, has_first_strike='enemy'):
@@ -198,7 +256,7 @@ def e033(party, console): # Warrior Wraiths
 
 def e034(party, console): # Spectre of the Inner Tomb
     spectre_party = []
-    spectre_party.append(characters.Character(name='Spectre', combat_skill=7, endurance=3, unearthly=True))
+    spectre_party.append(characters.Character(title='Spectre', race='Undead', combat_skill=7, endurance=3, unearthly=True))
     console.display_message('Looking around the atrium of an old tomb, you notice a hidden passage to the interior. You pass within, but it is a long hall, taking the rest of the day to explore. You sense the malevolent presence of a Spectre. You can either retreat now, or continue.')
     console.display_message('Choosing to press onward, at the end of the day, before the evening meal, you finally reach the inner tomb, and find the Spectre. Normal weapons have no effect on the spectre!  It is only hurt by poison wounds or wounds from a magic sword!  Any priest, monk, magician, wizard, or witch will have magical weapons that are poison to the Spectre.')
     
@@ -448,12 +506,12 @@ def e050(party, console, bonus=0): # Local Constabulary
     if randint(1,6) > 5:
         mounted_constables = randint(1,6) + 1 + bonus
         for _ in range(mounted_constables):
-            constable_party.append(characters.Character(name='Mounted Constable', combat_skill=5, endurance=4, wealth_code=4, mounted=True))
+            constable_party.append(characters.Character(title='Mounted Constable', combat_skill=5, endurance=4, wealth_code=4, mounted=True))
         console.display_message(f'You are confronted by {mounted_constables} mounted constables.')    
     else:
         constables = randint(1,6) + 3 + bonus
         for _ in range(constables):
-            constable_party.append(characters.Character(name='Constable', combat_skill=5, endurance=4, wealth_code=4))
+            constable_party.append(characters.Character(title='Constable', combat_skill=5, endurance=4, wealth_code=4))
         console.display_message(f'You are confronted by {constables} constables.')
 
     game_actions.combat(party, constable_party, console)
@@ -464,9 +522,9 @@ def e051(party, console): # Bandits
     num_bandits = len(party) + 2
     console.display_message(f'You are ambushed by {num_bandits} bandits!')
     bandit_party = []
-    bandit_party.append(characters.Character(name='Bandit Chief', combat_skill=6, endurance=6, wealth_code=15))
+    bandit_party.append(characters.Character(title='Bandit Chief', combat_skill=6, endurance=6, wealth_code=15))
     for _ in range(num_bandits - 1):
-        bandit_party.append(characters.Character(name='Bandit', combat_skill=5, endurance=4, wealth_code=1))
+        bandit_party.append(characters.Character(title='Bandit', combat_skill=5, endurance=4, wealth_code=1))
     
     game_actions.combat(party, bandit_party, console, has_surprise='enemy')
 
@@ -476,9 +534,9 @@ def e052(party, console): # Goblins
     num_goblins = randint(1,6) + randint(1,6)
     console.display_message(f'You sight a band of {num_goblins} goblins, lead by a Hobgoblin, in the distance.  You can either escape the area or attempt to follow them.')
     goblin_party = []
-    goblin_party.append(characters.Character(name='Hobgoblin', combat_skill=6, endurance=5, wealth_code=5))
+    goblin_party.append(characters.Character(title='Commander', race='Hobgoblin', combat_skill=6, endurance=5, wealth_code=5))
     for _ in range(num_goblins):
-        goblin_party.append(characters.Character(name='Goblin', combat_skill=3, endurance=3, wealth_code=1))
+        goblin_party.append(characters.Character(title='Skirmisher', race='Goblin', combat_skill=3, endurance=3, wealth_code=1))
     #game_actions.escape()
     #game_actions.follow_characters()
     '''If you follow them, after the follow movement (r219) roll one die. If the result exceeds your wit & wiles the band
@@ -498,9 +556,9 @@ def e055(party, console): # Orcs
     num_orcs = randint(1,6) + randint(1,6)
     console.display_message(f'You sight a band of {num_orcs} orcs, lead by a chieftan, in the distance.  You can either escape the area or attempt to follow them.')
     orc_party = []
-    orc_party.append(characters.Character(name='Chieftan', combat_skill=5, endurance=6, wealth_code=7))
+    orc_party.append(characters.Character(title='Chieftan', race='Orc', combat_skill=5, endurance=6, wealth_code=7))
     for _ in range(num_orcs):
-        orc_party.append(characters.Character(name='Orc Warrior', combat_skill=4, endurance=5, wealth_code=1))
+        orc_party.append(characters.Character(title='Warrior', race='Orc', combat_skill=4, endurance=5, wealth_code=1))
     #game_actions.escape()
     #game_actions.follow_characters()
     '''If you follow them, after the follow movement roll one die. If the result exceeds your wit & wiles the Orcs
@@ -514,9 +572,9 @@ def e056(party, console): # Orc Tower
     num_orcs = randint(1,6) + 1
     console.display_message(f'You see the dark tower of an Orc Warlord.  This area is full of orc and worse things.  A war-patrol of {num_orcs} orcs, led by a demi-Troll warchief, spots you!.  You can either surrender to them or attempt to escape.')
     orc_party = []
-    orc_party.append(characters.Character(name='Warchief', combat_skill=8, endurance=7, wealth_code=10))
+    orc_party.append(characters.Character(title='Warchief', race='demi-troll', combat_skill=8, endurance=7, wealth_code=10))
     for _ in range(num_orcs):
-        orc_party.append(characters.Character(name='Orc Warrior', combat_skill=5, endurance=5, wealth_code=2))
+        orc_party.append(characters.Character(title='Warrior', race='Orc', combat_skill=5, endurance=5, wealth_code=2))
     #game_actions.escape()
     #surrender e061()
 
@@ -524,7 +582,7 @@ def e056(party, console): # Orc Tower
 def e057(party, console): # Troll
     console.display_message('A huge stone-skinned Troll confronts your party.')
     troll_party = []
-    troll_party.append(characters.Character(name='Troll', combat_skill=8, endurance=8, wealth_code=15, regenerates=True))
+    troll_party.append(characters.Character(title='Brute', race='Troll', combat_skill=8, endurance=8, wealth_code=15, regenerates=True))
     troll_roll = randint(1,6)
     if troll_roll > party[0].wits:
         first_strike = 'enemy'
@@ -710,7 +768,7 @@ def e098(party, console): # Dragon
     dragon_party = []
     lair_roll = randint(1,6)
     if lair_roll <= 2:
-        dragon_party.append(characters.Character(name='Dragon', combat_skill=10, endurance=11, wealth_code=0, flying=True))
+        dragon_party.append(characters.Character(title='the Molten Fury', race='Dragon', combat_skill=10, endurance=11, wealth_code=0, flying=True))
         console.display_message('You have found the mighty beast at its lair, surrounded by treasure!')
         gold, item = game_actions.roll_treasure(110)
         gold2, item2 = game_actions.roll_treasure(60)
@@ -724,7 +782,7 @@ def e098(party, console): # Dragon
             party[0].add_item(item2)
             console.display_message(f'You find a {item2}!')
     else:
-        dragon_party.append(characters.Character(name='Dragon', combat_skill=10, endurance=11, wealth_code=30, flying=True))
+        dragon_party.append(characters.Character(title='the Molten Fury', race='Dragon', combat_skill=10, endurance=11, wealth_code=30, flying=True))
     ''' If you must fight it in combat (r220) you cannot escape. Your options are:
 die roll evade fight
 1 escape flying r313 surprise r302
