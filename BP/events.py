@@ -83,6 +83,7 @@ def e010(party, console, approach=None): # Starving Farmer
                     game_actions.desertion(character, party, console, 'your evil temper')
 
 
+### Need to correctly implement purchasing food
 def e011(party, console, approach=None): # Peaceful Farmer
     if approach == 'raid':
         console.display_message('The farmer and his family attempt to fight off your raid!')
@@ -94,44 +95,108 @@ def e011(party, console, approach=None): # Peaceful Farmer
             game_actions.distribute_rations(party, food_plunder)
     else:
         console.display_message('The farmer is generous, provides food and lodging for your entire party tonight at no cost. Tomorrow morning, he will sell you food units at the rate of 4 units per gold piece, and will sell as much as you wish to buy.')
-        game_actions.purchase_rations(party, console)
+        game_actions.purchase_rations(party, console, 4)
         if randint(1,6) == 6:
             console.display_message("As you are leaving, the farmer's youngest son joins you for a life of adventure.")
             party.append(characters.Character(title='Young Farmer', sex='male', combat_skill=3, endurance=4, guide=True))
 
+
+### Need to correctly implement turn by turn reinforcement rolls and purchasing food
 def e012(party, console, approach=None): # Farmer with Protector
     if approach == 'raid':
-        console.display_message('')
+        console.display_message('The farmer and his family bolt the doors, send smoke signals, and attempt to fight off your raid.')
+        farmer_party = []
+        farmer_party.append(characters.Character(name='Farmer Clan', title='Farmer Clan', combat_skill=4, endurance=7, wealth_code=2))
+        reinforcement_roll = randint(1,6)
+        if reinforcement_roll >= 3:
+            protector = characters.Character(title='Protector', combat_skill=6, endurance=5, wealth_code=25)
+            farmer_party.append(protector)
+            for _ in range(4):
+                farmer_party.append(characters.Character(title='Man at Arms', combat_skill=5, endurance=5, wealth_code=4))
+        if game_actions.combat(party, farmer_party, console, has_first_strike='player'):
+            console.display_message('Having slaughtered the entire family, you discover the treasure they were attempting to hide.')
+            e040(party, console)
     else:
-        console.display_message('')
+        console.display_message('The farmer warns you off his land, but will sell you food at 2 units per gold piece, in any quantity you desire.  Afterwards, you continue on your way.')
+        game_actions.purchase_rations(party, console, 2)
 
 
+### Need to correctly implement purchasing food and horses
 def e013(party, console, approach=None): # Rich Peasant Family
     if approach == 'raid':
-        console.display_message('')
+        console.display_message('The family retainers rush to mount a defense against your raid!')
+        retainer_party = []
+        for _ in range(4):
+            retainer_party.append(characters.Character(title='Retainer', combat_skill=4, endurance=4, wealth_code=1))
+        if game_actions.combat(party, retainer_party, console):
+            console.display_message('With their servants dead, the family takes up arms to resist you!')
+            farmer_party = []
+            farmer_party.append(characters.Character(name='Rich Farmer Clan', title='Rich Farmer Clan', combat_skill=5, endurance=6, wealth_code=30))
+            if game_actions.combat(party, farmer_party, console):
+                food_plunder = randint(1,6) * 6
+                console.display_message(f'Having slaughtered the entire family, you find {food_plunder} rations as plunder.')
+                game_actions.distribute_rations(party, food_plunder)
     else:
-        console.display_message('')
+        console.display_message('The family provides food and lodging as if you are in town, with the same penalties if you refuse to pay.')
+        stables_roll = randint(1,6)
+        if stables_roll >= 4:
+            horses_available = randint(1,6)
+            price_per_horse = randint(1,6) * 2
+            console.display_message(f'The family also has stables with {horses_available} horses avavalable to purchase at {price_per_horse} each.')
+        console.display_message('They will sell you food at 2 units per gold piece, in any quantity you desire.')
+        game_actions.purchase_rations(party, console, 2)
 
 
+### Need to correctly implement general inquiries
 def e014(party, console, approach=None): # Hostile Reaver Clan
+    hostile_reaver_party = []
+    hostile_reaver_party.append(characters.Character(title='Clan Leader', combat_skill=5, endurance=5, wealth_code=10))
+    num_reavers = randint(1,6) + 1
+    for _ in range(num_reavers):
+        hostile_reaver_party.append(characters.Character(title='Clan Member', combat_skill=4, endurance=4, wealth_code=4))
+
     if approach == 'raid':
-        console.display_message('')
+        console.display_message('You have encountered a hostile reaver clan!')
+        game_actions.combat(party, hostile_reaver_party, console)
     else:
-        console.display_message('')
+        if len(hostile_reaver_party) >= len(party):
+            console.display_message('The reaver clan attempts a surprise attack!')
+            game_actions.combat(party, hostile_reaver_party, console, has_first_strike='enemy')
+        else:
+            console.display_message('The reaver clan bars the house and bids you pass on. You can either pass on, or make general inquiries.')
+            if 'general inquiries r342':
+                game_actions.combat(party, hostile_reaver_party, console, has_first_strike='enemy')
 
 
+## Need to correctly implement general inquiries and purchasing food and horses
 def e015(party, console, approach=None): # Friendly Reaver Clan
+    friendly_reaver_party = []
+    friendly_reaver_party.append(characters.Character(title='Clan Leader', combat_skill=5, endurance=4, wealth_code=7))
+    num_reavers = randint(1,6)
+    for _ in range(num_reavers):
+        friendly_reaver_party.append(characters.Character(title='Clan Member', combat_skill=4, endurance=4, wealth_code=4))
+
     if approach == 'raid':
-        console.display_message('')
+        console.display_message('There is a battle between your party and the reaver clan.')
+        game_actions.combat(party, friendly_reaver_party, console)
     else:
-        console.display_message('')
+        console.display_message('The clan leader will discuss terms with you, see r342. Unless combat results, he will also sellvfood at 2 units per gold piece, and horses at 6 gold pieces each, regardless of whether he joins your party or not.')
 
 
 def e016(party, console, approach=None): # Magician's Home
     if approach == 'raid':
         console.display_message('')
+        '''magician calls upon his powers to defeat and destroy your party. Roll one die for the number of wounds
+you suffer, one of which is poisoned. All your followers die or flee, deserting you. You must abandon everything
+you cannot carry yourself. You will save any mount you are riding, and its loads, but no other mounts can be
+saved. If you have the Resistance Talisman (el84) you can stop his powers and destroy the magician in battle
+at the cost of destroying the talisman. If you do, roll one die for the wealth code of the magician: 1-5; 2,3-25;
+4,5-60; 6-110.'''
     else:
-        console.display_message('')
+        console.display_message('The magician insists you stay the night and tell him of your adventures to date. You must provide your own food for the day, as he has a small larder.')
+        '''He may be willing to discuss joining your party, he
+is combat skill 3, endurance 5, see r342 if you wish to try. If you don't, or do and avoid a combat situation, he
+will give you a magic gift, roll once on line "B" of the Treasure Table (r226) for the item received.'''
 
 
 def e017(party, console): # Peasant Mob in Hot Pursuit
@@ -141,8 +206,8 @@ def e017(party, console): # Peasant Mob in Hot Pursuit
     mob_party.append(characters.Character(title='Peasant Leader', combat_skill=3, endurance=2, wealth_code=2))
     for _ in range(mob - 1):
         mob_party.append(characters.Character(title=choice(['Angry Farmer', 'Angry Peasant', 'Angry Villager']), combat_skill=2, endurance=2))
-    
     game_actions.combat(party, mob_party, console)
+
 
 def e018(party, console): # Priest
     pass

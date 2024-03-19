@@ -345,10 +345,10 @@ def distribute_rations(party, quantity):
     for _ in range(extra_rations):
         party[randint(0, len(party) - 1)].add_item('ration')
 
-def purchase_rations(party, console):
-    ration_quantity = randint(0,10)
+def purchase_rations(party, console, units_per_gold):
+    ration_quantity = choice([0,4,8,12,16])
     console.display_message(f'You decide to purchase {ration_quantity} rations.')
-    party[0].gold -= ration_quantity * 4
+    party[0].gold -= ration_quantity // units_per_gold
     distribute_rations(party, ration_quantity)
 
 def hunt(party, player_hex, console, castles, temples, towns, deserts, mountains, farmlands, bonus=0):
@@ -495,7 +495,7 @@ def where_is_player(player_hex, castles, temples, towns):
     elif player_hex in towns:
         return towns[player_hex]
     else:
-        return [0, 0, 0, 0, 0]
+        return [0, 0, 1, 1, True]
 
 def escape():
     '''move randomly to adjacent hex, no new events.  Cannot cross river unless flying.'''
