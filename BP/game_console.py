@@ -13,13 +13,16 @@ class Console:
         self.cursor_blink_timer = 0
 
         self.displayed_messages = set()
-        self.scroll_offset = 0 
+        self.scroll_offset = 0
 
-    def render(self):
-        console_area_height = int((self.screen.get_height() * self.height_ratio) - 40)
-        console_area = pygame.Surface((self.screen.get_width() - 40, console_area_height))
-        console_area.fill((220, 215, 175))
+    def render_area(self):
+        self.console_area_height = int((self.screen.get_height() * self.height_ratio) - 40)
+        self.console_area = pygame.Surface((self.screen.get_width() - 40, self.console_area_height))
+        self.console_area.fill((220, 215, 175))
 
+        self.screen.blit(self.console_area, (20, self.screen.get_height() - self.console_area_height - 20))
+
+    def render_text(self):
         self.max_displayed_lines = 5 #int(console_area_height // self.font.get_linesize())
         start_index = max(0, len(self.console_lines) - self.max_displayed_lines - self.scroll_offset)
         visible_lines = self.console_lines[start_index:start_index + self.max_displayed_lines]
@@ -28,32 +31,33 @@ class Console:
 
         for line, requires_input in visible_lines:
             text_surface = self.font.render(line, True, ("black"))
-            console_area.blit(text_surface, (20, y_position))
+            self.console_area.blit(text_surface, (20, y_position))
             y_position += self.font.get_linesize()
 
             if requires_input:
             # Render an indicator that more input is needed for this message
                 input_required_surface = self.font.render("What is your choice? " + self.input_buffer, True, (255, 0, 0))
-                console_area.blit(input_required_surface, (20, y_position))
+                self.console_area.blit(input_required_surface, (20, y_position))
                 y_position +=  self.font.get_linesize()
 
         # Render input buffer
         input_surface = self.font.render(">>> " + self.input_buffer, True, (80, 80, 80))
-        console_area.blit(input_surface, (20, y_position))
+        self.console_area.blit(input_surface, (20, y_position))
         #console_area.blit(input_surface, (20, console_area_height - self.font.get_linesize()))
 
         # Render cursor blink
         self.cursor_blink_timer += pygame.time.get_ticks()
         if self.cursor_blink_timer // 500 % 2 == 0:
             cursor_pos = 20 + self.font.size(">>> " + self.input_buffer)[0]
-            pygame.draw.line(console_area, (80, 80, 80), (cursor_pos, y_position),
+            pygame.draw.line(self.console_area, (80, 80, 80), (cursor_pos, y_position),
                              (cursor_pos, y_position + self.font.get_linesize()), 2)
         else:
             cursor_pos = 20 + self.font.size(">>> " + self.input_buffer)[0]
-            pygame.draw.line(console_area, (220, 215, 175), (cursor_pos, y_position),
+            pygame.draw.line(self.console_area, (220, 215, 175), (cursor_pos, y_position),
                              (cursor_pos, y_position + self.font.get_linesize()), 2)
             
-        self.screen.blit(console_area, (20, self.screen.get_height() - console_area_height - 20))
+        self.screen.blit(self.console_area, (20, self.screen.get_height() - self.console_area_height - 20))
+            
 
 
     def add_line(self, text, requires_input=False):

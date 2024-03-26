@@ -59,7 +59,7 @@ item_table = {'A':['healing potion', 'cure poison vial', 'gift of charm', 'endur
 # e193 shield of light
 # e194 royal helm of the northlands
 
-def encounter(hex, console, terrain_type=None):
+def encounter(hex, party, console, terrain_type=None):
     '''this still needs to account for roads, river rafting, and river crossings'''
     if terrain_type is None:
         terrain_type = getattr(travel_events, overland_map[hex][0])
@@ -69,6 +69,179 @@ def encounter(hex, console, terrain_type=None):
         column_dice = randint(0,5)
         event = terrain_type[row_dice][column_dice]
         console.display_message(f'You encounter event {event} in the {overland_map[hex][0]}!')
+        #get_encounter(event, party, console) ### super broken
+        print(event)
+
+### This needs lots of work
+def get_encounter(encounter_event, party, console):
+    events_dict = {
+    #'e002': events.e002(party, console),
+    'e003':	events.e003(party, console),
+    'e004':	events.e004(party, console),
+    'e005':	events.e005(party, console),
+    'e006':	events.e006(party, console),
+    'e007':	events.e007(party, console),
+    'e008':	events.e008(party, console),
+    'e009':	events.e009(party, console),
+    'e010':	events.e010(party, console),
+    'e011':	events.e011(party, console),
+    'e012':	events.e012(party, console),
+    'e013':	events.e013(party, console),
+    'e014':	events.e014(party, console),
+    'e015':	events.e015(party, console),
+    'e016':	events.e016(party, console),
+    'e017':	events.e017(party, console),
+    'e018':	events.e018(party, console),
+    'e019':	events.e019(party, console),
+    'e020':	events.e020(party, console),
+    'e021':	events.e021(party, console),
+    'e022':	events.e022(party, console),
+    'e023':	events.e023(party, console),
+    'e024':	events.e024(party, console),
+    'e025':	events.e025(party, console),
+    'e026':	events.e026(party, console),
+    'e027':	events.e027(party, console),
+    'e028':	events.e028(party, console),
+    'e029':	events.e029(party, console),
+    'e030':	events.e030(party, console),
+    'e031':	events.e031(party, console),
+    'e032':	events.e032(party, console),
+    'e033':	events.e033(party, console),
+    'e034':	events.e034(party, console),
+    #'e035': events.e035(party, console),
+    'e036':	events.e036(party, console),
+    'e037':	events.e037(party, console),
+    'e038':	events.e038(party, console),
+    'e039':	events.e039(party, console),
+    'e040':	events.e040(party, console),
+    'e041':	events.e041(party, console),
+    'e042':	events.e042(party, console),
+    'e043':	events.e043(party, console),
+    'e044':	events.e044(party, console),
+    'e045':	events.e045(party, console),
+    'e046':	events.e046(party, console),
+    'e047':	events.e047(party, console),
+    'e048':	events.e048(party, console),
+    'e049':	events.e049(party, console),
+    'e050':	events.e050(party, console),
+    'e051':	events.e051(party, console),
+    'e052':	events.e052(party, console),
+    #'e053': events.e053(party, console),
+    'e054':	events.e054(party, console),
+    'e055':	events.e055(party, console),
+    'e056':	events.e056(party, console),
+    'e057':	events.e057(party, console),
+    'e058':	events.e058(party, console),
+    'e059':	events.e059(party, console),
+    'e060':	events.e060(party, console),
+    'e061':	events.e061(party, console),
+    'e062':	events.e062(party, console),
+    'e063':	events.e063(party, console),
+    'e064':	events.e064(party, console),
+    'e065':	events.e065(party, console),
+    'e066':	events.e066(party, console),
+    'e067':	events.e067(party, console),
+    'e068':	events.e068(party, console),
+    'e069':	events.e069(party, console),
+    'e070':	events.e070(party, console),
+    'e071':	events.e071(party, console),
+    'e072':	events.e072(party, console),
+    'e073':	events.e073(party, console),
+    'e074':	events.e074(party, console),
+    'e075':	events.e075(party, console),
+    'e076':	events.e076(party, console),
+    'e077':	events.e077(party, console),
+    'e078':	events.e078(party, console),
+    'e079':	events.e079(party, console),
+    'e080':	events.e080(party, console),
+    'e081':	events.e081(party, console),
+    'e082':	events.e082(party, console),
+    'e083':	events.e083(party, console),
+    'e084':	events.e084(party, console),
+    'e085':	events.e085(party, console),
+    'e086':	events.e086(party, console),
+    'e087':	events.e087(party, console),
+    'e088':	events.e088(party, console),
+    'e089':	events.e089(party, console),
+    'e090':	events.e090(party, console),
+    'e091':	events.e091(party, console),
+    'e092':	events.e092(party, console),
+    'e093':	events.e093(party, console),
+    'e094':	events.e094(party, console),
+    'e095':	events.e095(party, console),
+    'e096':	events.e096(party, console),
+    'e097':	events.e097(party, console),
+    'e098':	events.e098(party, console),
+    'e099':	events.e099(party, console),
+    'e100':	events.e100(party, console),
+    'e101':	events.e101(party, console),
+    'e102':	events.e102(party, console),
+    'e103':	events.e103(party, console),
+    'e104':	events.e104(party, console),
+    'e105':	events.e105(party, console),
+    'e106':	events.e106(party, console),
+    'e107':	events.e107(party, console),
+    'e108':	events.e108(party, console),
+    'e109':	events.e109(party, console),
+    'e110':	events.e110(party, console),
+    'e111':	events.e111(party, console),
+    'e112':	events.e112(party, console),
+    'e113':	events.e113(party, console),
+    'e114':	events.e114(party, console),
+    'e115':	events.e115(party, console),
+    'e116':	events.e116(party, console),
+    'e117':	events.e117(party, console),
+    'e118':	events.e118(party, console),
+    'e119':	events.e119(party, console),
+    'e120':	events.e120(party, console),
+    'e121':	events.e121(party, console),
+    'e122':	events.e122(party, console),
+    'e123':	events.e123(party, console),
+    'e124':	events.e124(party, console),
+    'e125':	events.e125(party, console),
+    'e126':	events.e126(party, console),
+    'e127':	events.e127(party, console),
+    'e128':	events.e128(party, console),
+    'e129':	events.e129(party, console),
+    'e130':	events.e130(party, console),
+    'e131':	events.e131(party, console),
+    #'e132': events.e132(party, console),
+    'e133':	events.e133(party, console),
+    #'e134': events.e134(party, console),
+    'e135':	events.e135(party, console),
+    'e136':	events.e136(party, console),
+    'e137':	events.e137(party, console),
+    'e138':	events.e138(party, console),
+    'e139':	events.e139(party, console),
+    'e140':	events.e140(party, console),
+    'e141':	events.e141(party, console),
+    'e142':	events.e142(party, console),
+    'e143':	events.e143(party, console),
+    'e144':	events.e144(party, console),
+    'e145':	events.e145(party, console),
+    'e146':	events.e146(party, console),
+    'e147':	events.e147(party, console),
+    'e148':	events.e148(party, console),
+    'e149':	events.e149(party, console),
+    'e150':	events.e150(party, console),
+    'e151':	events.e151(party, console),
+    'e152':	events.e152(party, console),
+    'e153':	events.e153(party, console),
+    'e154':	events.e154(party, console),
+    'e155':	events.e155(party, console),
+    'e156':	events.e156(party, console),
+    'e157':	events.e157(party, console),
+    'e158':	events.e158(party, console),
+    'e159':	events.e159(party, console),
+    'e160':	events.e160(party, console),
+    'e161':	events.e161(party, console),
+    'e162':	events.e162(party, console),
+    'e163':	events.e163(party, console),
+    'e164':	events.e164(party, console),
+    'e165':	events.e165(party, console),
+    'e166':	events.e166(party, console),
+}
+    return events_dict[encounter_event]
 
 def get_lost(hex, console, terrain_type=None):
     '''this still needs to account for roads, river rafting, and river crossings'''
@@ -131,7 +304,7 @@ def cross_river(direction, player_hex, console):
 def raft_river():
     pass
 
-def move(input, player_hex, hexagon_dict, console):
+def move(input, player_hex, hexagon_dict, console, party):
     if player_hex[0] % 2 == 0:
         dir = {
             'nw': (-1, +0),
@@ -158,7 +331,9 @@ def move(input, player_hex, hexagon_dict, console):
                     player_hex = player_hex
                 else:
                     player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
-                    encounter(player_hex, console, follow_road(input, player_hex, console))
+                    encounter(player_hex, party, console, follow_road(input, player_hex, console))
+                    # if encounter_event:
+                    #     get_encounter(encounter_event, party, console)
             else:
                 player_hex = player_hex
         else:
@@ -576,7 +751,7 @@ def true_love(party, lovers, console):
 
 '''actions available in any hex'''
 def rest(party, player_hex, console):
-    encounter(player_hex, console)
+    encounter(player_hex, party, console)    
     rest_message = ""
     for character in party:
         if character.wounds > 0:

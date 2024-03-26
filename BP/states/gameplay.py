@@ -142,7 +142,7 @@ class Gameplay(BaseState):
         self.next_state = "GAME_OVER"
         self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
         self.console = Console(self.screen, self.console_font, 1.0, 0.25)
-        self.player = characters.Character('Cal Arath', 'male', 8, 9, 0, 2, randint(2,6), True)
+        self.player = characters.Character(name='Cal Arath', sex='male', combat_skill=8, endurance=9, wealth_code=2, wits=randint(2,6), heir=True)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         '''camera and map are confined to the upper-left 3/4s of the screen'''
         self.camera = pygame.Rect((0, 0), (self.x * 0.75, self.y * 0.75)) #(self.x, self.y))
@@ -176,7 +176,7 @@ class Gameplay(BaseState):
     def initialize(self):
         self.console.clear_console()
         self.console.create_log()
-        self.player = characters.Character('Cal Arath', sex='male', combat_skill=8, endurance=9, wealth_code=2, wits=randint(2,6), heir=True)
+        self.player = characters.Character(name='Cal Arath', sex='male', combat_skill=8, endurance=9, wealth_code=2, wits=randint(2,6), heir=True)
         self.party = []
         self.lovers = []
         self.party.append(self.player)
@@ -254,8 +254,9 @@ class Gameplay(BaseState):
             self.quit = True
 
         if self.player.alive is False:
-            self.console.display_message('Sadly, O Prince, your life and your quest end here.', True)
-            if event.type == pygame.KEYDOWN:
+            self.console.display_message('Sadly, O Prince, your life and your quest end here.')
+            self.console.display_message('Click the left mouse button to escape.')
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 self.done = True
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -308,9 +309,10 @@ class Gameplay(BaseState):
                     char.mounted = False
                     char.flying = True
         
-        player_input = self.console.handle_input(event)
+        if self.player.alive:
+            player_input = self.console.handle_input(event)
 
-        self.daily_cycle(player_input)
+            self.daily_cycle(player_input)
 
         # if player_input in ['nw','n','ne','sw','s','se']:
         #     direction = player_input
@@ -585,7 +587,7 @@ class Gameplay(BaseState):
         surface.blit(party_text, (self.x - self.x * 0.22, character_y_coord))
         character_y_coord += char_font.get_linesize()
         for character in self.party[1:]:
-            character_text = char_font.render(f'{character.name} ({len(character.possessions)}/{character.max_carry})', True, [80, 80, 80])
+            character_text = char_font.render(f'{character.name} ({character.total_wounds}/{character.endurance})', True, [80, 80, 80])
             surface.blit(character_text, (self.x - self.x * 0.22, character_y_coord))
             character_y_coord += char_font.get_linesize()
 
@@ -625,7 +627,8 @@ class Gameplay(BaseState):
         # surface.blit(self.knotwork, (0, self.y - 84))
 
         self.time_message()        
-        self.console.render()
+        self.console.render_area()
+        self.console.render_text()
 
 
     '''This method handles the daily cycle of game play (choose actions, encounters, hunt, eat meals, etc.)'''
@@ -666,7 +669,7 @@ class Gameplay(BaseState):
     def choose_daily_action(self, player_input):
         if player_input in ['nw','n','ne','sw','s','se']:
             direction = player_input
-            self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console)
+            self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console, self.party)
             self.camera_follow(self.player_rect)
             self.location_message()
             return True

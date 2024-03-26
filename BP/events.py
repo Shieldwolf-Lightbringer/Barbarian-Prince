@@ -1034,7 +1034,7 @@ def e132(party, player_hex, console): # Organized Search
         else:
             console.display_message('Despite your thoroughness, you turn up nothing of use.')
     else:
-        e131(console) # Empty Ruins
+        e131(party, console) # Empty Ruins
 
 
 # Not yet fully implemented
@@ -1046,6 +1046,7 @@ def e133(party, console): # Plague
         if randint(1,6) >= 3:
             if not character.heir:
                 console.display_message(f'Madness has destroyed the mind of {character.name}!  They crumple to heap and soon die, foaming at the mouth!')
+                character.alive = False
                 party.remove(character)
             else:
                 console.display_message(f'Madness has taken the mind of {character.name}, but your northern blood helps you to survive! You awaken the next morning and find youself alone.')
@@ -1239,7 +1240,8 @@ def e142(party, console): # Gems
     console.display_message('The box contains a horde of gems!')
     gold1, item1 = game_actions.roll_treasure(100)
     gold2, item2 = game_actions.roll_treasure(100)
-    party[0].gold += gold1, gold2
+    party[0].gold += gold1 
+    party[0].gold += gold2
     console.display_message(f'The gems are worth {gold1 + gold2} gold!')
     caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
     if caster_in_party:
@@ -1560,8 +1562,3 @@ def e195(party, console): # Random Items Reference
                     12: e192(party, console)}
     random_item_result = random_items[random_item_roll]
     return random_item_result
-
-
-
-
-
