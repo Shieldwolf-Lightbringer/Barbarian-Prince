@@ -633,7 +633,7 @@ class Gameplay(BaseState):
 
     '''This method handles the daily cycle of game play (choose actions, encounters, hunt, eat meals, etc.)'''
     def daily_cycle(self, player_input):
-        if player_input in ['nw','n','ne','sw','s','se','i','t','r','o','p','h','q','c']:
+        if player_input in ['nw','n','ne','sw','s','se','e','i','t','r','o','p','h','q','c']:
             daily_action_done = False
             if not daily_action_done:
                 ### morning ###
@@ -648,6 +648,7 @@ class Gameplay(BaseState):
 
                 ### daily updates ###
                 self.count_rations()
+                events.e002(self.party, self.console, self.player_hex)
                 self.update_trackers()
                 for character in self.party:
                     character.update()
@@ -674,7 +675,20 @@ class Gameplay(BaseState):
             self.location_message()
             return True
             
+        if player_input == 'e':
+            escape_flag = False
+            while not escape_flag:
+                escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
+                if escape_route == self.player_hex:
+                    escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
+                else:
+                    escape_flag = True
             
+            self.player_hex = escape_route
+            self.camera_follow(self.player_rect)
+            self.location_message()
+            return True
+
         if player_input == 'i':
             self.show_inventory_screen = not self.show_inventory_screen
             return False
