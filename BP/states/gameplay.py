@@ -295,6 +295,10 @@ class Gameplay(BaseState):
                 for _ in range(num_foes):
                     foes.append(characters.Character(title='Warrior', race='Orc', combat_skill=4, endurance=5, wealth_code=4))
                 game_actions.combat(self.party, foes, self.console)
+            if event.key == pygame.K_4:
+                events.e035(self.party, self.player_hex, self.console)
+            if event.key == pygame.K_5:
+                events.e133(self.party, self.player_hex, self.console)
             if event.key == pygame.K_7:
                 self.party.append(characters.Character(title='Random Dude', daily_wage=randint(0,2)))
             if event.key == pygame.K_8:
@@ -676,14 +680,14 @@ class Gameplay(BaseState):
             return True
             
         if player_input == 'e':
-            escape_flag = False
-            while not escape_flag:
-                escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
-                if escape_route == self.player_hex:
-                    escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
-                else:
-                    escape_flag = True
-            
+            # escape_flag = False
+            # while not escape_flag:
+            #     escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
+            #     if escape_route == self.player_hex:
+            #         escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
+            #     else:
+            #         escape_flag = True
+            escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
             self.player_hex = escape_route
             self.camera_follow(self.player_rect)
             self.location_message()
@@ -695,7 +699,10 @@ class Gameplay(BaseState):
 
         if player_input == 't':
             if self.player_hex in ruins:
-                game_actions.search_ruins(self.party, self.player_hex, self.console)
+                self.player_hex, days_passed = game_actions.search_ruins(self.party, self.player_hex, self.console)
+                self.trackers['Day'] += days_passed
+                self.camera_follow(self.player_rect)
+                self.location_message()
                 return True
             return False            
 

@@ -666,7 +666,6 @@ def where_is_player(player_hex, castles, temples, towns):
 
 def escape(player_hex, hexagon_dict, console, party):
     '''move randomly to adjacent hex, no new events.  Cannot cross river unless flying.'''
-    escape_direction = random_direction()
     if player_hex[0] % 2 == 0:
         dir = {
             'nw': (-1, +0),
@@ -693,24 +692,27 @@ def escape(player_hex, hexagon_dict, console, party):
 		"s" : "4",
 		"sw": "5",
 		"nw": "6"}
-
-    v = dir[escape_direction]
-    if (player_hex[0] + v[0], player_hex[1] + v[1]) not in hexagon_dict:
-        console.display_message('No escape off the map!')
-    else:
-        if overland_map[player_hex][2] is None:
-            player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
+    escape_flag = False
+    while not escape_flag:
+        escape_direction = random_direction()
+        v = dir[escape_direction]
+        if (player_hex[0] + v[0], player_hex[1] + v[1]) not in hexagon_dict:
+            console.display_message('No escape off the map!')
         else:
-            if has_river[escape_direction] in overland_map[player_hex][2]:
-                if not all([character.flying for character in party]):
-                    console.display_message('No escape over the river without flying!')
+            if overland_map[player_hex][2] is None:
+                player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
+                escape_flag = True
+            else:
+                if has_river[escape_direction] in overland_map[player_hex][2]:
+                    if not all([character.flying for character in party]):
+                        console.display_message('No escape over the river without flying!')
+                    else:
+                        player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
+                        escape_flag = True
                 else:
                     player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
-            else:
-                player_hex = (player_hex[0] + v[0], player_hex[1] + v[1])
+                    escape_flag = True
     
-    print(escape_direction)
-
     return player_hex
 
 
@@ -1248,12 +1250,13 @@ def make_offering(party, player_hex, console, temples): #temple
 
 
 def search_ruins(party, player_hex, console): #ruins
+    days_passed = 0
     ruin_results = {2: ['e133', 'Plague'], 3: ['e135', 'Broken Columns'], 
                     4: ['e136', 'Hidden Treasures'], 5: ['e137', 'Inhabitants'], 
                     6: ['e139', 'Minor Treasures'], 7: ['e131', 'Empty Ruins'],
-                    8: ['e132', 'Organized Search'], 9: ['e134', 'Unstable Ruins'], 
-                    10: ['e138', 'Unclean'], 11: ['e135', 'Broken Columns'], 
-                    12: ['e035', 'Spell of Chaos']}
+                    8: ['e132', 'the need for an Organized Search'], 9: ['e134', 'Unstable Ruins'], 
+                    10: ['e138', 'the Unclean'], 11: ['e135', 'Broken Columns'], 
+                    12: ['e035', 'A Spell of Chaos']}
     ruin_search_roll = randint(1,6) + randint(1,6)
     ruin_event = ruin_results[ruin_search_roll]
     console.display_message(f'Your search of the ruins has uncovered {ruin_event[1]}!')
@@ -1262,7 +1265,7 @@ def search_ruins(party, player_hex, console): #ruins
     elif ruin_event[0] == 'e132':
         events.e132(party, player_hex, console)
     elif ruin_event[0] == 'e133':
-        events.e133(party, console)
+        player_hex = events.e133(party, player_hex, console)
     elif ruin_event[0] == 'e134':
         events.e134(party, player_hex, console)
     elif ruin_event[0] == 'e135':
@@ -1276,6 +1279,8 @@ def search_ruins(party, player_hex, console): #ruins
     elif ruin_event[0] == 'e139':
         events.e139(party, console)
     elif ruin_event[0] == 'e035':
-        events.e035(party, player_hex, console)
+        player_hex, days_passed = events.e035(party, player_hex, console)
+        
+    return player_hex, days_passed
 
         

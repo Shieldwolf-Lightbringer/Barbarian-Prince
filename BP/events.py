@@ -324,20 +324,25 @@ def e034(party, console): # Spectre of the Inner Tomb
     spectre_party = []
     spectre_party.append(characters.Character(title='Spectre', race='Undead', combat_skill=7, endurance=3, unearthly=True))
     console.display_message('Looking around the atrium of an old tomb, you notice a hidden passage to the interior. You pass within, but it is a long hall, taking the rest of the day to explore. You sense the malevolent presence of a Spectre. You can either retreat now, or continue.')
-    console.display_message('Choosing to press onward, at the end of the day, before the evening meal, you finally reach the inner tomb, and find the Spectre. Normal weapons have no effect on the spectre!  It is only hurt by poison wounds or wounds from a magic sword!  Any priest, monk, magician, wizard, or witch will have magical weapons that are poison to the Spectre.')
-    
-    if game_actions.combat(party, spectre_party, console):
+    spectre_choice = choice(['yes', 'no'])
+    if spectre_choice == 'yes':
+        console.display_message('Choosing to press onward, at the end of the day, before the evening meal, you finally reach the inner tomb, and find the Spectre. Normal weapons have no effect on the spectre!  It is only hurt by poison wounds or wounds from a magic sword!  Any priest, monk, magician, wizard, or witch will have magical weapons that are poison to the Spectre.')
+        
+        if game_actions.combat(party, spectre_party, console):
 
-        console.display_message('With the spectre defeated, you turn to investigate the treasure it guarded.')
-        spectre_plunder_roll = randint(1,6)
-        spectre_plunder = {1:5, 2:12, 3:25, 4:25, 5:60, 6:110}
-        spectre_plunder_value = spectre_plunder[spectre_plunder_roll]
-        gold, item = game_actions.roll_treasure(spectre_plunder_value)
-        party[0].gold += gold
-        console.display_message(f'You find {gold} gold!')
-        if item:
-            party[0].add_item(item)
-            console.display_message(f'You find a {item}!')
+            console.display_message('With the spectre defeated, you turn to investigate the treasure it guarded.')
+            spectre_plunder_roll = randint(1,6)
+            spectre_plunder = {1:5, 2:12, 3:25, 4:25, 5:60, 6:110}
+            spectre_plunder_value = spectre_plunder[spectre_plunder_roll]
+            gold, item = game_actions.roll_treasure(spectre_plunder_value)
+            party[0].gold += gold
+            console.display_message(f'You find {gold} gold!')
+            if item:
+                party[0].add_item(item)
+                console.display_message(f'You find a {item}!')
+
+    if spectre_choice == 'no':
+        console.display_message('You decide to leave the spectre-haunted tomb alone and retreat to the surface.')
 
 
 def e035(party, player_hex, console): # Spell of Chaos
@@ -352,11 +357,11 @@ def e035(party, player_hex, console): # Spell of Chaos
     while party[0].mindless:
         if randint(1,6) - days_mindless < 0:
             party[0].mindless = False
-            return days_mindless
+            console.display_message(f'You come to your senses after wandering mindlessly for {days_mindless} days.')
+            return player_hex, days_mindless
         else:
             from states.gameplay import hexagon_dict
-            random_move = choice(['n','ne','se','s','sw','nw'])
-            player_hex = game_actions.move(random_move, player_hex, hexagon_dict, console)
+            player_hex = game_actions.escape(player_hex, hexagon_dict, console, party)
             game_actions.starvation(party[0], party, console)
             days_mindless += 1
 
@@ -1038,8 +1043,7 @@ def e132(party, player_hex, console): # Organized Search
         e131(party, console) # Empty Ruins
 
 
-# Not yet fully implemented
-def e133(party, console): # Plague
+def e133(party, player_hex, console): # Plague
     console.display_message('After considerable searching during the day, you find a variety of items worth 50 gold pieces in all, among many skeletons.')
     party[0].gold += 50
     console.display_message('Tonight, before you start to eat, a plague of mind-madness begins to affect your party, due to an ancient curse upon this place.') 
@@ -1059,8 +1063,11 @@ def e133(party, console): # Plague
                     for character in party:
                         if not character.heir:
                             party.remove(character)
-                
-    #game_actions.escape()
+
+    from states.gameplay import hexagon_dict            
+    console.display_message('You flee from the plague-cursed site.')
+    player_hex = game_actions.escape(player_hex, hexagon_dict, console, party)
+    return player_hex
 
 
 # Not yet fully implemented
