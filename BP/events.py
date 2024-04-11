@@ -21,28 +21,41 @@ def e002(party, console, hex):
             game_actions.combat(party, usurper_party, console)
 
 
+#not fully implemented
 def e003(party, console): # Swordsman on horse
-    pass
+    swordsman_party = []
+    swordsman = characters.Character(title='Swordsman', combat_skill=6, endurance=6, wealth_code=7, mounted=True)
+    swordsman_party.append(swordsman)
+    console.display_message('You meet a swordsman adventurer. He is mounted on a horse with combat skill 6, endurance 6, and wealth 7. Sitting there on his horse he takes an active interest in your party. You have the option to talk, evade, or fight.')
+    option = choice(['talk', 'evade', 'fight'])
+    if option == 'talk':
+        console.display_message(f'{swordsman.name} the swordsman joins your party.')
+        party.append(swordsman)
+    elif option == 'evade':
+        console.display_message('You evade the swordsman.')
+        #game_actions.escape(player_hex, hexagon_dict, console, party)
+    elif option == 'fight':
+        game_actions.combat(party, swordsman_party, console)
 
 
 def e004(party, console): # Mercenary Band
-    pass
+    console.display_message('You observe a small band of mercenaries approaching.')
 
 
 def e005(party, console): # Amazons
-    pass
+    console.display_message('You see a group of Amazon warriors approaching, all on foot.')
 
 
 def e006(party, console): # Dwarf
-    pass
+    console.display_message('You encounter a dwarf warrior.')
 
 
 def e007(party, console): # Elf
-    pass
+    console.display_message('You encounter an elf on foot.')
 
 
 def e008(party, console): # Halfling
-    pass
+    console.display_message('You encounter a halfling.')
 
 
 def e009(party, console): # Farm
@@ -211,19 +224,19 @@ def e017(party, console): # Peasant Mob in Hot Pursuit
 
 
 def e018(party, console): # Priest
-    pass
+    console.display_message('You encounter a priest riding on a donkey.')
 
 
 def e019(party, console): # Hermit Monk
-    pass
+    console.display_message('You encounter a hermit monk meditating in the wilderness.')
 
 
 def e020(party, console): # Travelling Monk
-    pass
+    console.display_message('You encounter a travelling monk.')
 
 
 def e021(party, console): # Warrior Monks
-    pass
+    console.display_message('You encounter a party of Monks belonging to a powerful military order, who have weapons and armor.')
 
 
 def e022(party, console): # Random Monks
@@ -237,39 +250,98 @@ def e022(party, console): # Random Monks
 
 
 def e023(party, console): # Wizard
-    pass
+    console.display_message('You meet a wizard. The wizard seems old, but still active and perhaps quite powerful.')
 
 
 def e024(party, console): # Wizard Mind-Control Attack
-    pass
+    console.display_message('The wizard attempts to use magic and take control of you and your party.')
 
 
 def e025(party, console): # Wizard Advice
-    pass
+    console.display_message('The wizard, now a member of your party, confides during the evening meal that he knows the location of a valuable treasure.')
 
 
 def e026(party, console): # Search For Treasure
-    pass
+    console.display_message('You believe you have found the proper location of a treasure. You now must spend one day searching for the precise spot.')
+    treasure_search_roll = randint(1,6)
+    if treasure_search_roll == 1:
+        e027(party, console)
+    elif treasure_search_roll == 2:
+        e028(party, console)
+    elif treasure_search_roll == 3:
+        e029(party, console)
+    elif treasure_search_roll in [4,5]:
+        console.display_message('The information was bogus, there is no treasure here.')
+    elif treasure_search_roll == 6:
+        console.display_message('Clues suggest the treasure is in an adjacent hex.')
+        #Need to implement moving the treasure to the other hex
 
 
 def e027(party, console): # Ancient Treasure
-    pass
+    console.display_message('You find a long-lost ancient treasure!')
+    gold, item = game_actions.roll_treasure(110)
+    party[0].gold += gold
+    console.display_message(f'You find {gold} gold!')
+    if item:
+        party[0].add_item(item)
+        console.display_message(f'You find a {item}!')
 
 
 def e028(party, console): # Cave Tombs
-    pass
+    console.display_message('Amid the howling winds on a craggy cliff you find caves, and within the caves the tombs of an ancient race. You can decide to avoid them, ending this event, or you can continue inward and investigate the tombs.')
+    cave_tombs_roll = randint(1,6)
+    if cave_tombs_roll == 1:
+        e030(party, console)
+    elif cave_tombs_roll == 2:
+        e031(party, console)
+    elif cave_tombs_roll == 3:
+        e032(party, console)
+    elif cave_tombs_roll == 4:
+        e033(party, console)
+    elif cave_tombs_roll == 5:
+        e034(party, console)
+    elif cave_tombs_roll == 6:
+        e029(party, console)
 
 
 def e029(party, console): # Danger and Treasure
-    pass
+    console.display_message('You sense that both danger and treasures are near.')
+    treasure_danger_roll = randint(1,6)
+    if treasure_danger_roll == 1:
+        e028(party, console)
+    elif treasure_danger_roll == 2:
+        e032(party, console)
+    elif treasure_danger_roll == 3:
+        e036(party, console)
+    elif treasure_danger_roll == 4:
+        e037(party, console)
+    elif treasure_danger_roll == 5:
+        e038(party, console)
+    elif treasure_danger_roll == 6:
+        e044(party, console)
 
 
 def e030(party, console): # Mummies
-    pass
+    console.display_message('You discover dried mummies of a long lost race. Although a scholar may be interested, you are not; because amid the dust and rot you find just one (1) gold piece!')
+    party[0].gold += 1
 
 
 def e031(party, console): # Looted Tomb
-    pass
+    console.display_message('You find a partially looted tomb of a dead Prince. Under his sarcophagus you find a secret compartment, but it has a trap lock.')
+    if party[0].wits > randint(1,6):
+        console.display_message('You have outwitted the trap!')
+    else:
+        game_actions.trap_lock(party[0], console)
+    gold, item = game_actions.roll_treasure(50)
+    item = 'Gift of Charm'
+    party[0].gold += gold
+    console.display_message(f'You find {gold} gold!')
+    if item:
+        console.display_message(f'You find a {item}!  However, it looks very old and delicate.')
+        if randint(1,6) >= 5:
+            console.display_message(f'The {item} turns to dust as you lift it from the compartment, and is therefore worthless.')
+        else:
+            party[0].add_item(item)
 
 
 def e032(party, console): # Ghosts
@@ -367,7 +439,22 @@ def e035(party, player_hex, console): # Spell of Chaos
 
 
 def e036(party, console): # Golem at the Gate
-    pass
+    console.display_message('You become separated from the rest of your party during the search. You notice the gateway of a ruined temple, and pass through it. A huge golem appears before you, made entirely of living stone.')
+    golem_party = [characters.Character(title='Guardian', race='Golem', combat_skill=6, endurance=8)]
+    if game_actions.combat(party[0], golem_party, console):
+        next_event_roll = randint(1,6)
+        if next_event_roll == 1:
+            e038(party[0], console)
+        elif next_event_roll == 2:
+            e040(party[0], console)
+        elif next_event_roll == 3:
+            e043(party[0], console)
+        elif next_event_roll == 4:
+            e044(party[0], console)
+        elif next_event_roll == 5:
+            e046(party[0], console)
+        elif next_event_roll == 6:
+            e027(party[0], console)
 
 
 def e037(party, console): # Broken Chest
@@ -564,12 +651,14 @@ def e047(party, console): # Mirror of Reversal
     # game_actions.combat(party, evil_twin), any followers accidentally strike you on d6 5+, if you win, gain wits += 1 and all wealth and possessions
 
 
+# not fully implemented
 def e048(party, console): # Fugitive
-    pass
+    console.display_message('You encounter a person trying to avoid local justice.')
 
 
+# not fully implemented
 def e049(party, console): # Travelling Minstrel
-    pass
+    console.display_message('You meet a musician.')
 
 
 def e050(party, console, bonus=0): # Local Constabulary
