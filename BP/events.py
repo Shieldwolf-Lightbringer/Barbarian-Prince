@@ -3,6 +3,16 @@ import game_actions
 from hexmap import overland_map
 from random import choice, randint
 
+def victory(party, console, hex):
+    north_tragoth_river = [(1,1),(2,1),(3,1),(3,2),(4,1),(5,1),(5,2),(6,1),(7,1),(8,1),(9,1),
+                           (10,1),(11,1),(12,1),(13,1),(15,1),(16,1),(17,1),(18,1),(19,1),(20,1),]
+    victory_possible = False
+    if party[0].gold >= 500 or 'royal helm of the northlands' in party[0].possessions or 'Staff of Command' in party[0].possessions or party[0].patron:
+        victory_possible = True
+    if hex in north_tragoth_river and victory_possible:
+        console.display_message('Crossing the Tragoth river on your way north, your triumphant return causes your countrymen to flock to your banner.  You swiftly avenge your father and drive the usurpers from your lands!  You are crowned king amid much rejoicing.')
+        return True
+
 # Not yet fully implemented
 def e002(party, console, hex):
     north_tragoth_river = [(1,1),(2,1),(3,1),(3,2),(4,1),(5,1),(5,2),(6,1),(7,1),(8,1),(9,1),
@@ -337,9 +347,9 @@ def e031(party, console): # Looted Tomb
     party[0].gold += gold
     console.display_message(f'You find {gold} gold!')
     if item:
-        console.display_message(f'You find a {item}!  However, it looks very old and delicate.')
+        console.display_message(f'You find a {item}!')
         if randint(1,6) >= 5:
-            console.display_message(f'The {item} turns to dust as you lift it from the compartment, and is therefore worthless.')
+            console.display_message(f'However, as it is very old and delicate, the {item} turns to dust as you lift it from the compartment and is therefore worthless.')
         else:
             party[0].add_item(item)
 
@@ -620,6 +630,7 @@ def e044(party, console): # High Altar
                 console.display_message('One of the gods appears, issuing thunderbolts and flames, pledging support to your cause. In an astral vision you see the gods striking down the usurpers to your throne, and telling Northlands priests that your reign shall be holy. You will regain your throne and win the game if you can return alive to the northlands (any hex north of the Tragoth River) within the next 30 days. However, experiencing the power of the gods directly has weakened your human frame, your endurance is permanently reduced by one.  In gratitude for the godly support, you must give all your money away to the gods of the altar instantly, or be struck down dead.')
                 party[0].endurance -= 1
                 party[0].gold = 0
+                party[0].patron = True
 
 
 # Not yet fully implemented

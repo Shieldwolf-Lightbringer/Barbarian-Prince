@@ -745,6 +745,7 @@ def trap_lock(character, console):
         character.wounds += sharp_damage
     else:
         console.display_message(f'Trap malfunctions! No injury to {character.name}!')
+    character.update()
     return
 
 def true_love(party, lovers, console):

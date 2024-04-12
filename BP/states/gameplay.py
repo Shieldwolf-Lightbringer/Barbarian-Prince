@@ -151,6 +151,7 @@ class Gameplay(BaseState):
         self.party.append(self.player)
         self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Speed': min(char.move_speed for char in self.party)}
         self.establish_data_path()
+        self.victory = False
 
         self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_icon_outline.png')).convert_alpha()
         self.player_rect = self.player_icon.get_rect()
@@ -179,6 +180,7 @@ class Gameplay(BaseState):
         self.player = characters.Character(name='Cal Arath', sex='male', combat_skill=8, endurance=9, wealth_code=2, wits=randint(2,6), heir=True)
         self.party = []
         self.lovers = []
+        self.victory = False
         self.party.append(self.player)
         sword_maiden = characters.Character(title='Swordmaiden', sex='female', combat_skill=7, endurance=7, true_love=True)
         self.party.append(sword_maiden)
@@ -259,6 +261,12 @@ class Gameplay(BaseState):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 self.done = True
 
+        if self.victory:
+            self.console.display_message('Congratulations!')
+            self.console.display_message('Click the left mouse button to escape.')
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                self.done = True
+
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
             if mouse_pos[0] <= self.x * 0.75 and mouse_pos[1] <= self.y * 0.75:
@@ -286,15 +294,11 @@ class Gameplay(BaseState):
             if event.key == pygame.K_ESCAPE:
                 self.quit = True
             if event.key == pygame.K_1:
-                events.e010(self.party, self.console, 'raid')
+                self.party[0].add_item('royal helm of the northlands')
             if event.key == pygame.K_2:
-                events.e011(self.party, self.console, 'raid')
+                self.party[0].add_item('Staff of Command')
             if event.key == pygame.K_3:
-                num_foes = 4
-                foes = []
-                for _ in range(num_foes):
-                    foes.append(characters.Character(title='Warrior', race='Orc', combat_skill=4, endurance=5, wealth_code=4))
-                game_actions.combat(self.party, foes, self.console)
+                self.party[0].patron = True
             if event.key == pygame.K_4:
                 events.e035(self.party, self.player_hex, self.console)
             if event.key == pygame.K_5:
@@ -653,6 +657,8 @@ class Gameplay(BaseState):
                 ### daily updates ###
                 self.count_rations()
                 events.e002(self.party, self.console, self.player_hex)
+                if events.victory(self.party, self.console, self.player_hex):
+                    self.victory = True
                 self.update_trackers()
                 for character in self.party:
                     character.update()

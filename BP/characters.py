@@ -1,4 +1,3 @@
-import pygame
 from random import randint, choice
 
 class Character:
@@ -13,12 +12,13 @@ class Character:
         self.fatigue = 0
         self.endurance = endurance if endurance else max((self.combat_skill + randint(0,2)), 2)
         self.wounds = wounds
-        self.poison_wounds = wounds
+        self.poison_wounds = 0
         self.possessions = []
         self.max_carry = 10
         self.wits = wits if wits else 0
         self.wits_bonus = 0
         self.heir = heir
+        self.patron = False
         self.gold = 0
         self.wealth_code = wealth_code
         self.determine_wealth(wealth_code)

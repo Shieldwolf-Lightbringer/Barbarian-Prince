@@ -1,6 +1,5 @@
 import sys
 import pygame
-import random
 from states.menu import Menu
 from states.gameplay import Gameplay
 from states.game_over import GameOver
