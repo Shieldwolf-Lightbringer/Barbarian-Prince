@@ -1,7 +1,27 @@
 import characters
 import game_actions
+import pygame
 from hexmap import overland_map
 from random import choice, randint
+
+def create_location(type, player_hex, console):
+    from states.gameplay import castles, temples, towns, ruins
+    if any(player_hex in dictionary for dictionary in [castles, temples, towns, ruins]):
+        console.display_message('Cannot add a location here, one already exists.')
+    else:
+        if type == 'ruins':
+            ruins[player_hex] = ['Lost Ruins', (pygame.Rect(0, choice([0, 80, 160]), 80, 80))]
+            return ruins
+        if type == 'temples':
+            temples[player_hex] = ['Secret Temple', (pygame.Rect(80, choice([0, 80, 160, 240, 320]), 80, 80)), 1, 1, True]
+            return temples
+        if type == 'towns':
+            towns[player_hex] = ['Hidden Town', (pygame.Rect(0, choice([240, 320]), 80, 80)), 1, 1, True]
+            return towns
+        if type == 'castles':
+            castles[player_hex] = ['Wilderness Keep', (pygame.Rect(0, 400, 80, 80)), 1, 1, True]
+            return castles
+
 
 def victory(party, console, hex):
     north_tragoth_river = [(1,1),(2,1),(3,1),(3,2),(4,1),(5,1),(5,2),(6,1),(7,1),(8,1),(9,1),
@@ -12,6 +32,7 @@ def victory(party, console, hex):
     if hex in north_tragoth_river and victory_possible:
         console.display_message('Crossing the Tragoth river on your way north, your triumphant return causes your countrymen to flock to your banner.  You swiftly avenge your father and drive the usurpers from your lands!  You are crowned king amid much rejoicing.')
         return True
+
 
 # Not yet fully implemented
 def e002(party, console, hex):
@@ -560,14 +581,14 @@ def e042(party, console): # Alcove of Sending
 
 
 def e043(party, console): # Small Altar
-    altar_items = {'e186':'Magic Sword',
-                   'e189':'Charisma Talisman',
-                   'e191':'Resistance Ring',
-                   'e192':'Ressurection Necklace',
-                   'e193':'Shield of Light',
-                   'e194':'Royal Helm of the Northlands'}
+    altar_items = {'e186':'magic sword',
+                   'e189':'charisma talisman',
+                   'e191':'resistance ring',
+                   'e192':'ressurection necklace',
+                   'e193':'shield of light',
+                   'e194':'royal helm of the northlands'}
     item = choice(['e186','e189','e191','e192','e193','e194'])
-    special_item = altar_items[item]
+    special_item = altar_items[item].title()
     console.display_message(f'Upon the altar is displayed a {special_item}.  However, the air around the altar shimmers with magical energy.')
     altar_spell = choice(['magic shock field', 'magic shock field', 'magic fire', 'magic fire','poison air', 'fear'])
     caster_in_party = any([character.magician, character.wizard, character.witch] for character in party)
@@ -715,8 +736,49 @@ discovers you and attacks, but your party will get the first strike in combat (r
 one die to see where they lead you: 1-e054; 2,3,4,5,6-e053.'''
 
 
+# Not fully implemented
 def e053(party, other_party, console): # Campsite
-    pass
+    campsite_location_roll = randint(1,6) + randint(1,6)
+    campsite_location_result = None
+    campsite_event = None
+    campsite_options = 'You may now elect to fight the characters encountered at the campsite, or hide in this hex until tomorrow.'
+    if campsite_location_roll == 2:
+        campsite_location_result = 'The campsite is located at a small altar.'
+        campsite_event = e043(party, console)
+    elif campsite_location_roll == 3:
+        campsite_location_result = 'The campsite is located at previously unknown ruins.'
+        campsite_event = e064(party, console)
+    elif campsite_location_roll == 4:
+        campsite_location_result = 'The campsite is located at the entrance to cave tombs.'
+        campsite_event = e028(party, console)
+    elif campsite_location_roll == 5:
+        campsite_location_result = 'The campsite is the rendezvous with another group of the same size. They may spot you and attack first.'
+        other_party *= 2
+        # roll campsite location again for actual location, can repeat this result
+    elif campsite_location_roll in [6, 7, 8]:
+        campsite_location_result = 'The campsite is located in open ground.'
+    elif campsite_location_roll == 9:
+        campsite_location_result = 'The campsite is hidden by terrain and vegetation.'
+        # roll campsite location again for actual location, reroll if this result occurs again
+    elif campsite_location_roll == 10:
+        campsite_location_result = 'The campsite is located at a small building.'
+        small_building_roll = randint(1,6)
+        small_buildings = {1: e042, 2: e037, 3: e043, 4: e039, 5: None, 6: None}
+        campsite_event = small_buildings[small_building_roll](party, console)
+    elif campsite_location_roll == 11:
+        campsite_location_result = 'The campsite is near a place where you sense magic.'
+        magic_place_roll = randint(1,6)
+        magic_place = {1: e032, 2: e036, 3: e043, 4: e044, 5: e045, 6: e046}
+        campsite_event = magic_place[magic_place_roll](party, console)
+    elif campsite_location_roll == 12:
+        campsite_location_result = 'The campsite is near a place of hidden magic.  A party member with magical abilities may be able to find it.'
+        if any([character.priest, character.monk, character.magician, character.wizard, character.witch] for character in party):
+            magic_place_roll = randint(1,6)
+            magic_place = {1: e022, 2: e036, 3: e043, 4: e044, 5: e045, 6: e046}
+            campsite_event = magic_place[magic_place_roll](party, console)
+    console.display_message(f'{campsite_location_result} {campsite_options}')
+    if game_actions.combat(party, other_party, console):
+        campsite_event(party, console)
 
 
 def e054(party, console): # Goblin Keep

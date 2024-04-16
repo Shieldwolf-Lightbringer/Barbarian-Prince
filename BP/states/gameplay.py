@@ -316,58 +316,14 @@ class Gameplay(BaseState):
                 for char in self.party:
                     char.mounted = False
                     char.flying = True
+            
+            if event.key == pygame.K_MINUS:
+                events.create_location(choice(['ruins', 'temples', 'towns', 'castles']), self.player_hex, self.console)
         
         if self.player.alive:
             player_input = self.console.handle_input(event)
-
             self.daily_cycle(player_input)
 
-        # if player_input in ['nw','n','ne','sw','s','se']:
-        #     direction = player_input
-        #     self.player_hex = game_actions.move(direction, self.player_hex, hexagon_dict, self.console)
-        #     self.camera_follow(self.player_rect)
-        #     self.location_message()
-        #     #game_actions.encounter(self.player_hex, self.console)
-        #     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
-        #     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-            
-        #     self.count_rations()
-        #     self.update_trackers()
-        #     for character in self.party:
-        #         character.update()
-        #         if not character.alive and not character.heir:
-        #             self.console.display_message(f'{character.name} has died!')
-        #             self.party.remove(character)
-        #     game_actions.true_love(self.party, self.lovers, self.console)
-
-        # if player_input == 'i':
-        #     self.show_inventory_screen = not self.show_inventory_screen
-
-        # if player_input == 't':
-        #     if self.player_hex in ruins:
-        #         game_actions.search_ruins(self.party, self.player_hex, self.console)
-        #         game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands)
-        #         game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-        #         self.count_rations()
-        #         self.update_trackers()
-        #         for character in self.party:
-        #             character.update()
-        #             if not character.alive and not character.heir:
-        #                 self.console.display_message(f'{character.name} has died!')
-        #                 self.party.remove(character)
-        #         game_actions.true_love(self.party, self.lovers, self.console)
-
-        # if player_input == 'r':
-        #     game_actions.hunt(self.party, self.player_hex, self.console, castles, temples, towns, deserts, mountains, farmlands, game_actions.rest(self.party, self.player_hex, self.console))
-        #     game_actions.eat_meal(self.party, self.player_hex, self.console, castles, temples, towns, deserts, oasis)
-        #     self.count_rations()
-        #     self.update_trackers()
-        #     for character in self.party:
-        #         character.update()
-        #         if not character.alive and not character.heir:
-        #             self.console.display_message(f'{character.name} has died!')
-        #             self.party.remove(character)
-        #     game_actions.true_love(self.party, self.lovers, self.console)
 
     '''This method counts the rations in the party and updates the tracker'''
     def count_rations(self):
@@ -516,13 +472,13 @@ class Gameplay(BaseState):
     '''This method displays a message for the player when they arrive in a hex containing a feature'''
     def location_message(self):
         if self.player_hex in castles:
-            self.console.display_message(f'You arrive at the imposing fortifications of {castles[self.player_hex][0]}')
+            self.console.display_message(f'You arrive at the imposing fortifications of {castles[self.player_hex][0]}. You may (h)ire followers, (p)etition for audience, or (q)uery news.')
         elif self.player_hex in towns:
-            self.console.display_message(f'You arrive at the town of {towns[self.player_hex][0]}')
+            self.console.display_message(f'You arrive at the town of {towns[self.player_hex][0]}. You may (h)ire followers, (p)etition for audience, or (q)uery news.')
         elif self.player_hex in temples:
-            self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}')
+            self.console.display_message(f'You arrive at the holy site of {temples[self.player_hex][0]}.  You may make an (o)ffering, (p)etition for audience, or (q)uery news.')
         elif self.player_hex in ruins:
-            self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}')
+            self.console.display_message(f'You arrive at the desolate remnants of {ruins[self.player_hex][0]}. You may search for (t)reasure here.')
 
     '''This method displays a message for the player on certain days'''
     def time_message(self):
