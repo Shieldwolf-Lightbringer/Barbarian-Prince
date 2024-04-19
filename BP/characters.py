@@ -51,6 +51,7 @@ class Character:
             self.offering_bonus = {}
             self.food_mod = {}
             self.room_mod = {}
+            self.location = None
         self.unearthly = unearthly
         self.regenerates = regenerates
         self.update()

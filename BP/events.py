@@ -4,22 +4,26 @@ import pygame
 from hexmap import overland_map
 from random import choice, randint
 
-def create_location(type, player_hex, console):
+def create_location(type, name, player_hex, console):
     from states.gameplay import castles, temples, towns, ruins
     if any(player_hex in dictionary for dictionary in [castles, temples, towns, ruins]):
         console.display_message('Cannot add a location here, one already exists.')
     else:
         if type == 'ruins':
-            ruins[player_hex] = ['Lost Ruins', (pygame.Rect(0, choice([0, 80, 160]), 80, 80))]
+            ruins[player_hex] = [name, (pygame.Rect(0, choice([0, 80, 160]), 80, 80))]
+            console.display_message(f'You discover the lost ruins of {name}.')
             return ruins
         if type == 'temples':
-            temples[player_hex] = ['Secret Temple', (pygame.Rect(80, choice([0, 80, 160, 240, 320]), 80, 80)), 1, 1, True]
+            temples[player_hex] = [name, (pygame.Rect(80, choice([0, 80, 160, 240, 320]), 80, 80)), 1, 1, True]
+            console.display_message(f'You discover the secret temple of {name}.')
             return temples
         if type == 'towns':
-            towns[player_hex] = ['Hidden Town', (pygame.Rect(0, choice([240, 320]), 80, 80)), 1, 1, True]
+            towns[player_hex] = [name, (pygame.Rect(0, choice([240, 320]), 80, 80)), 1, 1, True]
+            console.display_message(f'You discover the hidden town of {name}.')
             return towns
         if type == 'castles':
-            castles[player_hex] = ['Wilderness Keep', (pygame.Rect(0, 400, 80, 80)), 1, 1, True]
+            castles[player_hex] = [name, (pygame.Rect(0, 400, 80, 80)), 1, 1, True]
+            console.display_message(f'You discover the concealed fortifications of a {name}.')
             return castles
 
 
@@ -27,7 +31,7 @@ def victory(party, console, hex):
     north_tragoth_river = [(1,1),(2,1),(3,1),(3,2),(4,1),(5,1),(5,2),(6,1),(7,1),(8,1),(9,1),
                            (10,1),(11,1),(12,1),(13,1),(15,1),(16,1),(17,1),(18,1),(19,1),(20,1),]
     victory_possible = False
-    if party[0].gold >= 500 or 'royal helm of the northlands' in party[0].possessions or 'Staff of Command' in party[0].possessions or party[0].patron:
+    if party[0].gold >= 500 or 'royal helm of the northlands' in party[0].possessions or 'staff of command' in party[0].possessions or party[0].patron:
         victory_possible = True
     if hex in north_tragoth_river and victory_possible:
         console.display_message('Crossing the Tragoth river on your way north, your triumphant return causes your countrymen to flock to your banner.  You swiftly avenge your father and drive the usurpers from your lands!  You are crowned king amid much rejoicing.')
@@ -781,8 +785,35 @@ def e053(party, other_party, console): # Campsite
         campsite_event(party, console)
 
 
+# This is not working.  I can't get the keep to spawn AND have the party escape. :/  create e054a to handle escape and fight?
 def e054(party, console): # Goblin Keep
-    pass
+    console.display_message('You see a fortified tower keep of a Goblin King. The area is swarming with hundreds of Goblins. You decide you should escape, but a band of Goblins has already seen you. They charge forward with screams and howls.')
+    keep_location = party[0].location
+    from states.gameplay import hexagon_dict
+    goblin_escape_roll = randint(1,6)
+    if party[0].wits > goblin_escape_roll:
+        console.display_message('You manage to elude the pursuing goblins.')
+        create_location('castles', 'Goblin King', keep_location, console)
+        party[0].location = game_actions.escape(party[0].location, hexagon_dict, console, party)
+        return party[0].location
+    elif party[0].wits <= goblin_escape_roll:
+        goblin_decision = choice(['fight', 'surrender'])
+        if goblin_decision == 'surrender':
+            console.display_message('You choose to surrender rather than fight the horde.')
+            create_location('castles', 'Goblin King', keep_location, console)
+            return party[0].location, e061(party, console)
+        elif goblin_decision == 'fight':
+            console.display_message('You choose to fight!')
+            goblins_roll = randint(1,6) + randint(1,6) + randint(1,6)
+            goblin_party = [characters.Character(title='Leader', race='Hobgoblin', combat_skill=6, endurance=5, wealth_code=4)]
+            for _ in range(goblins_roll):
+                goblin_party.append(characters.Character(title='Warrior', race='Goblin', combat_skill=3, endurance=3, wealth_code=1))
+            if game_actions.combat(party, goblin_party, console, has_first_strike='player'):
+                console.display_message('You have slain the pursuing goblins, and make good your escape.')
+                create_location('castles', 'Goblin King', keep_location, console)
+                party[0].location = game_actions.escape(party[0].location, hexagon_dict, console, party)
+                return party[0].location
+
 
 
 def e055(party, console): # Orcs
@@ -841,7 +872,7 @@ def e060(party, console): # Arrested
 
 
 def e061(party, console): # Marked For Death (Arrested)
-    pass
+    console.display_message('Oh no!  Marked for death!')
 
 
 def e062(party, console): # Thrown in the Dungeon (Arrested)
@@ -853,15 +884,28 @@ def e063(party, console): # Imprisoned (Arrested)
 
 
 def e064(party, console): # Hidden Ruins
-    pass
+    ruin_name = choice(['Mellikaard', 'Bandeban Hall', 'The Tomb of Nequim', 'The Scorched Tower'])
+    create_location('ruins', ruin_name, party[0].location, console)
 
 
 def e065(party, console): # Hidden Town
-    pass
+    town_name = choice(['Thricia', 'Dunlaw', 'Ufwyll'])
+    create_location('towns', town_name, party[0].location, console)
+    # Cannot seek news and information here, need to implement that
 
 
 def e066(party, console): # Secret Temple
-    pass
+    temple_name = choice(['the Oracle', 'the Cult of Steel', 'Chaos Undivided'])
+    create_location('temples', temple_name, party[0].location, console)
+    '''Before you can do anything a large group of guardian
+monks surrounds you. Roll one die: if the result equals or exceeds your wit & wiles you and your party are
+arrested, see e060 and subtract one (-1) from the die roll when resolving that event.
+If the result is less than your wit & wiles you talk your way past the guardians, and you can stay at the temple as
+if it were a normal temple marked on the map. Thus the rules for food (r215) and lodging (r217) at a temple
+apply, as well as your ability to undertake daily actions allowed at a temple (r203). If you later return to this
+temple, the guardians will continue to permit you free entrance, with no new die rolls needed/However, if you kill
+anyone while in this temple hex, or escape from it, the next time you enter you must begin this event afresh,
+including a new die roll.'''
 
 
 def e067(party, console): # Abandoned Mines

@@ -494,12 +494,17 @@ def combat_strike(attacker, target, console):
 
 
 def talk():
+    '''r321 to r329 cover bribes and other attempts to let your party pass'''
+    '''r331 to r340 cover various methods to add characters to your party'''
+    '''r341 is a 2d6 table of conversation, r342 is a 2d6 table of general inquiries; both lead to fights or hiring'''
     pass
 
 def evade():
+    '''r311 to r320 determine various escape or hide outcomes'''
     pass
 
 def fight():
+    '''r300 to r310 determine who gets surprise or first strike; r330 randomizes r300 to r310'''
     pass
 
 def dismiss_party_member(party):
@@ -1239,9 +1244,9 @@ def make_offering(party, player_hex, console, temples): #temple
 
     if offering_roll >= 14:
         party[0].offering_bonus[player_hex] = 0
-        if 'Staff of Command' not in party[0].possessions:
+        if 'staff of command' not in party[0].possessions:
             console.display_message('Gods declare your cause a religious crusade, and the Staff of Command is passed into your hands. If you bring this possession to any hex north of the Tragoth River you will command instant obedience throughout the Northlands, regain your throne and win the game. In the meantime you are given a pair of warrior monks (combat skill 5, endurance 6) with mounts to join your party and help you return northward.')
-            party[0].add_item('Staff of Command')
+            party[0].add_item('staff of command')
             for _ in range(2):
                 warrior_monk = characters.Character(title='Warrior Monk', combat_skill=5, endurance=6, monk=True, mounted=True)
                 party.append(warrior_monk)

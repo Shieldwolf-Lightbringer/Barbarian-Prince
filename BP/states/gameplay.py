@@ -189,6 +189,7 @@ class Gameplay(BaseState):
         priest = characters.Character(title= 'Priest', priest=True)
         self.party.append(priest)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
+        self.player.location = self.player_hex
         self.trackers = {'Day': 1, 'Party': len(self.party), 'Rations': 0, 'Gold': self.player.gold, 'Speed': min(char.move_speed for char in self.party)}
         self.hunt_bonus = 0
 
@@ -300,9 +301,9 @@ class Gameplay(BaseState):
             if event.key == pygame.K_3:
                 self.party[0].patron = True
             if event.key == pygame.K_4:
-                events.e035(self.party, self.player_hex, self.console)
+                events.e064(self.party, self.console)
             if event.key == pygame.K_5:
-                events.e133(self.party, self.player_hex, self.console)
+                events.e066(self.party, self.console)
             if event.key == pygame.K_7:
                 self.party.append(characters.Character(title='Random Dude', daily_wage=randint(0,2)))
             if event.key == pygame.K_8:
@@ -602,6 +603,7 @@ class Gameplay(BaseState):
             if not daily_action_done:
                 ### morning ###
                 daily_action_done = self.choose_daily_action(player_input)
+                self.player.location = self.player_hex
 
             if daily_action_done and self.player.alive:
                 ### afternoon ###
