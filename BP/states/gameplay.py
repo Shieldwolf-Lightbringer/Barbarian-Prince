@@ -644,13 +644,6 @@ class Gameplay(BaseState):
             return True
             
         if player_input == 'e':
-            # escape_flag = False
-            # while not escape_flag:
-            #     escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
-            #     if escape_route == self.player_hex:
-            #         escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
-            #     else:
-            #         escape_flag = True
             escape_route = game_actions.escape(self.player_hex, hexagon_dict, self.console, self.party)
             self.player_hex = escape_route
             self.camera_follow(self.player_rect)
@@ -658,7 +651,9 @@ class Gameplay(BaseState):
             return True
 
         if player_input == 'i':
-            self.show_inventory_screen = not self.show_inventory_screen
+            self.next_state = 'PARTY_MANAGE'
+            self.done = True
+            #self.show_inventory_screen = not self.show_inventory_screen
             return False
 
         if player_input == 't':

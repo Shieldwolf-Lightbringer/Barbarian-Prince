@@ -1,8 +1,10 @@
 import sys
 import pygame
+from states.battle import Battle
 from states.menu import Menu
 from states.gameplay import Gameplay
 from states.game_over import GameOver
+from states.party_manage import PartyManagement
 from states.splash import Splash
 from game import Game
 
@@ -19,6 +21,8 @@ states = {
      "SPLASH": Splash(),
      "GAMEPLAY": Gameplay(),
      "GAME_OVER": GameOver(),
+     "PARTY_MANAGE": PartyManagement(),
+     "BATTLE": Battle(),
 }
 
 if __name__ == '__main__':
