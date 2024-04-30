@@ -53,7 +53,18 @@ def e002(party, console, hex):
             for _ in range(thugs):
                 usurper_party.append(characters.Character(title='Usurper Thug', combat_skill=5, endurance=4, wealth_code=4, mounted=True))
             console.display_message('You have the option to negotiate, evade, or fight them.')
-            game_actions.combat(party, usurper_party, console)
+            if len(usurper_party) <= len(party) and party[0].total_wounds <= 3:
+                option = 'fight'
+            else:
+                option = 'evade'
+                
+            if option == 'fight':
+                game_actions.combat(party, usurper_party, console)
+            elif option == 'evade':
+                from states.gameplay import hexagon_dict
+                hex = game_actions.escape(hex, hexagon_dict, console, party)
+                return hex
+    return hex
 
 
 #not fully implemented
@@ -860,15 +871,26 @@ def e057(party, console): # Troll
 
 
 def e058(party, console): # Band of Dwarves
-    pass
+    console.display_message('You encounter a group of dwarves.')
 
 
 def e059(party, console): # Dwarf Mines
-    pass
+    console.display_message('You see a great underground castle inhabited by dwarves.  Dwarven constables and patrols intercept your party.')
 
 
 def e060(party, console): # Arrested
-    pass
+    console.display_message('You and your party are arrested by an overwhelming force, and cannot resist.  You are put into jail.')
+    offence_roll = randint(1,6)
+    if offence_roll <= 1:
+        e061(party, console)
+    elif offence_roll == 2:
+        e062(party, console)
+    elif offence_roll in [3, 4]:
+        e063(party, console)
+    elif offence_roll in [5, 6]:
+        console.display_message('You have committed a minor offence and you, along with your entire party, are held overnight.  In the morning, you are assessed a fine of 10 gold.')
+        if party[0].gold < 10 + (2 * len(party)):
+            e063(party, console)
 
 
 def e061(party, console): # Marked For Death (Arrested)
@@ -876,11 +898,11 @@ def e061(party, console): # Marked For Death (Arrested)
 
 
 def e062(party, console): # Thrown in the Dungeon (Arrested)
-    pass
+    console.display_message('You are thrown into a deep dungeon.  Other members of your party are imprisoned or sold as slaves.')
 
 
 def e063(party, console): # Imprisoned (Arrested)
-    pass
+    console.display_message('You and your party are imprisoned.')
 
 
 def e064(party, console): # Hidden Ruins
@@ -909,47 +931,55 @@ including a new die roll.'''
 
 
 def e067(party, console): # Abandoned Mines
-    pass
+    console.display_message('You come across apparently abandoned mines.  It looks like they were once inhabited by dwarves.  You may investigate, if you wish.')
 
 
 def e068(party, console): # Wizard's Abode
-    pass
+    console.display_message("You come across a wizard's home.")
 
 
 def e069(party, console): # Wounded Warrior
-    pass
+    console.display_message('You come across a heroic fighter near death.  If you remain with him while he rests and heals, he will join your party as an ally.')
+    party.append(characters.Character(title='Warrior', sex='male', combat_skill=7, endurance=6, wounds=5, wealth_code=0))
 
 
 def e070(party, console): # Halfling Town
-    pass
+    console.display_message('You discover a hidden and unknown town of halflings.')
+    create_location('towns', 'Halfling Village', party[0].location, console)
 
 
 def e071(party, console): # Elven Band
-    pass
+    console.display_message('You encounter a band of elves.')
 
 
 def e072(party, console): # Following an Elven Band
-    pass
+    console.display_message('The elves bid that you follow them.  If you do not, you must either evade or fight them.')
 
 
 def e073(party, console): # Witch
-    pass
+    console.display_message('You encounter a witch.  She may be friendly, hostile, or ignore you.')
 
 
 def e074(party, console): # Giant Spiders
-    pass
+    console.display_message('Giant spiders trap you for their next meal!')
 
 
 def e075(party, console): # Pack of Wolves
-    pass
+    console.display_message('At night a hunting pack of wolves attacks your party!')
+    #ignore if in castle, temple, or town
 
 
 def e076(party, console): # Great Hunting Cat
-    pass
+    console.display_message('You are surprised by a great hunting cat!')
+    #ignore if in castle, temple, or town
 
 
 def e077(party, console): # Herd of Wild Horses
-    pass
+    console.display_message('You surprise a herd of wild horses.')
+    #ignore if in castle, temple, town, or swamp hex
+    '''Each character in your party can capture one, giving you that many additional mounts. However, you must spend
+tomorrow resting (r203) in order to train the captures. If you have a magician, wizard or witch in your party, that
+character can cast a spell that trains the animals instantly, no extra day of rest is needed.'''
 
 
 def e078(party, console): # Bad Going
@@ -961,11 +991,14 @@ def e079(party, console): # Heavy Rains
 
 
 def e080(party, console): # Pixies
-    pass
+    console.display_message('A group of small, flying sprites called Pixies appear and dance around you and your party.')
+    ''' Unless you have a magician, wizard, witch, elf or half-ling in your party they will dance away and end the encounter. If your party
+includes any one of these characters, the pixies, may stop to grant you a boon, roll one die: 1-nothing of use; 2-
+advice see e025; 3-lead you to ancient cache see e038; 4,5-provide magic gift, see e195; 6-give you a winged pegasus mount see e188.'''
 
 
 def e081(party, console): # Mounted Patrol
-    pass
+    console.display_message('You encounter a mounted patrol of soldiers.')
 
 
 def e082(party, console): # Spectre
@@ -981,11 +1014,12 @@ def e082(party, console): # Spectre
 
 
 def e083(party, console): # Wild Boar Charge
-    pass
+    console.display_message('A huge wild boar charges toward your party, and it has surprised you in combat!')
 
 
 def e084(party, console): # Bear Comes to Dinner
-    pass
+    console.display_message('You are about to sit down for a meal when a large black bear wanders into your campsite!')
+    #Ignore this event if you are in a town, castle, temple, friendly farm, in desert, or guest of any character who provides a free meal.
 
 
 def e085(party, console): # Narrow Ledges

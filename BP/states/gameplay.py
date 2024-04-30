@@ -614,7 +614,9 @@ class Gameplay(BaseState):
 
                 ### daily updates ###
                 self.count_rations()
-                events.e002(self.party, self.console, self.player_hex)
+                self.player_hex = events.e002(self.party, self.console, self.player_hex)
+                self.camera_follow(self.player_rect)
+                self.location_message()
                 if events.victory(self.party, self.console, self.player_hex):
                     self.victory = True
                 self.update_trackers()
