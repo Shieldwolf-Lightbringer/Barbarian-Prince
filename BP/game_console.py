@@ -15,14 +15,16 @@ class Console:
         self.displayed_messages = set()
         self.scroll_offset = 0
 
-    def render_area(self):
+    def render_area(self, surface=None):
         self.console_area_height = int((self.screen.get_height() * self.height_ratio) - 40)
         self.console_area = pygame.Surface((self.screen.get_width() - 40, self.console_area_height))
         self.console_area.fill((220, 215, 175))
+        if surface:
+            surface.blit(self.console_area, (20, self.screen.get_height() - self.console_area_height - 20))
+        else:
+            self.screen.blit(self.console_area, (20, self.screen.get_height() - self.console_area_height - 20))
 
-        self.screen.blit(self.console_area, (20, self.screen.get_height() - self.console_area_height - 20))
-
-    def render_text(self):
+    def render_text(self, surface=None):
         self.max_displayed_lines = 5 #int(console_area_height // self.font.get_linesize())
         start_index = max(0, len(self.console_lines) - self.max_displayed_lines - self.scroll_offset)
         visible_lines = self.console_lines[start_index:start_index + self.max_displayed_lines]
@@ -55,8 +57,11 @@ class Console:
             cursor_pos = 20 + self.font.size(">>> " + self.input_buffer)[0]
             pygame.draw.line(self.console_area, (220, 215, 175), (cursor_pos, y_position),
                              (cursor_pos, y_position + self.font.get_linesize()), 2)
-            
-        self.screen.blit(self.console_area, (20, self.screen.get_height() - self.console_area_height - 20))
+
+        if surface:
+            surface.blit(self.console_area, (20, self.screen.get_height() - self.console_area_height - 20))
+        else:    
+            self.screen.blit(self.console_area, (20, self.screen.get_height() - self.console_area_height - 20))
             
 
 

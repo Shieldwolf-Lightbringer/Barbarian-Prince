@@ -14,7 +14,7 @@ class Game():
             self.game_canvas = pygame.Surface((self.GAME_W, self.GAME_H))
             self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
             self.running, self.playing = True, True
-            self.actions = {"left": False, "right": False, "up" : False, "down" : False, "action1" : False, "action2" : False, "start" : False}
+            self.actions = {"left": False, "right": False, "up" : False, "down" : False, "action1" : False, "action2" : False, "space": False, "start" : False}
             self.dt, self.prev_time = 0, 0
             self.state_stack = []
             self.load_assets()
@@ -47,9 +47,11 @@ class Game():
                     if event.key == pygame.K_p:
                         self.actions['action1'] = True
                     if event.key == pygame.K_o:
-                        self.actions['action2'] = True    
+                        self.actions['action2'] = True 
                     if event.key == pygame.K_RETURN:
-                        self.actions['start'] = True  
+                        self.actions['start'] = True   
+                    if event.key == pygame.K_SPACE:
+                        self.actions['space'] = True  
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
@@ -65,7 +67,9 @@ class Game():
                     if event.key == pygame.K_o:
                         self.actions['action2'] = False
                     if event.key == pygame.K_RETURN:
-                        self.actions['start'] = False  
+                        self.actions['start'] = False
+                    if event.key == pygame.K_SPACE:
+                        self.actions['space'] = False  
 
         def update(self):
             self.state_stack[-1].update(self.dt, self.actions)

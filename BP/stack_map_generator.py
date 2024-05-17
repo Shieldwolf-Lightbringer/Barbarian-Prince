@@ -614,7 +614,7 @@ class HexMap():
         self.player_rect.center = (self.HEX_RADIUS, self.HEX_RADIUS)
         self.player_hex = choice([(1,1),(7,1),(9,1),(13,1),(15,1),(18,1)])
         '''camera and map are confined to the upper-left 3/4s of the screen'''
-        self.camera = pygame.Rect((0, 0), (self.game.GAME_W, self.game.GAME_H)) #(self.game.GAME_W * 0.75, self.game.GAME_H * 0.75)) #(self.x, self.y))
+        self.camera = pygame.Rect((0, 0), (self.game.GAME_W * 0.75, self.game.GAME_H * 0.75)) #(self.game.GAME_W, self.game.GAME_H))
 
         self.map_surface = pygame.Surface((self.MAP_WIDTH, self.MAP_HEIGHT))
         self.map_surface_rect = self.map_surface.get_rect()
@@ -831,4 +831,4 @@ class HexMap():
         surface.blit(self.map_surface, self.map_surface_rect)
         surface.blit(self.map_surface.subsurface(self.camera), (0, 0))
 	
-	
+		
