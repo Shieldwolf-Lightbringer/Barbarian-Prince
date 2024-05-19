@@ -9,7 +9,7 @@ class Game():
             pygame.init()
             self.GAME_W, self.GAME_H = 1440, 900 #480, 270
             self.display_info = pygame.display.Info()
-            self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.display_info.current_w, self.display_info.current_h #960, 540
+            self.SCREEN_WIDTH, self.SCREEN_HEIGHT = 1440, 900#self.display_info.current_w, self.display_info.current_h #960, 540  #1920, 1080
             #self.GAME_W, self.GAME_H = self.display_info.current_w / 2, self.display_info.current_h / 2
             self.game_canvas = pygame.Surface((self.GAME_W, self.GAME_H))
             self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))

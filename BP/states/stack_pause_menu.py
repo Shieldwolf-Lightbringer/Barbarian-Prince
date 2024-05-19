@@ -4,8 +4,9 @@ from states.stack_base_state import BaseState
 from states.stack_party import PartyMenu
 
 class PauseMenu(BaseState):
-    def __init__(self, game):
+    def __init__(self, game, party):
         self.game = game
+        self.party = party
         BaseState.__init__(self, game)
         # Set the menu
         self.menu_img = pygame.image.load(os.path.join(self.game.assets_dir, "map", "menu.png"))
@@ -36,7 +37,7 @@ class PauseMenu(BaseState):
 
     def transition_state(self):
         if self.menu_options[self.index] == "Party": 
-            new_state = PartyMenu(self.game)
+            new_state = PartyMenu(self.game, self.party)
             new_state.enter_state()
         elif self.menu_options[self.index] == "Items": 
             pass # TO-DO

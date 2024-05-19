@@ -12,7 +12,7 @@ class GameWorld(BaseState):
     def __init__(self, game):
         BaseState.__init__(self, game)
         self.console_font = pygame.font.Font(pygame.font.match_font('papyrus', True), 16)
-        self.console = Console(self.game.screen, self.console_font, 1.0, 0.25)
+        self.console = Console(self.game.game_canvas, self.console_font, 1.0, 0.25)
         self.player = Character(name='Cal Arath', sex='male', combat_skill=8, endurance=9, wealth_code=2, wits=randint(2,6), heir=True)
         self.party = []
         self.lovers = []
@@ -22,6 +22,13 @@ class GameWorld(BaseState):
         self.hunt_bonus = 0
         self.map = stack_map_generator.HexMap(self.game)
         self.player_hex = self.map.player_hex
+
+        sword_maiden = Character(title='Swordmaiden', sex='female', combat_skill=7, endurance=7, true_love=True)
+        wizard = Character(title= 'Wizard', wizard=True)
+        priest = Character(title= 'Priest', priest=True)
+        self.party.append(sword_maiden)
+        self.party.append(wizard)
+        self.party.append(priest)
         # self.player = Player(self.game)
         # self.grass_img = pygame.image.load(os.path.join(self.game.assets_dir, "map", "grass.png"))
         #self.grass_img = pygame.transform.scale(self.grass_img, (self.game.GAME_W, self.game.GAME_H))
@@ -29,7 +36,7 @@ class GameWorld(BaseState):
     def update(self, delta_time, actions):
         # Check if the game was paused 
         if actions["space"]:
-            new_state = PauseMenu(self.game)
+            new_state = PauseMenu(self.game, self.party)
             new_state.enter_state()
         # self.player.update(delta_time, actions)
 
@@ -120,7 +127,7 @@ class GameWorld(BaseState):
         #         display.blit(self.grass_img, (x, y))
         
         # self.player.render(display)
-        self.map.create_map(display)
+        self.map.draw_map(display)
 
         ### side info panel ###
         self.render_side_panel(display)

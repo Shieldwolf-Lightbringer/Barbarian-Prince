@@ -811,7 +811,7 @@ class HexMap():
         y = key[1] + ((self.HEX_RADIUS * 0.9) * sin(angle + radians(-90)))
         return int(x), int(y)
     
-    def create_map(self, surface):
+    def draw_map(self, surface):
         self.map_surface.fill("black")
         self.draw_hex_grid(self.map_surface)
         for hex_center in self.hexagon_dict.values():
